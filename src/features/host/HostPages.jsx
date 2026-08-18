@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import '../../styles/host-app.css'
 
 const KEY='movera-host-listings-v1'
