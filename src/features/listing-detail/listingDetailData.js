@@ -1,0 +1,42 @@
+export const LISTING_DETAILS = {
+  'marsa-sea': {
+    id: 'marsa-sea', title: 'La Marsa · Vue mer', subtitle: 'Appartement lumineux près de la plage', location: 'La Marsa, Tunis', rating: 4.92, reviews: 48,
+    nightlyRate: 180, currency: 'TND', fees: 25,
+    amenities: ['Wi‑Fi', 'Climatisation', 'Cuisine équipée', 'Balcon', 'Parking'],
+    host: { name: 'Imen', since: 'Hôte depuis 2024', response: 'Répond rapidement' },
+    availability: 'Disponible cette semaine',
+    images: [
+      { id: 'marsa-1', alt: 'Salon lumineux avec vue mer', tone: 'sea' },
+      { id: 'marsa-2', alt: 'Terrasse de l’appartement', tone: 'sand' },
+      { id: 'marsa-3', alt: 'Chambre principale', tone: 'stone' },
+    ],
+  },
+  'carthage-suite': {
+    id: 'carthage-suite', title: 'Carthage · Suite', subtitle: 'Suite calme avec patio', location: 'Carthage, Tunis', rating: 4.88, reviews: 31,
+    nightlyRate: 240, currency: 'TND', fees: 30,
+    amenities: ['Wi‑Fi', 'Piscine', 'Patio', 'Climatisation', 'Petit-déjeuner'],
+    host: { name: 'Seif', since: 'Hôte depuis 2023', response: 'Répond en moins d’une heure' },
+    availability: 'Quelques dates restantes',
+    images: [
+      { id: 'carthage-1', alt: 'Suite principale', tone: 'olive' },
+      { id: 'carthage-2', alt: 'Piscine', tone: 'water' },
+      { id: 'carthage-3', alt: 'Patio', tone: 'clay' },
+    ],
+  },
+  'gammarth-house': {
+    id: 'gammarth-house', title: 'Gammarth · Maison', subtitle: 'Maison avec jardin', location: 'Gammarth, Tunis', rating: 4.95, reviews: 62,
+    nightlyRate: 320, currency: 'TND', fees: 40,
+    amenities: ['Wi‑Fi', 'Jardin', 'Parking', 'Cuisine équipée', 'Lave-linge'],
+    host: { name: 'Movera Host', since: 'Hôte professionnel', response: 'Assistance dédiée' },
+    availability: 'Disponible sur demande',
+    images: [
+      { id: 'gammarth-1', alt: 'Façade de la maison', tone: 'pearl' },
+      { id: 'gammarth-2', alt: 'Séjour', tone: 'smoke' },
+      { id: 'gammarth-3', alt: 'Jardin', tone: 'sage' },
+    ],
+  },
+}
+
+export function getListingDetail(id) {
+  return LISTING_DETAILS[id] || null
+}

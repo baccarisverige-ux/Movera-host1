@@ -1,6 +1,7 @@
 import { CarouselLab } from '../features/carousel/CarouselShell.jsx'
 import { GestureLab } from '../features/carousel/GestureLab.jsx'
-import { ListingDetailPage, MapCarouselPage } from '../features/map-carousel/MapCarouselPage.jsx'
+import { ListingDetailPage } from '../features/listing-detail/ListingDetailPage.jsx'
+import { MapCarouselPage } from '../features/map-carousel/MapCarouselPage.jsx'
 import { HomePage } from './Home/HomePage.jsx'
 
 function PageFrame({ eyebrow, title, description, testId }) {
