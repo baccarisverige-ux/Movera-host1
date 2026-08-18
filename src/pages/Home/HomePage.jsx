@@ -1,20 +1,40 @@
 import { useMemo, useState } from 'react'
-import { homeCategories, homeDestinations, homeFavorites, homeFeatured } from '../../mocks/homeData'
+import { homeCategories, homeCollections, homeDestinations, homeFeatured, homeServices } from '../../mocks/homeData'
+import '../../styles/home-b225.css'
+
+function SearchIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+}
+
+function ArrowIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+}
 
 function ListingCard({ item, onOpen }) {
   return (
-    <article className="home-card" data-testid={`home-card-${item.id}`}>
-      <div className="home-card__media" aria-hidden="true" />
-      <div className="home-card__body">
-        <div>
-          <p className="home-card__location">{item.location}</p>
-          <h3>{item.title}</h3>
-        </div>
-        {item.badge ? <span className="home-card__badge">{item.badge}</span> : null}
-        <p className="home-card__price"><strong>{item.price} {item.currency}</strong> / nuit</p>
-        <button type="button" className="home-card__action" onClick={() => onOpen(item.id)}>Voir l’offre</button>
+    <article className="b225-card" data-testid={`home-card-${item.id}`} onClick={() => onOpen(item.id)}>
+      <div className="b225-card__image">
+        <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
+        {item.badge ? <span className="b225-card__badge">{item.badge}</span> : null}
+        <button type="button" className="b225-card__heart" aria-label={`Ajouter ${item.title} aux favoris`} onClick={(event) => event.stopPropagation()}>♡</button>
+      </div>
+      <div className="b225-card__body">
+        <div className="b225-card__topline"><h3>{item.title}</h3><span>★ {item.rating || '4.90'}</span></div>
+        <p>{item.location} · Tunisie</p>
+        <p className="b225-card__price"><strong>{item.price} {item.currency}</strong> <span>/ nuit</span></p>
       </div>
     </article>
+  )
+}
+
+function Collection({ title, items, onOpen }) {
+  return (
+    <section className="b225-section">
+      <div className="b225-section__title"><h2>{title}</h2><button type="button" aria-label={`Voir ${title}`}><ArrowIcon /></button></div>
+      <div className="b225-scroll">
+        {items.map((item) => <ListingCard key={`${title}-${item.id}`} item={item} onOpen={onOpen} />)}
+      </div>
+    </section>
   )
 }
 
@@ -31,68 +51,79 @@ export function HomePage({ onNavigate }) {
     })
   }, [category, query])
 
+  const openListing = (id) => onNavigate(`/listing/${id}`)
+
   return (
-    <div className="home-page" data-testid="page-home">
-      <section className="home-hero" aria-labelledby="home-title">
-        <p className="home-eyebrow">Movera Host</p>
-        <h1 id="home-title">Trouvez votre prochain séjour</h1>
-        <p>Des adresses sélectionnées en Tunisie, simplement.</p>
-        <label className="home-search">
-          <span className="sr-only">Rechercher une destination</span>
-          <input
-            data-testid="home-search"
-            type="search"
-            placeholder="Destination, logement…"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
+    <div className="b225-home" data-testid="page-home">
+      <header className="b225-home-header">
+        <div className="b225-brand">Movera Host</div>
+        <label className="b225-search" aria-label="Rechercher une destination">
+          <SearchIcon />
+          <span className="b225-search__copy">
+            <strong>Où allez-vous ?</strong>
+            <span>Destination · Dates · Voyageurs</span>
+          </span>
+          <input data-testid="home-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Destination" />
+          <button type="button" className="b225-ai" aria-label="Assistant IA" onClick={() => onNavigate('/messages')}>✦</button>
         </label>
-      </section>
+      </header>
 
-      <section className="home-section" aria-labelledby="categories-title">
-        <div className="home-section__heading"><h2 id="categories-title">Explorer</h2></div>
-        <div className="home-categories" data-testid="home-categories">
-          {homeCategories.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className="home-category"
-              data-active={category === item.id ? 'true' : 'false'}
-              onClick={() => setCategory(item.id)}
-            >{item.label}</button>
-          ))}
+      <div className="b225-categories" data-testid="home-categories">
+        {homeCategories.map((item) => (
+          <button key={item.id} type="button" data-active={category === item.id ? 'true' : 'false'} onClick={() => setCategory(item.id)}>
+            <span aria-hidden="true">{item.icon}</span>{item.label}
+          </button>
+        ))}
+      </div>
+
+      <section className="b225-welcome" aria-label="Bienvenue chez Movera">
+        <div>
+          <span>Bienvenue chez Movera</span>
+          <div className="b225-signs">
+            <button type="button" onClick={() => onNavigate('/map?destination=sidi-bou-said')}>Sidi Bou Saïd</button>
+            <button type="button" onClick={() => onNavigate('/map?destination=sousse')}>Sousse</button>
+            <button type="button" onClick={() => onNavigate('/map?destination=hammamet')}>Hammamet</button>
+          </div>
         </div>
+        <div className="b225-welcome__visual" aria-hidden="true"><span>MH</span></div>
       </section>
 
-      <section className="home-section" aria-labelledby="featured-title">
-        <div className="home-section__heading"><h2 id="featured-title">Sélection Movera</h2><span>{featured.length} offre{featured.length === 1 ? '' : 's'}</span></div>
-        <div className="home-card-grid" data-testid="home-featured">
-          {featured.length ? featured.map((item) => <ListingCard key={item.id} item={item} onOpen={(id) => onNavigate(`/listing/${id}`)} />) : <p className="home-empty">Aucune offre pour cette sélection.</p>}
-        </div>
-      </section>
-
-      <section className="home-section" aria-labelledby="favorite-title">
-        <div className="home-section__heading"><h2 id="favorite-title">Coup de cœur</h2></div>
-        <div className="home-card-grid home-card-grid--compact" data-testid="home-favorites">
-          {homeFavorites.map((item) => <ListingCard key={item.id} item={item} onOpen={(id) => onNavigate(`/listing/${id}`)} />)}
-        </div>
-      </section>
-
-      <section className="home-section" aria-labelledby="destinations-title">
-        <div className="home-section__heading"><h2 id="destinations-title">Destinations privilégiées</h2></div>
-        <div className="home-destinations" data-testid="home-destinations">
+      <section className="b225-section" data-testid="home-destinations">
+        <div className="b225-section__title"><h2>Destinations Privilégiées</h2></div>
+        <div className="b225-cities">
           {homeDestinations.map((item) => (
-            <button key={item.id} type="button" className="home-destination" onClick={() => onNavigate(`/map?destination=${item.id}`)}>
-              <strong>{item.label}</strong><span>{item.subtitle}</span>
+            <button key={item.id} type="button" onClick={() => onNavigate(`/map?destination=${item.id}`)}>
+              <span className="b225-city__image"><img src={item.image} alt="" loading="lazy" decoding="async" /><span>{item.label}</span></span>
             </button>
           ))}
         </div>
       </section>
 
-      <section className="home-map-cta" data-testid="home-map-cta">
-        <div><p className="home-eyebrow">Explorer autrement</p><h2>Voir les logements sur la carte</h2></div>
-        <button type="button" onClick={() => onNavigate('/map')}>Explorer la carte</button>
+      <section className="b225-services" aria-label="Services Movera">
+        {homeServices.map((service) => <button type="button" key={service.id}><span>{service.symbol}</span><strong>{service.label}</strong></button>)}
       </section>
+
+      <section className="b225-section" data-testid="home-featured">
+        <div className="b225-section__title"><h2>Sélection d'Exception</h2></div>
+        <div className="b225-scroll">
+          {featured.length ? featured.map((item) => <ListingCard key={item.id} item={item} onOpen={openListing} />) : <p className="b225-empty">Aucune offre pour cette sélection.</p>}
+        </div>
+      </section>
+
+      {homeCollections.map((collection) => <Collection key={collection.id} title={collection.title} items={collection.items} onOpen={openListing} />)}
+
+      <section className="b225-section b225-experiences">
+        <div className="b225-section__title"><h2>Expériences Exclusives</h2></div>
+        <div className="b225-experience-grid">
+          <button type="button"><span>✦</span><strong>Table privée</strong><small>Expérience locale sélectionnée</small></button>
+          <button type="button"><span>◌</span><strong>Escapade mer</strong><small>Moments exclusifs en Tunisie</small></button>
+        </div>
+      </section>
+
+      <button className="b225-map-cta" data-testid="home-map-cta" type="button" onClick={() => onNavigate('/map')}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
+        Explorer la carte
+      </button>
     </div>
   )
 }
