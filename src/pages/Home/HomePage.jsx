@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { homeCategories, homeCollections, homeDestinations, homeFeatured, homeServices } from '../../mocks/homeData'
 import '../../styles/home-b225.css'
 import '../../styles/home-b225-block2.css'
+import '../../styles/home-b225-block3.css'
 
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
