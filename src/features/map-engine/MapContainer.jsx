@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ClusterLayer } from './ClusterLayer.jsx'
 import { MapControls } from './MapControls.jsx'
 import { MarkerLayer } from './MarkerLayer.jsx'
@@ -28,6 +28,8 @@ export function MapContainer() {
   const [lifecycleEvents, setLifecycleEvents] = useState(0)
   renderCountRef.current += 1
 
+  useEffect(() => () => cancelAnimationFrame(frameRef.current), [])
+
   const commitViewport = useCallback((updater) => {
     cancelAnimationFrame(frameRef.current)
     frameRef.current = requestAnimationFrame(() => {
@@ -49,6 +51,7 @@ export function MapContainer() {
   }, [])
 
   const onPointerDown = (event) => {
+    if (event.target.closest('button, a, input, select, textarea')) return
     event.preventDefault()
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
     try { event.currentTarget.setPointerCapture(event.pointerId) } catch { /* synthetic test event */ }
@@ -113,7 +116,9 @@ export function MapContainer() {
         data-render-count={renderCountRef.current}
         data-listener-count="7"
         data-lifecycle-events={lifecycleEvents}
-        onDoubleClick={() => zoomBy(1)}
+        onDoubleClick={(event) => {
+          if (!event.target.closest('button')) zoomBy(1)
+        }}
         onPointerCancel={releasePointer}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
