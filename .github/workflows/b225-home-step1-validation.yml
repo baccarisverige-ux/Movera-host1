@@ -1,0 +1,25 @@
+name: B225 Home Step 1 Validation
+on:
+  push:
+    branches: [b225-ui-home]
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Verify B225 Step 1 markers
+        run: |
+          test -f src/styles/home-b225.css
+          grep -q 'rgba(235,235,235,.80)' src/styles/home-b225.css
+          grep -q 'background:#dedede' src/styles/home-b225.css
+          grep -q "label: 'Prestige'" src/mocks/homeData.js
+          grep -q "label: 'Partenaire'" src/mocks/homeData.js
