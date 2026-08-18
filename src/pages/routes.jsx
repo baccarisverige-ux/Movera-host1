@@ -1,3 +1,4 @@
+import { BookingPage } from '../features/booking/BookingPage.jsx'
 import { CarouselLab } from '../features/carousel/CarouselShell.jsx'
 import { GestureLab } from '../features/carousel/GestureLab.jsx'
 import { ListingDetailPage } from '../features/listing-detail/ListingDetailPage.jsx'
@@ -8,7 +9,6 @@ function PageFrame({ eyebrow, title, description, testId }) {
   return <section className="route-page" data-testid={testId}><p className="route-page__eyebrow">{eyebrow}</p><h1>{title}</h1><p>{description}</p></section>
 }
 
-const BookingPage = ({ params }) => <PageFrame eyebrow="Guest" title={`Réservation ${params.id}`} description="Shell du parcours réservation." testId="page-booking" />
 const FavoritesPage = () => <PageFrame eyebrow="Guest" title="Favoris" description="Shell des favoris." testId="page-favorites" />
 const MessagesPage = ({ params }) => <PageFrame eyebrow="Guest" title={params.id ? `Conversation ${params.id}` : 'Messages'} description="Shell de la messagerie." testId="page-messages" />
 const ProfilePage = () => <PageFrame eyebrow="Guest" title="Profil" description="Shell du profil." testId="page-profile" />
