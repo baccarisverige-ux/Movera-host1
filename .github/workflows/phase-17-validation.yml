@@ -61,9 +61,11 @@ jobs:
             EventTarget.prototype.removeEventListener=function(type,...rest){if(watched.has(type)){counts[type]=(counts[type]||0)-1}return remove.call(this,type,...rest)}
             window.__listenerCounts=counts
           })
+          const watched=['orientationchange','pagehide','pageshow','visibilitychange']
+          const normalizedCounts=async()=>page.evaluate((types)=>Object.fromEntries(types.map(type=>[type,window.__listenerCounts[type]||0])),watched)
           const go=async(path)=>{await page.evaluate((p)=>{history.pushState({},'',p);window.dispatchEvent(new PopStateEvent('popstate'))},path);await page.waitForTimeout(40)}
           await page.goto('http://127.0.0.1:4173/')
-          const baseline=await page.evaluate(()=>JSON.stringify(window.__listenerCounts))
+          const baseline=await normalizedCounts()
           for(let i=0;i<12;i++){
             await go('/map')
             await page.getByTestId('map-engine').waitFor()
@@ -72,8 +74,8 @@ jobs:
             await page.getByTestId('page-home').waitFor()
             if(await page.getByTestId('map-engine').count()!==0) throw new Error('map did not unmount')
           }
-          const after=await page.evaluate(()=>JSON.stringify(window.__listenerCounts))
-          if(after!==baseline) throw new Error(`obvious listener leak: baseline=${baseline} after=${after}`)
+          const after=await normalizedCounts()
+          if(JSON.stringify(after)!==JSON.stringify(baseline)) throw new Error(`obvious listener leak: baseline=${JSON.stringify(baseline)} after=${JSON.stringify(after)}`)
 
           await go('/map')
           const surface=page.getByTestId('map-surface')
