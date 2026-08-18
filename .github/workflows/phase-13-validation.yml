@@ -1,0 +1,70 @@
+name: Phase 13 Validation
+on:
+  push:
+    branches: [phase13-core-account-messaging]
+  pull_request:
+    branches: [phase12-booking]
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-preview.log 2>&1 &
+          echo $! > /tmp/movera-preview.pid
+          for i in {1..20}; do curl --fail --silent http://127.0.0.1:4173/login >/dev/null && exit 0; sleep 1; done
+          cat /tmp/movera-preview.log; exit 1
+      - name: Install browser tooling
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Phase 13 E2E gate
+        run: |
+          cat > phase13-smoke.mjs <<'EOF'
+          import { chromium } from 'playwright'
+          const browser=await chromium.launch({headless:true})
+          const page=await browser.newPage({viewport:{width:390,height:844}})
+          const errors=[];page.on('pageerror',e=>errors.push(e.message))
+          await page.goto('http://127.0.0.1:4173/listing/marsa-sea')
+          await page.evaluate(()=>localStorage.clear())
+          await page.reload()
+          const fav=page.getByTestId('favorite-toggle')
+          await fav.click()
+          if((await fav.getAttribute('aria-pressed'))!=='true')throw new Error('Favorite toggle/store mismatch')
+          await page.goto('http://127.0.0.1:4173/favorites')
+          await page.getByTestId('favorite-marsa-sea').waitFor()
+          await page.reload();await page.getByTestId('favorite-marsa-sea').waitFor()
+          await page.goto('http://127.0.0.1:4173/profile')
+          await page.waitForURL(/\/login$/)
+          await page.goto('http://127.0.0.1:4173/login')
+          await page.getByTestId('page-login').waitFor()
+          await page.locator('[data-testid="page-login"] button[type="submit"]').click()
+          await page.waitForURL(/\/profile$/)
+          for(const id of ['profile-account','profile-preferences','profile-saved','profile-settings'])await page.getByTestId(id).waitFor()
+          await page.goto('http://127.0.0.1:4173/messages')
+          await page.getByTestId('conversation-list').waitFor()
+          await page.getByRole('button',{name:'Imen'}).click();await page.waitForURL(/\/messages\/c1$/)
+          const before=await page.getByTestId('message-bubble').count()
+          await page.getByLabel('Message').fill('Message test phase 13');await page.getByRole('button',{name:'Envoyer'}).click()
+          if(await page.getByTestId('message-bubble').count()!==before+1)throw new Error('Composer/message append failed')
+          await page.goto('http://127.0.0.1:4173/profile');await page.getByTestId('logout').click();await page.waitForURL(/\/login$/)
+          await page.goto('http://127.0.0.1:4173/messages');await page.waitForURL(/\/login$/)
+          await page.goto('http://127.0.0.1:4173/register');await page.getByLabel('Nom').fill('Test User');await page.getByLabel('Email').fill('phase13@example.test');await page.getByLabel('Mot de passe').fill('Strong123!');await page.locator('[data-testid="page-register"] button[type="submit"]').click();await page.waitForURL(/\/profile$/)
+          await page.getByTestId('logout').click();await page.goto('http://127.0.0.1:4173/forgot-password');await page.getByLabel('Email').fill('phase13@example.test');await page.locator('[data-testid="page-forgot"] button[type="submit"]').click();if(!/Instructions envoyées/.test(await page.getByRole('alert').innerText()))throw new Error('Forgot password flow failed')
+          if(errors.length)throw new Error(errors.join(' | '))
+          await browser.close()
+          EOF
+          node phase13-smoke.mjs
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/movera-preview.pid) || true
