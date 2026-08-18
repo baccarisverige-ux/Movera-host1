@@ -5,8 +5,9 @@ img, svg, video, canvas { max-width: 100%; height: auto; }
 
 :where(a, button, input, select, textarea, [tabindex]):focus,
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-brand-700) 72%, white);
-  outline-offset: 3px;
+  outline: 3px solid #2d6a4f !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.24) !important;
 }
 
 :where(button, a, input, select, textarea) { touch-action: manipulation; }
