@@ -10,6 +10,7 @@ const hostNav = [
 function AppLink({ children, className, href, onNavigate, active }) {
   return (
     <a
+      aria-current={active ? 'page' : undefined}
       className={className}
       data-active={active ? 'true' : 'false'}
       href={href}
@@ -43,7 +44,7 @@ export function HostLayout({ children, currentPath, onNavigate }) {
           </AppLink>
         ))}
       </nav>
-      <main className="app-shell__content">{children}</main>
+      <main className="app-shell__content" id="main-content" tabIndex={-1}>{children}</main>
     </div>
   )
 }
