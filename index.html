@@ -5,6 +5,26 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
+    <style>
+      /* Category artwork placement: Prestige artwork belongs to Expérience. */
+      .b225-categories > button:nth-child(5) > img { display: none !important; }
+      .b225-categories > button:nth-child(6)::before {
+        content: "";
+        position: static;
+        inset: auto;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        flex: 0 0 24px;
+        display: block;
+        border-radius: 0;
+        background: transparent url('/Movera-host1/assets/prestige-category.webp') center / contain no-repeat;
+        -webkit-mask: none;
+        mask: none;
+        pointer-events: none;
+      }
+      .b225-categories > button:nth-child(6) > span { display: none !important; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
