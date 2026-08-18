@@ -1,3 +1,4 @@
+import { ResilienceLayer } from '../features/resilience/ResilienceLayer.jsx'
 import { GlobalErrorBoundary } from './error-boundary/GlobalErrorBoundary.jsx'
 import { AppProviders } from './providers/AppProviders.jsx'
 import { AppRouter } from './router/index.jsx'
@@ -5,9 +6,11 @@ import { AppRouter } from './router/index.jsx'
 function App() {
   return (
     <GlobalErrorBoundary>
-      <AppProviders>
-        <AppRouter />
-      </AppProviders>
+      <ResilienceLayer>
+        <AppProviders>
+          <AppRouter />
+        </AppProviders>
+      </ResilienceLayer>
     </GlobalErrorBoundary>
   )
 }
