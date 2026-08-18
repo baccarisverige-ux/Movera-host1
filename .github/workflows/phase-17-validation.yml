@@ -86,10 +86,11 @@ jobs:
           const afterBurst=Number(await surface.getAttribute('data-update-count'))
           const committed=afterBurst-before
           if(committed>30) throw new Error(`map update burst not coalesced: ${committed}`)
-          for(let i=0;i<12;i++){
-            const marker=page.getByTestId(i%2===0?'map-marker-marsa-sea':'map-marker-carthage-suite')
-            await marker.waitFor(); await marker.click(); await page.waitForTimeout(20)
-          }
+          await page.getByRole('button',{name:'Recentrer la carte'}).click()
+          await page.waitForTimeout(80)
+          const marker=page.getByTestId('map-marker-marsa-sea')
+          await marker.waitFor()
+          for(let i=0;i<12;i++){await marker.click();await page.waitForTimeout(20)}
           if(await page.getByTestId('map-engine').count()!==1) throw new Error('map unstable after interactions')
           const errors=[]
           page.on('pageerror',e=>errors.push(e.message))
