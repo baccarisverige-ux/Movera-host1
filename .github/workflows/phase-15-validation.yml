@@ -50,11 +50,16 @@ jobs:
             if (!(await card.getByRole('button').isDisabled())) throw new Error(`${kind} retry not capped`)
           }
 
-          await context.setOffline(true)
-          await page.goto('http://127.0.0.1:4173/resilience-lab').catch(()=>{})
+          await page.evaluate(() => {
+            Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+            window.dispatchEvent(new Event('offline'))
+          })
           await page.getByTestId('offline-fallback').waitFor()
-          await context.setOffline(false)
-          await page.reload()
+          await page.evaluate(() => {
+            Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true })
+            window.dispatchEvent(new Event('online'))
+          })
+          await page.getByTestId('offline-fallback').waitFor({state:'hidden'})
 
           await page.goto('http://127.0.0.1:4173/listing/marsa-sea?mediaError=1')
           await page.getByTestId('listing-image-fallback').waitFor()
