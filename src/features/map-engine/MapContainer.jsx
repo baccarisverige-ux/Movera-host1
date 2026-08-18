@@ -17,13 +17,7 @@ export const DEFAULT_MARKERS = Object.freeze([
   { id: 'gammarth-house', label: 'Gammarth', lat: 36.9179, lng: 10.2934 },
 ])
 
-export function MapContainer({
-  markers = DEFAULT_MARKERS,
-  selectedListingId: controlledSelectedId,
-  onSelectedListingChange,
-  initialViewport = INITIAL_VIEWPORT,
-  onViewportChange,
-}) {
+export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: controlledSelectedId, onSelectedListingChange, initialViewport = INITIAL_VIEWPORT, onViewportChange }) {
   const surfaceRef = useRef(null)
   const pointersRef = useRef(new Map())
   const pinchDistanceRef = useRef(null)
@@ -35,6 +29,7 @@ export function MapContainer({
   const [lifecycleEvents, setLifecycleEvents] = useState(0)
   const [internalSelectedId, setInternalSelectedId] = useState(null)
   const selectedListingId = controlledSelectedId === undefined ? internalSelectedId : controlledSelectedId
+  const previousSelectedRef = useRef(selectedListingId)
   renderCountRef.current += 1
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), [])
@@ -54,22 +49,13 @@ export function MapContainer({
   }, [])
 
   const zoomBy = useCallback((delta) => commitViewport((current) => zoomViewport(current, delta)), [commitViewport])
-
-  const reset = useCallback(() => {
-    setSelected(null)
-    commitViewport(() => ({ ...INITIAL_VIEWPORT }))
-  }, [commitViewport, setSelected])
-
-  const focusPoint = useCallback((point, targetZoom) => {
-    commitViewport((current) => ({ ...current, lat: point.lat, lng: point.lng, zoom: targetZoom }))
-  }, [commitViewport])
-
-  const selectMarker = useCallback((marker) => {
-    setSelected(marker.id)
-    focusPoint(marker, MARKER_FOCUS_ZOOM)
-  }, [focusPoint, setSelected])
+  const reset = useCallback(() => { setSelected(null); commitViewport(() => ({ ...INITIAL_VIEWPORT })) }, [commitViewport, setSelected])
+  const focusPoint = useCallback((point, targetZoom) => commitViewport((current) => ({ ...current, lat: point.lat, lng: point.lng, zoom: targetZoom })), [commitViewport])
+  const selectMarker = useCallback((marker) => { setSelected(marker.id); focusPoint(marker, MARKER_FOCUS_ZOOM) }, [focusPoint, setSelected])
 
   useEffect(() => {
+    if (previousSelectedRef.current === selectedListingId) return
+    previousSelectedRef.current = selectedListingId
     if (!selectedListingId) return
     const marker = markers.find((item) => item.id === selectedListingId)
     if (marker) focusPoint(marker, MARKER_FOCUS_ZOOM)
@@ -111,24 +97,19 @@ export function MapContainer({
     try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId) } catch { /* no capture */ }
   }
 
-  return (
-    <section className="map-engine" data-testid="map-engine" data-selected-listing-id={selectedListingId || ''}>
-      <div ref={surfaceRef} className="map-surface" data-testid="map-surface"
-        data-lat={viewport.lat.toFixed(6)} data-lng={viewport.lng.toFixed(6)} data-zoom={viewport.zoom}
-        data-width={size.width} data-height={size.height} data-update-count={updateCountRef.current}
-        data-render-count={renderCountRef.current} data-listener-count="7" data-lifecycle-events={lifecycleEvents}
-        onDoubleClick={(event) => { if (!event.target.closest('button')) zoomBy(1) }}
-        onPointerCancel={releasePointer} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
-        onPointerUp={releasePointer} onWheel={(event) => { event.preventDefault(); zoomBy(event.deltaY < 0 ? 1 : -1) }}>
-        <TileLayer viewport={viewport} size={size} />
-        <ClusterLayer markers={markers} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
-        {viewport.zoom > 10 ? <MarkerLayer markers={markers} viewport={viewport} size={size} selectedListingId={selectedListingId} onSelect={selectMarker} /> : null}
-        <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} onReset={reset} />
-        <div className="map-attribution">© OpenStreetMap contributors</div>
-        <ResizeManager targetRef={surfaceRef} onSize={setSize} />
-        <ViewportController onLifecycle={() => setLifecycleEvents((count) => count + 1)} />
-      </div>
-      <p className="map-engine__status" aria-live="polite">{selectedListingId ? `Sélection: ${selectedListingId}` : `Tunis · zoom ${viewport.zoom}`}</p>
-    </section>
-  )
+  return <section className="map-engine" data-testid="map-engine" data-selected-listing-id={selectedListingId || ''}>
+    <div ref={surfaceRef} className="map-surface" data-testid="map-surface" data-lat={viewport.lat.toFixed(6)} data-lng={viewport.lng.toFixed(6)} data-zoom={viewport.zoom}
+      data-width={size.width} data-height={size.height} data-update-count={updateCountRef.current} data-render-count={renderCountRef.current} data-listener-count="7" data-lifecycle-events={lifecycleEvents}
+      onDoubleClick={(event) => { if (!event.target.closest('button')) zoomBy(1) }} onPointerCancel={releasePointer} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
+      onPointerUp={releasePointer} onWheel={(event) => { event.preventDefault(); zoomBy(event.deltaY < 0 ? 1 : -1) }}>
+      <TileLayer viewport={viewport} size={size} />
+      <ClusterLayer markers={markers} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
+      {viewport.zoom > 10 ? <MarkerLayer markers={markers} viewport={viewport} size={size} selectedListingId={selectedListingId} onSelect={selectMarker} /> : null}
+      <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} onReset={reset} />
+      <div className="map-attribution">© OpenStreetMap contributors</div>
+      <ResizeManager targetRef={surfaceRef} onSize={setSize} />
+      <ViewportController onLifecycle={() => setLifecycleEvents((count) => count + 1)} />
+    </div>
+    <p className="map-engine__status" aria-live="polite">{selectedListingId ? `Sélection: ${selectedListingId}` : `Tunis · zoom ${viewport.zoom}`}</p>
+  </section>
 }
