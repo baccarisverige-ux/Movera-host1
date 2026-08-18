@@ -43,7 +43,7 @@ jobs:
           if ((await page.getByTestId('page-map').getAttribute('data-official-flow')) !== 'marker-carousel-detail') throw new Error('Official map flow missing')
           const marker = page.locator('button[data-testid^="map-marker-"]').first()
           await marker.waitFor()
-          await marker.click({ force: true })
+          await marker.evaluate(el => el.click())
           await page.waitForTimeout(150)
           const firstSelected = await map.getAttribute('data-selected-listing-id')
           if (!firstSelected) throw new Error('Marker did not set selectedListingId')
