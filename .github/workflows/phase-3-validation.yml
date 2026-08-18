@@ -1,0 +1,47 @@
+name: Phase 3 Validation
+
+on:
+  push:
+    branches:
+      - refactor/movera-architecture-v1
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-preview.log 2>&1 &
+          echo $! > /tmp/movera-preview.pid
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:4173/ > /tmp/movera-home.html; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/movera-preview.log
+          exit 1
+      - name: Browser visual smoke
+        run: |
+          npx --yes playwright@1.55.0 install --with-deps chromium
+          npx --yes playwright@1.55.0 screenshot --device="iPhone 13" http://127.0.0.1:4173/ /tmp/movera-home.png
+          test -s /tmp/movera-home.png
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/movera-preview.pid) || true
