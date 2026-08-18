@@ -52,6 +52,8 @@ jobs:
           import { chromium } from 'playwright'
           const browser=await chromium.launch({headless:true})
           const page=await browser.newPage({viewport:{width:390,height:844}})
+          const errors=[]
+          page.on('pageerror',e=>errors.push(e.message))
           await page.addInitScript(() => {
             const watched=new Set(['orientationchange','pagehide','pageshow','visibilitychange'])
             const counts={}
@@ -88,13 +90,18 @@ jobs:
           if(committed>30) throw new Error(`map update burst not coalesced: ${committed}`)
           await page.getByRole('button',{name:'Recentrer la carte'}).click()
           await page.waitForTimeout(80)
-          const marker=page.getByTestId('map-marker-marsa-sea')
-          await marker.waitFor()
-          for(let i=0;i<12;i++){await marker.click();await page.waitForTimeout(20)}
+          const markerLayer=page.getByTestId('map-marker-layer')
+          await markerLayer.waitFor()
+          if(Number(await markerLayer.getAttribute('data-marker-count'))!==3) throw new Error('marker layer unstable')
+          const zoomIn=page.getByRole('button',{name:'Zoom avant'})
+          const zoomOut=page.getByRole('button',{name:'Zoom arrière'})
+          for(let i=0;i<20;i++){
+            await (i%2===0?zoomIn:zoomOut).click()
+            await page.waitForTimeout(16)
+          }
+          await page.getByRole('button',{name:'Recentrer la carte'}).click()
+          await page.waitForTimeout(80)
           if(await page.getByTestId('map-engine').count()!==1) throw new Error('map unstable after interactions')
-          const errors=[]
-          page.on('pageerror',e=>errors.push(e.message))
-          await page.waitForTimeout(100)
           if(errors.length) throw new Error(`runtime errors: ${errors.join('; ')}`)
           await browser.close()
           EOF
