@@ -1,13 +1,28 @@
-import { BookingPage } from '../features/booking/BookingPage.jsx'
-import { CarouselLab } from '../features/carousel/CarouselShell.jsx'
-import { GestureLab } from '../features/carousel/GestureLab.jsx'
-import { ListingDetailPage } from '../features/listing-detail/ListingDetailPage.jsx'
-import { MapCarouselPage } from '../features/map-carousel/MapCarouselPage.jsx'
-import { FavoritesPage, ForgotPasswordPage, LoginPage, ProfilePage, RegisterPage } from '../features/account/AccountPages.jsx'
-import { MessagesPage } from '../features/messages/MessagesPage.jsx'
-import { HostDashboardPage, HostListingsPage, HostListingCreatePage, HostListingEditPage, HostReservationsPage, HostCalendarPage, HostEarningsPage, HostSettingsPage } from '../features/host/HostPages.jsx'
-import { ResilienceLab } from '../features/resilience/ResilienceLab.jsx'
+import { lazy } from 'react'
 import { HomePage } from './Home/HomePage.jsx'
+
+const lazyNamed = (loader, name) => lazy(() => loader().then((module) => ({ default: module[name] })))
+
+const BookingPage = lazyNamed(() => import('../features/booking/BookingPage.jsx'), 'BookingPage')
+const CarouselLab = lazyNamed(() => import('../features/carousel/CarouselShell.jsx'), 'CarouselLab')
+const GestureLab = lazyNamed(() => import('../features/carousel/GestureLab.jsx'), 'GestureLab')
+const ListingDetailPage = lazyNamed(() => import('../features/listing-detail/ListingDetailPage.jsx'), 'ListingDetailPage')
+const MapCarouselPage = lazyNamed(() => import('../features/map-carousel/MapCarouselPage.jsx'), 'MapCarouselPage')
+const FavoritesPage = lazyNamed(() => import('../features/account/AccountPages.jsx'), 'FavoritesPage')
+const ForgotPasswordPage = lazyNamed(() => import('../features/account/AccountPages.jsx'), 'ForgotPasswordPage')
+const LoginPage = lazyNamed(() => import('../features/account/AccountPages.jsx'), 'LoginPage')
+const ProfilePage = lazyNamed(() => import('../features/account/AccountPages.jsx'), 'ProfilePage')
+const RegisterPage = lazyNamed(() => import('../features/account/AccountPages.jsx'), 'RegisterPage')
+const MessagesPage = lazyNamed(() => import('../features/messages/MessagesPage.jsx'), 'MessagesPage')
+const HostDashboardPage = lazyNamed(() => import('../features/host/HostPages.jsx'), 'HostDashboardPage')
+const HostListingsPage = lazyNamed(() => import('../features/host/HostPages.jsx'), 'HostListingsPage')
+const HostListingCreatePage = lazyNamed(() => import('../features/host/HostPages.jsx'), 'HostListingCreatePage')
+const HostListingEditPage = lazyNamed(() => import('../features/host/HostPages.jsx'), 'HostListingEditPage')
+const HostReservationsPage = lazyNamed(() => import('../features/host/HostPages.jsx'), 'HostReservationsPage')
+const HostCalendarPage = lazyNamed(() => import('../features/host/HostPages.jsx'), 'HostCalendarPage')
+const HostEarningsPage = lazyNamed(() => import('../features/host/HostPages.jsx'), 'HostEarningsPage')
+const HostSettingsPage = lazyNamed(() => import('../features/host/HostPages.jsx'), 'HostSettingsPage')
+const ResilienceLab = lazyNamed(() => import('../features/resilience/ResilienceLab.jsx'), 'ResilienceLab')
 
 export function NotFoundPage({onNavigate}){return <main className="not-found" data-testid="page-404"><p className="route-page__eyebrow">404</p><h1>Page introuvable</h1><p>Cette route n’existe pas dans Movera Host.</p><button className="route-link-button" onClick={()=>onNavigate('/')}>Retour à l’accueil</button></main>}
 export const routeDefinitions=[
