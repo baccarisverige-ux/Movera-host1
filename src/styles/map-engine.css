@@ -1,0 +1,19 @@
+.map-engine { width: min(100%, 960px); margin: 0 auto; }
+.map-surface { position: relative; width: 100%; height: clamp(420px, 68svh, 640px); overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-xl); background: #e8ece8; touch-action: none; user-select: none; overscroll-behavior: contain; cursor: grab; isolation: isolate; }
+.map-surface:active { cursor: grabbing; }
+.map-tiles, .map-marker-layer, .map-cluster-layer { position: absolute; inset: 0; pointer-events: none; }
+.map-tile { position: absolute; width: 256px; height: 256px; overflow: hidden; background-color: #e6ebe6; background-image: linear-gradient(135deg, rgba(255,255,255,.6) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,.42) 25%, transparent 25%), linear-gradient(45deg, rgba(205,214,205,.32) 25%, transparent 25%), linear-gradient(315deg, rgba(205,214,205,.28) 25%, #e6ebe6 25%); background-position: 18px 0, 18px 0, 0 0, 0 0; background-size: 36px 36px; will-change: transform; }
+.map-tile::after { content: ''; position: absolute; inset: 0; border: 1px solid rgba(80, 96, 84, .05); pointer-events: none; }
+.map-tile img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.map-marker, .map-cluster { position: absolute; left: 0; top: 0; translate: -50% -50%; pointer-events: auto; will-change: transform; }
+.map-marker { width: 30px; height: 38px; border: 0; background: transparent; padding: 0; cursor: pointer; }
+.map-marker span { position: absolute; left: 50%; top: 2px; width: 22px; height: 22px; translate: -50% 0; border: 3px solid #fff; border-radius: 50% 50% 50% 0; background: #313633; box-shadow: 0 4px 12px rgba(22, 28, 24, .22); transform: rotate(-45deg); }
+.map-marker span::after { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: #fff; }
+.map-cluster { min-width: 42px; height: 42px; display: grid; place-items: center; padding: 0 10px; border: 3px solid rgba(255,255,255,.9); border-radius: 999px; background: #343a36; color: #fff; font-weight: 700; box-shadow: 0 8px 20px rgba(20, 26, 22, .22); }
+.map-controls { position: absolute; right: 12px; top: 12px; z-index: 6; display: grid; gap: 6px; }
+.map-controls button { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid rgba(42, 50, 45, .12); border-radius: 13px; background: rgba(248, 249, 248, .94); color: #2d332f; font: 600 22px/1 var(--font-sans); box-shadow: 0 6px 18px rgba(26, 33, 28, .13); backdrop-filter: blur(12px); cursor: pointer; }
+.map-controls button:active { transform: translateY(1px) scale(.98); }
+.map-controls__reset { font-size: 19px !important; }
+.map-attribution { position: absolute; right: 8px; bottom: 7px; z-index: 5; padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,.82); color: #5b625e; font-size: 9px; pointer-events: none; }
+.map-engine__status { margin: var(--space-2) 0 0; color: var(--color-text-secondary); font-size: var(--font-size-xs); text-align: right; }
+@media (max-width: 430px) { .map-surface { height: min(62svh, 560px); border-radius: var(--radius-lg); } .map-controls { right: 9px; top: 9px; } .map-controls button { width: 40px; height: 40px; } }
