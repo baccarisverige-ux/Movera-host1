@@ -1,4 +1,5 @@
 import { CarouselLab } from '../features/carousel/CarouselShell.jsx'
+import { GestureLab } from '../features/carousel/GestureLab.jsx'
 import { MapContainer } from '../features/map-engine/MapContainer.jsx'
 import { HomePage } from './Home/HomePage.jsx'
 
@@ -83,6 +84,7 @@ export const routeDefinitions = [
   { path: '/', area: 'guest', component: HomePage },
   { path: '/map', area: 'guest', component: MapPage },
   { path: '/carousel-lab', area: 'guest', component: CarouselLab },
+  { path: '/gesture-lab', area: 'guest', component: GestureLab },
   { path: '/listing/:id', area: 'guest', component: ListingPage },
   { path: '/booking/:id', area: 'guest', component: BookingPage },
   { path: '/favorites', area: 'guest', component: FavoritesPage },
