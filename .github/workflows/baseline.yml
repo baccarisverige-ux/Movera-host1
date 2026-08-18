@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - audit/baseline-validation
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -28,11 +31,18 @@ jobs:
         run: |
           npm run preview -- --host 127.0.0.1 > /tmp/movera-preview.log 2>&1 &
           PID=$!
+          READY=0
           for i in {1..20}; do
             if curl --fail --silent http://127.0.0.1:4173/ > /tmp/movera-home.html; then
+              READY=1
               break
             fi
             sleep 1
           done
-          curl --fail --silent http://127.0.0.1:4173/ | grep -q '<div id="root"></div>'
+          if [ "$READY" -ne 1 ]; then
+            cat /tmp/movera-preview.log
+            kill $PID || true
+            exit 1
+          fi
+          grep -q '<div id="root"></div>' /tmp/movera-home.html
           kill $PID
