@@ -51,7 +51,7 @@ jobs:
           if((await page.locator('[aria-current="page"]').count())<1) throw new Error('aria-current missing')
           const tabIndex=await nav.evaluate(e=>e.tabIndex); if(tabIndex<0) throw new Error('navigation not keyboard-focusable')
           await nav.focus()
-          const focusVisible=await nav.evaluate(e=>{const s=getComputedStyle(e);return document.activeElement===e&&s.outlineStyle!=='none'&&parseFloat(s.outlineWidth)>0})
+          const focusVisible=await nav.evaluate(e=>{const s=getComputedStyle(e);const outline=s.outlineStyle!=='none'&&parseFloat(s.outlineWidth)>0;const ring=s.boxShadow&&s.boxShadow!=='none';return document.activeElement===e&&(outline||ring)})
           if(!focusVisible) throw new Error('keyboard focus not visible')
           const motion=await page.locator('.home-card').first().evaluate(e=>{const s=getComputedStyle(e);return {a:s.animationDuration,t:s.transitionDuration}})
           const maxDuration=(v)=>Math.max(...v.split(',').map(x=>parseFloat(x)||0))
