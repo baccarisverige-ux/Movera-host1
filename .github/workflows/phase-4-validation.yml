@@ -1,0 +1,81 @@
+name: Phase 4 Validation
+
+on:
+  push:
+    branches:
+      - refactor/movera-architecture-v1
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-preview.log 2>&1 &
+          echo $! > /tmp/movera-preview.pid
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/movera-preview.log
+          exit 1
+      - name: Install browser
+        run: npx --yes playwright@1.55.0 install --with-deps chromium
+      - name: Route navigation 404 and error-boundary smoke
+        run: |
+          cat > /tmp/phase4.mjs <<'EOF'
+          import { chromium } from 'playwright'
+          const browser = await chromium.launch({ headless: true })
+          const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
+          const base = 'http://127.0.0.1:4173'
+          const routes = [
+            ['/', 'page-home'], ['/map', 'page-map'], ['/listing/test-listing', 'page-listing'],
+            ['/booking/test-booking', 'page-booking'], ['/favorites', 'page-favorites'],
+            ['/messages', 'page-messages'], ['/messages/test-thread', 'page-messages'],
+            ['/profile', 'page-profile'], ['/login', 'page-login'], ['/register', 'page-register'],
+            ['/host', 'page-host'], ['/host/listings', 'page-host-listings'],
+            ['/host/listings/new', 'page-host-listing-new'], ['/host/listings/test-listing/edit', 'page-host-listing-edit'],
+            ['/host/reservations', 'page-host-reservations'], ['/host/calendar', 'page-host-calendar'],
+            ['/host/earnings', 'page-host-earnings'], ['/host/settings', 'page-host-settings'],
+          ]
+          for (const [path, testId] of routes) {
+            const response = await page.goto(base + path, { waitUntil: 'networkidle' })
+            if (!response || !response.ok()) throw new Error(`HTTP failure ${path}`)
+            await page.locator(`[data-testid="${testId}"]`).waitFor()
+          }
+          await page.goto(base + '/', { waitUntil: 'networkidle' })
+          await page.getByRole('button', { name: 'Carte' }).click()
+          await page.locator('[data-testid="page-map"]').waitFor()
+          if (new URL(page.url()).pathname !== '/map') throw new Error('Guest navigation failed')
+          await page.goto(base + '/host', { waitUntil: 'networkidle' })
+          await page.getByRole('button', { name: 'Annonces' }).click()
+          await page.locator('[data-testid="page-host-listings"]').waitFor()
+          if (new URL(page.url()).pathname !== '/host/listings') throw new Error('Host navigation failed')
+          await page.goto(base + '/not-a-real-route', { waitUntil: 'networkidle' })
+          await page.locator('[data-testid="page-404"]').waitFor()
+          await page.goto(base + '/?__testError=1', { waitUntil: 'networkidle' })
+          await page.locator('[data-testid="global-error-boundary"]').waitFor()
+          await browser.close()
+          EOF
+          npx --yes --package=playwright@1.55.0 node /tmp/phase4.mjs
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/movera-preview.pid) || true
