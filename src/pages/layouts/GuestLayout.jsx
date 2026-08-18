@@ -9,6 +9,7 @@ const guestNav = [
 function AppLink({ children, className, href, onNavigate, active }) {
   return (
     <a
+      aria-current={active ? 'page' : undefined}
       className={className}
       data-active={active ? 'true' : 'false'}
       href={href}
@@ -29,7 +30,7 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
         <strong>Movera Host</strong>
         <AppLink className="shell-switch" href="/host" onNavigate={onNavigate}>Mode hôte</AppLink>
       </header>
-      <main className="app-shell__content">{children}</main>
+      <main className="app-shell__content" id="main-content" tabIndex={-1}>{children}</main>
       <nav className="app-shell__nav" aria-label="Navigation principale">
         {guestNav.map(([label, path]) => (
           <AppLink
