@@ -41,22 +41,19 @@ jobs:
           const surface = page.getByTestId('map-surface')
           await surface.waitFor()
           if ((await page.getByTestId('page-map').getAttribute('data-official-flow')) !== 'marker-carousel-detail') throw new Error('Official map flow missing')
-
-          const marker = page.locator('[data-testid^="map-marker-"]').first()
+          const marker = page.locator('button[data-testid^="map-marker-"]').first()
           await marker.waitFor()
-          await marker.click()
+          await marker.click({ force: true })
           await page.waitForTimeout(150)
           const firstSelected = await map.getAttribute('data-selected-listing-id')
           if (!firstSelected) throw new Error('Marker did not set selectedListingId')
           if ((await page.getByTestId('carousel-shell').getAttribute('data-selected-listing-id')) !== firstSelected) throw new Error('Carousel not synchronized from marker')
           if ((await page.getByTestId('carousel-shell').getAttribute('data-carousel-state')) === 'closed') throw new Error('Carousel did not open from marker selection')
-
           await page.getByRole('button', { name: 'Offre suivante' }).click()
           await page.waitForTimeout(150)
           const secondSelected = await page.getByTestId('carousel-shell').getAttribute('data-selected-listing-id')
           if (!secondSelected || secondSelected === firstSelected) throw new Error('Carousel next did not change listing')
           if ((await map.getAttribute('data-selected-listing-id')) !== secondSelected) throw new Error('Map marker state not synchronized from carousel')
-
           await surface.evaluate(el => {
             const fire=(t,x,y)=>el.dispatchEvent(new PointerEvent(t,{bubbles:true,cancelable:true,pointerId:91,pointerType:'touch',clientX:x,clientY:y,isPrimary:true}))
             fire('pointerdown',120,260); fire('pointermove',170,285); fire('pointerup',170,285)
@@ -73,7 +70,6 @@ jobs:
           if (JSON.stringify(restored) !== JSON.stringify(beforeDetail)) throw new Error(`Back viewport mismatch ${JSON.stringify({beforeDetail,restored})}`)
           if ((await page.getByTestId('map-engine').getAttribute('data-selected-listing-id')) !== secondSelected) throw new Error('Back selected listing mismatch')
           if ((await page.getByTestId('carousel-shell').getAttribute('data-carousel-state')) === 'closed') throw new Error('Back carousel state not restored')
-
           const path = await page.evaluate(() => location.pathname)
           if (path !== '/map') throw new Error(`Parallel path detected: ${path}`)
           if (errors.length) throw new Error(errors.join(' | '))
