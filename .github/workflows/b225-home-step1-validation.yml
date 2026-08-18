@@ -2,6 +2,8 @@ name: B225 Home Step 1 Validation
 on:
   push:
     branches: [b225-ui-home]
+  pull_request:
+    branches: [phase17-performance-engineering]
   workflow_dispatch:
 jobs:
   validate:
