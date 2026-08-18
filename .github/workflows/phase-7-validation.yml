@@ -2,6 +2,8 @@ name: Phase 7 Validation
 on:
   push:
     branches: [phase7-marker-system]
+  pull_request:
+    branches: [refactor/movera-architecture-v1]
   workflow_dispatch:
 jobs:
   validate:
