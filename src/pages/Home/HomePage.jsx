@@ -95,6 +95,13 @@ export function HomePage({ onNavigate }) {
         <div className="b225-welcome__visual" aria-hidden="true"><span>MH</span></div>
       </section>
 
+      <section className="b225-section b225-featured-section" data-testid="home-featured">
+        <div className="b225-section__title"><h2>Sélection d'Exception</h2></div>
+        <div className="b225-scroll b225-featured-scroll">
+          {featured.length ? featured.map((item) => <ListingCard key={item.id} item={item} onOpen={openListing} featured />) : <p className="b225-empty">Aucune offre pour cette sélection.</p>}
+        </div>
+      </section>
+
       <section className="b225-section b225-destinations-section" data-testid="home-destinations">
         <div className="b225-section__title"><h2>Destinations Privilégiées</h2></div>
         <div className="b225-cities">
@@ -114,13 +121,6 @@ export function HomePage({ onNavigate }) {
             <strong>{service.label}</strong>
           </button>
         ))}
-      </section>
-
-      <section className="b225-section b225-featured-section" data-testid="home-featured">
-        <div className="b225-section__title"><h2>Sélection d'Exception</h2></div>
-        <div className="b225-scroll b225-featured-scroll">
-          {featured.length ? featured.map((item) => <ListingCard key={item.id} item={item} onOpen={openListing} featured />) : <p className="b225-empty">Aucune offre pour cette sélection.</p>}
-        </div>
       </section>
 
       {homeCollections.map((collection) => <Collection key={collection.id} title={collection.title} items={collection.items} onOpen={openListing} />)}
