@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CAROUSEL_LISTINGS } from './carouselData.js'
 import { ImagePager } from './ImagePager.jsx'
+import { GESTURE, resolveGesture, SWIPE_THRESHOLD } from './gestureArbitration.js'
 import '../../styles/carousel.css'
 
 const clampIndex = (value, length) => Math.max(0, Math.min(length - 1, value))
@@ -16,47 +17,67 @@ export function Controls({ open, onOpen, onClose, onPrevious, onNext }) {
   )
 }
 
-export function GestureController({ children, onListingSwipe, onPhotoSwipe, onGestureState }) {
+export function GestureController({ children, onListingSwipe, onPhotoSwipe, onGestureState, onGestureLock }) {
+  const pointersRef = useRef(new Map())
   const startRef = useRef(null)
-  const pointerIdRef = useRef(null)
+  const lockRef = useRef(GESTURE.NONE)
 
-  const finish = (event, cancelled = false) => {
-    if (pointerIdRef.current !== event.pointerId) return
+  const cleanup = (event, cancelled = false) => {
+    pointersRef.current.delete(event.pointerId)
+    if (pointersRef.current.size > 0) return
     const start = startRef.current
-    pointerIdRef.current = null
+    const lock = lockRef.current
     startRef.current = null
+    lockRef.current = GESTURE.NONE
+    onGestureLock(GESTURE.NONE)
     if (!start || cancelled) {
       onGestureState('open')
       return
     }
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
-    const ax = Math.abs(dx)
-    const ay = Math.abs(dy)
-    if (Math.max(ax, ay) < 38) {
-      onGestureState('snapping')
-      requestAnimationFrame(() => onGestureState('open'))
-      return
-    }
     onGestureState('snapping')
-    if (ax >= ay) onListingSwipe(dx < 0 ? 1 : -1)
-    else onPhotoSwipe(dy < 0 ? 1 : -1)
+    if (lock === GESTURE.LISTING && Math.abs(dx) >= SWIPE_THRESHOLD) onListingSwipe(dx < 0 ? 1 : -1)
+    if (lock === GESTURE.PHOTO && Math.abs(dy) >= SWIPE_THRESHOLD) onPhotoSwipe(dy < 0 ? 1 : -1)
     requestAnimationFrame(() => onGestureState('open'))
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+    } catch { /* capture may already be released */ }
   }
 
   return (
     <div
       className="carousel-gesture"
       data-testid="carousel-gesture"
+      data-gesture-lock={lockRef.current}
       onPointerDown={(event) => {
         if (event.target.closest('button,a,input')) return
-        pointerIdRef.current = event.pointerId
-        startRef.current = { x: event.clientX, y: event.clientY }
+        pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+        if (!startRef.current) startRef.current = { x: event.clientX, y: event.clientY }
+        if (pointersRef.current.size >= 2) {
+          lockRef.current = GESTURE.PINCH
+          onGestureLock(GESTURE.PINCH)
+        }
         onGestureState('dragging')
         try { event.currentTarget.setPointerCapture(event.pointerId) } catch { /* synthetic pointer */ }
       }}
-      onPointerUp={(event) => finish(event)}
-      onPointerCancel={(event) => finish(event, true)}
+      onPointerMove={(event) => {
+        if (!pointersRef.current.has(event.pointerId) || !startRef.current) return
+        pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+        if (lockRef.current === GESTURE.NONE) {
+          const dx = event.clientX - startRef.current.x
+          const dy = event.clientY - startRef.current.y
+          const next = resolveGesture({ pointerCount: pointersRef.current.size, insideCarousel: true, dx, dy })
+          if (next !== GESTURE.NONE) {
+            lockRef.current = next
+            onGestureLock(next)
+          }
+        }
+        if (lockRef.current !== GESTURE.NONE) event.preventDefault()
+      }}
+      onPointerUp={(event) => cleanup(event)}
+      onPointerCancel={(event) => cleanup(event, true)}
+      onLostPointerCapture={(event) => cleanup(event, true)}
     >
       {children}
     </div>
@@ -87,10 +108,11 @@ export function CarouselTrack({ listing, imageIndex, listingIndex }) {
   )
 }
 
-export function CarouselShell({ listings = CAROUSEL_LISTINGS }) {
+export function CarouselShell({ listings = CAROUSEL_LISTINGS, onGestureLock = () => {} }) {
   const [phase, setPhase] = useState('closed')
   const [listingIndex, setListingIndex] = useState(0)
   const [imageIndexes, setImageIndexes] = useState(() => listings.map(() => 0))
+  const [gestureLock, setGestureLock] = useState(GESTURE.NONE)
   const open = phase !== 'closed' && phase !== 'closing'
   const listing = listings[listingIndex]
   const imageIndex = imageIndexes[listingIndex] || 0
@@ -101,6 +123,11 @@ export function CarouselShell({ listings = CAROUSEL_LISTINGS }) {
     return () => window.clearTimeout(timer)
   }, [phase])
 
+  const updateGestureLock = (next) => {
+    setGestureLock(next)
+    onGestureLock(next)
+  }
+
   const moveListing = (delta) => setListingIndex((current) => clampIndex(current + delta, listings.length))
   const movePhoto = (delta) => setImageIndexes((current) => {
     const next = [...current]
@@ -108,10 +135,10 @@ export function CarouselShell({ listings = CAROUSEL_LISTINGS }) {
     return next
   })
 
-  const stateLabel = useMemo(() => `${phase}:${listingIndex}:${imageIndex}`, [phase, listingIndex, imageIndex])
+  const stateLabel = useMemo(() => `${phase}:${listingIndex}:${imageIndex}:${gestureLock}`, [phase, listingIndex, imageIndex, gestureLock])
 
   return (
-    <section className={`carousel-shell is-${phase}`} data-testid="carousel-shell" data-carousel-state={phase} data-state-label={stateLabel}>
+    <section className={`carousel-shell is-${phase}`} data-testid="carousel-shell" data-carousel-state={phase} data-gesture-lock={gestureLock} data-state-label={stateLabel}>
       <Controls
         open={open}
         onOpen={() => setPhase('opening')}
@@ -120,7 +147,7 @@ export function CarouselShell({ listings = CAROUSEL_LISTINGS }) {
         onNext={() => moveListing(1)}
       />
       {open ? (
-        <GestureController onListingSwipe={moveListing} onPhotoSwipe={movePhoto} onGestureState={setPhase}>
+        <GestureController onListingSwipe={moveListing} onPhotoSwipe={movePhoto} onGestureState={setPhase} onGestureLock={updateGestureLock}>
           <CarouselTrack listing={listing} imageIndex={imageIndex} listingIndex={listingIndex} />
         </GestureController>
       ) : null}
