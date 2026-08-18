@@ -4,7 +4,7 @@ import '../../styles/home-b225.css'
 import '../../styles/home-b225-block2.css'
 import '../../styles/home-b225-block3.css'
 
-const ALL_CATEGORY_GLOBE = '/Movera-host1/assets/all-category-globe.svg'
+const ALL_CATEGORY_GLOBE = '/Movera-host1/assets/all-category-globe-v2.svg'
 
 function SearchIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>}
 function ArrowIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>}
