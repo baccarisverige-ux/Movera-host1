@@ -1,0 +1,75 @@
+name: Phase 12 Validation
+on:
+  push:
+    branches: [phase12-booking]
+  pull_request:
+    branches: [phase11-listing-detail]
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Pricing unit gate
+        run: |
+          node --input-type=module <<'EOF'
+          import { nightsBetween, calculateBookingTotal, validateBooking } from './src/features/booking/bookingEngine.js'
+          const assert=(ok,msg)=>{if(!ok)throw new Error(msg)}
+          assert(nightsBetween('2026-08-20','2026-08-22')===2,'2-night boundary failed')
+          assert(nightsBetween('2026-08-20','2026-08-20')===0,'zero-night failed')
+          assert(nightsBetween('2026-08-22','2026-08-20')===0,'negative dates failed')
+          assert(calculateBookingTotal({nightlyRate:180,nights:2,fees:25,discounts:10}).total===375,'pricing formula failed')
+          assert(calculateBookingTotal({nightlyRate:99.995,nights:1,fees:0.005,discounts:0}).total===100,'rounding failed')
+          assert(validateBooking({checkIn:'2026-08-20',checkOut:'2026-08-22',guests:2}).ok,'valid booking failed')
+          assert(!validateBooking({checkIn:'2026-08-20',checkOut:'2026-08-20',guests:2}).ok,'invalid dates accepted')
+          assert(!validateBooking({checkIn:'2026-08-20',checkOut:'2026-08-22',guests:0}).ok,'zero guests accepted')
+          assert(!validateBooking({checkIn:'2026-08-20',checkOut:'2026-08-22',guests:7}).ok,'max guests failed')
+          EOF
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-preview.log 2>&1 &
+          echo $! > /tmp/movera-preview.pid
+          for i in {1..20}; do curl --fail --silent http://127.0.0.1:4173/booking/marsa-sea >/dev/null && exit 0; sleep 1; done
+          cat /tmp/movera-preview.log; exit 1
+      - name: Install browser tooling
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Booking integration E2E gate
+        run: |
+          cat > phase12-smoke.mjs <<'EOF'
+          import { chromium } from 'playwright'
+          const browser=await chromium.launch({headless:true})
+          const page=await browser.newPage({viewport:{width:390,height:844}})
+          const errors=[]; page.on('pageerror',e=>errors.push(e.message))
+          await page.goto('http://127.0.0.1:4173/listing/marsa-sea')
+          await page.getByRole('button',{name:/Réserver/}).click()
+          await page.waitForURL(/\/booking\/marsa-sea$/)
+          const submit=page.getByTestId('booking-submit')
+          await submit.click(); await page.waitForTimeout(30)
+          if(!(await submit.isDisabled())) throw new Error('Double-submit not protected while submitting')
+          await page.waitForTimeout(160)
+          await page.getByTestId('booking-confirmation').waitFor()
+          const scenario=()=>page.getByLabel('Scénario',{exact:true})
+          await page.reload()
+          await page.getByLabel('Départ').fill('2026-08-20'); await submit.click(); await page.getByTestId('booking-error').waitFor()
+          await page.reload(); await scenario().selectOption('unavailable'); await submit.click(); if(!/plus disponibles/.test(await page.getByTestId('booking-error').innerText())) throw new Error('Unavailable state missing')
+          await page.reload(); await scenario().selectOption('network'); await submit.click(); await page.waitForTimeout(160); if(!/réseau/i.test(await page.getByTestId('booking-error').innerText())) throw new Error('Network state missing')
+          await page.reload(); await scenario().selectOption('session'); await submit.click(); if(!/session/i.test(await page.getByTestId('booking-error').innerText())) throw new Error('Session-expired state missing')
+          for(const width of [320,375,390,430,768,1024]){await page.setViewportSize({width,height:800}); await page.goto('http://127.0.0.1:4173/booking/marsa-sea'); const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+1); if(overflow)throw new Error(`Horizontal overflow ${width}`)}
+          await page.goto('http://127.0.0.1:4173/booking/missing'); await page.getByTestId('booking-missing').waitFor()
+          if(errors.length) throw new Error(errors.join(' | '))
+          await browser.close()
+          EOF
+          node phase12-smoke.mjs
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/movera-preview.pid) || true
