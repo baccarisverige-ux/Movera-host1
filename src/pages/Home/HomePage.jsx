@@ -45,7 +45,7 @@ export function HomePage({ onNavigate }) {
   const featured = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
     return homeFeatured.filter((item) => {
-      const categoryMatch = category === 'all' || item.category === category
+      const categoryMatch = category === 'all' || item.category.split(' ').includes(category)
       const queryMatch = !normalizedQuery || `${item.title} ${item.location}`.toLowerCase().includes(normalizedQuery)
       return categoryMatch && queryMatch
     })
