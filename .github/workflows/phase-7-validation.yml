@@ -55,7 +55,7 @@ jobs:
           if ((await page.locator('[data-marker-state="selected"]').count()) !== 1) throw new Error('Multiple markers selected')
           if ((await page.locator('[data-testid="map-engine"]').getAttribute('data-selected-listing-id')) !== 'carthage') throw new Error('Second selection failed')
           if (page.url() !== startUrl) throw new Error('Old route triggered after second selection')
-          await page.getByRole('button', { name: 'Réinitialiser la carte' }).click()
+          await page.getByRole('button', { name: 'Recentrer la carte' }).click()
           await page.waitForTimeout(100)
           await page.getByRole('button', { name: 'Zoom arrière' }).click()
           await page.waitForTimeout(100)
