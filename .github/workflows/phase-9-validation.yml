@@ -1,0 +1,97 @@
+name: Phase 9 Validation
+on:
+  push:
+    branches: [phase9-gesture-arbitration]
+  pull_request:
+    branches: [phase8-carousel-independent]
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-preview.log 2>&1 &
+          echo $! > /tmp/movera-preview.pid
+          for i in {1..20}; do curl --fail --silent http://127.0.0.1:4173/gesture-lab >/dev/null && exit 0; sleep 1; done
+          cat /tmp/movera-preview.log; exit 1
+      - name: Install browser tooling
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Gesture arbitration stress gate
+        run: |
+          cat > phase9-smoke.mjs <<'EOF'
+          import { chromium } from 'playwright'
+          const browser = await chromium.launch({ headless: true })
+          const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
+          const errors = []
+          page.on('pageerror', e => errors.push(e.message))
+          await page.goto('http://127.0.0.1:4173/gesture-lab')
+          const surface = page.locator('[data-testid="map-surface"]')
+          await surface.waitFor()
+          await page.getByTestId('carousel-open').click()
+          await page.waitForTimeout(120)
+          const gesture = page.getByTestId('carousel-gesture')
+          const track = page.getByTestId('carousel-track')
+
+          const fire = async (points) => gesture.evaluate((el, pts) => {
+            for (const p of pts) el.dispatchEvent(new PointerEvent(p.type, { bubbles:true, cancelable:true, pointerId:p.id, pointerType:p.pointerType || 'touch', clientX:p.x, clientY:p.y, isPrimary:p.id===1 }))
+          }, points)
+
+          for (let i=0;i<20;i++) {
+            const before = Number(await track.getAttribute('data-listing-index'))
+            await fire([{type:'pointerdown',id:1,x:260,y:420},{type:'pointermove',id:1,x:180,y:423},{type:'pointerup',id:1,x:120,y:425}])
+            await page.waitForTimeout(20)
+            const lock = await page.getByTestId('carousel-shell').getAttribute('data-gesture-lock')
+            if (lock !== 'none') throw new Error(`Persistent horizontal lock iteration ${i}: ${lock}`)
+            const after = Number(await track.getAttribute('data-listing-index'))
+            if (i === 0 && after < before) throw new Error('Horizontal arbitration direction invalid')
+          }
+
+          for (let i=0;i<20;i++) {
+            await fire([{type:'pointerdown',id:2,x:190,y:470},{type:'pointermove',id:2,x:192,y:410},{type:'pointerup',id:2,x:194,y:350}])
+            await page.waitForTimeout(20)
+            if ((await page.getByTestId('carousel-shell').getAttribute('data-gesture-lock')) !== 'none') throw new Error(`Persistent vertical lock iteration ${i}`)
+          }
+
+          for (let i=0;i<20;i++) {
+            await fire([{type:'pointerdown',id:11,x:140,y:430},{type:'pointerdown',id:12,x:230,y:430},{type:'pointermove',id:12,x:275,y:430},{type:'pointercancel',id:11,x:140,y:430},{type:'pointerup',id:12,x:275,y:430}])
+            await page.waitForTimeout(15)
+            if ((await page.getByTestId('carousel-shell').getAttribute('data-gesture-lock')) !== 'none') throw new Error(`Persistent pinch lock iteration ${i}`)
+          }
+
+          const mapBefore = await surface.evaluate(el => `${el.dataset.lat}:${el.dataset.lng}`)
+          await surface.evaluate(el => {
+            const f=(t,x,y)=>el.dispatchEvent(new PointerEvent(t,{bubbles:true,cancelable:true,pointerId:31,pointerType:'touch',clientX:x,clientY:y,isPrimary:true}))
+            f('pointerdown',100,240); f('pointermove',170,270); f('pointerup',170,270)
+          })
+          await page.waitForTimeout(80)
+          const mapAfter = await surface.evaluate(el => `${el.dataset.lat}:${el.dataset.lng}`)
+          if (mapAfter === mapBefore) throw new Error('Map drag outside carousel blocked')
+
+          await fire([{type:'pointerdown',id:7,x:250,y:420},{type:'pointermove',id:7,x:170,y:420},{type:'pointercancel',id:7,x:170,y:420}])
+          await page.waitForTimeout(40)
+          if ((await page.getByTestId('carousel-shell').getAttribute('data-gesture-lock')) !== 'none') throw new Error('Cancellation left gesture lock')
+
+          await page.setViewportSize({width:844,height:390})
+          await page.evaluate(() => window.dispatchEvent(new Event('orientationchange')))
+          await page.waitForTimeout(80)
+          await page.setViewportSize({width:390,height:844})
+          if ((await page.getByTestId('carousel-shell').getAttribute('data-gesture-lock')) !== 'none') throw new Error('Orientation change left gesture lock')
+          if (errors.length) throw new Error(errors.join(' | '))
+          await browser.close()
+          EOF
+          node phase9-smoke.mjs
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/movera-preview.pid) || true
