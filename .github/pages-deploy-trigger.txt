@@ -1,0 +1,2 @@
+Force GitHub Pages redeploy for current b225-ui-home build.
+Triggered: 2026-08-18T16:34+02:00
