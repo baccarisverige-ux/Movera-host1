@@ -6,9 +6,12 @@ import { ResizeManager } from './ResizeManager.jsx'
 import { TileLayer } from './TileLayer.jsx'
 import { ViewportController } from './ViewportController.jsx'
 import { panViewport, zoomViewport } from './geometry.js'
+import { selectListing } from './markerModel.js'
 import '../../styles/map-engine.css'
 
 const INITIAL_VIEWPORT = Object.freeze({ lat: 36.8065, lng: 10.1815, zoom: 11 })
+const MARKER_FOCUS_ZOOM = 10.5
+const CLUSTER_FOCUS_ZOOM = 11
 const INFRA_MARKERS = Object.freeze([
   { id: 'tunis-centre', label: 'Tunis centre', lat: 36.8065, lng: 10.1815 },
   { id: 'carthage', label: 'Carthage', lat: 36.8528, lng: 10.3233 },
@@ -26,6 +29,7 @@ export function MapContainer() {
   const [viewport, setViewport] = useState(INITIAL_VIEWPORT)
   const [size, setSize] = useState({ width: 390, height: 560 })
   const [lifecycleEvents, setLifecycleEvents] = useState(0)
+  const [selectedListingId, setSelectedListingId] = useState(null)
   renderCountRef.current += 1
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), [])
@@ -43,8 +47,23 @@ export function MapContainer() {
   }, [commitViewport])
 
   const reset = useCallback(() => {
+    setSelectedListingId(null)
     commitViewport(() => ({ ...INITIAL_VIEWPORT }))
   }, [commitViewport])
+
+  const focusPoint = useCallback((point, targetZoom) => {
+    commitViewport((current) => ({
+      ...current,
+      lat: point.lat,
+      lng: point.lng,
+      zoom: targetZoom,
+    }))
+  }, [commitViewport])
+
+  const selectMarker = useCallback((marker) => {
+    setSelectedListingId((current) => selectListing(current, marker.id))
+    focusPoint(marker, MARKER_FOCUS_ZOOM)
+  }, [focusPoint])
 
   const onLifecycle = useCallback(() => {
     setLifecycleEvents((count) => count + 1)
@@ -102,7 +121,7 @@ export function MapContainer() {
   }
 
   return (
-    <section className="map-engine" data-testid="map-engine">
+    <section className="map-engine" data-testid="map-engine" data-selected-listing-id={selectedListingId || ''}>
       <div
         ref={surfaceRef}
         className="map-surface"
@@ -126,15 +145,23 @@ export function MapContainer() {
         onWheel={onWheel}
       >
         <TileLayer viewport={viewport} size={size} />
-        <ClusterLayer markers={INFRA_MARKERS} viewport={viewport} size={size} />
-        {viewport.zoom > 10 ? <MarkerLayer markers={INFRA_MARKERS} viewport={viewport} size={size} /> : null}
+        <ClusterLayer markers={INFRA_MARKERS} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
+        {viewport.zoom > 10 ? (
+          <MarkerLayer
+            markers={INFRA_MARKERS}
+            viewport={viewport}
+            size={size}
+            selectedListingId={selectedListingId}
+            onSelect={selectMarker}
+          />
+        ) : null}
         <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} onReset={reset} />
         <div className="map-attribution">© OpenStreetMap contributors</div>
         <ResizeManager targetRef={surfaceRef} onSize={setSize} />
         <ViewportController onLifecycle={onLifecycle} />
       </div>
       <p className="map-engine__status" aria-live="polite">
-        Tunis · zoom {viewport.zoom}
+        {selectedListingId ? `Sélection: ${selectedListingId}` : `Tunis · zoom ${viewport.zoom}`}
       </p>
     </section>
   )
