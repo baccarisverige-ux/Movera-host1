@@ -1,9 +1,9 @@
 function App() {
   return (
-    <div style={{ padding: '40px', fontFamily: 'sans-serif', textAlign: 'center' }}>
-      <h1 style={{ color: '#2D6A4F' }}>Movera Host</h1>
-      <p>Bienvenue sur la nouvelle version du site.</p>
-    </div>
+    <main className="app-baseline">
+      <h1 className="app-baseline__title">Movera Host</h1>
+      <p className="app-baseline__text">Bienvenue sur la nouvelle version du site.</p>
+    </main>
   )
 }
 
