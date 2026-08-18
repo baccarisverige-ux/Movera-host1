@@ -1,9 +1,9 @@
 export const homeCategories = [
   { id: 'all', label: 'Tout', icon: '◉' },
+  { id: 'prestige', label: 'Prestige', icon: '◇' },
   { id: 'beach', label: 'Plage', icon: '◒' },
   { id: 'guesthouse', label: "Maison d’hôte", icon: '⌂' },
-  { id: 'experience', label: 'Expériences', icon: '✦' },
-  { id: 'prestige', label: 'Prestige', icon: '◇' },
+  { id: 'experience', label: 'Expérience', icon: '✦' },
   { id: 'family', label: 'Famille', icon: '♡' },
   { id: 'partner', label: 'Partenaire', icon: '○' },
 ]
