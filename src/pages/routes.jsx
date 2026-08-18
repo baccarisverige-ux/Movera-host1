@@ -1,3 +1,5 @@
+import { HomePage } from './Home/HomePage.jsx'
+
 function PageFrame({ eyebrow, title, description, testId }) {
   return (
     <section className="route-page" data-testid={testId}>
@@ -8,9 +10,6 @@ function PageFrame({ eyebrow, title, description, testId }) {
   )
 }
 
-function HomePage() {
-  return <PageFrame eyebrow="Guest" title="Movera Host" description="Accueil de l’application." testId="page-home" />
-}
 function MapPage() {
   return <PageFrame eyebrow="Guest" title="Explorer la carte" description="Shell de la page carte." testId="page-map" />
 }
