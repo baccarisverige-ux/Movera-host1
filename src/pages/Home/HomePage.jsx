@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { homeCategories, homeCollections, homeDestinations, homeFeatured, homeServices } from '../../mocks/homeData'
 import '../../styles/home-b225.css'
+import '../../styles/home-b225-block2.css'
 
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -10,18 +11,24 @@ function ArrowIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 }
 
-function ListingCard({ item, onOpen }) {
+function ListingCard({ item, onOpen, featured = false }) {
   return (
-    <article className="b225-card" data-testid={`home-card-${item.id}`} onClick={() => onOpen(item.id)}>
+    <article className={`b225-card${featured ? ' b225-featured-card' : ''}`} data-testid={`home-card-${item.id}`} onClick={() => onOpen(item.id)}>
       <div className="b225-card__image">
         <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
         {item.badge ? <span className="b225-card__badge">{item.badge}</span> : null}
         <button type="button" className="b225-card__heart" aria-label={`Ajouter ${item.title} aux favoris`} onClick={(event) => event.stopPropagation()}>♡</button>
       </div>
       <div className="b225-card__body">
-        <div className="b225-card__topline"><h3>{item.title}</h3><span>★ {item.rating || '4.90'}</span></div>
-        <p>{item.location} · Tunisie</p>
-        <p className="b225-card__price"><strong>{item.price} {item.currency}</strong> <span>/ nuit</span></p>
+        {featured ? (
+          <p className="b225-featured-line"><strong>{item.title}</strong><span> — {item.price} {item.currency}</span></p>
+        ) : (
+          <>
+            <div className="b225-card__topline"><h3>{item.title}</h3><span>★ {item.rating || '4.90'}</span></div>
+            <p>{item.location} · Tunisie</p>
+            <p className="b225-card__price"><strong>{item.price} {item.currency}</strong> <span>/ nuit</span></p>
+          </>
+        )}
       </div>
     </article>
   )
@@ -88,25 +95,31 @@ export function HomePage({ onNavigate }) {
         <div className="b225-welcome__visual" aria-hidden="true"><span>MH</span></div>
       </section>
 
-      <section className="b225-section" data-testid="home-destinations">
+      <section className="b225-section b225-destinations-section" data-testid="home-destinations">
         <div className="b225-section__title"><h2>Destinations Privilégiées</h2></div>
         <div className="b225-cities">
-          {homeDestinations.map((item) => (
-            <button key={item.id} type="button" onClick={() => onNavigate(`/map?destination=${item.id}`)}>
-              <span className="b225-city__image"><img src={item.image} alt="" loading="lazy" decoding="async" /><span>{item.label}</span></span>
+          {homeDestinations.map((item, index) => (
+            <button key={item.id} type="button" className="b225-city" onClick={() => onNavigate(`/map?destination=${item.id}`)}>
+              <span className="b225-city__image"><img src={item.image} alt={item.label} loading={index === 0 ? 'eager' : 'lazy'} decoding="async" /></span>
+              <span className="b225-city__copy"><strong>{item.label}</strong><span>{item.subtitle}</span></span>
             </button>
           ))}
         </div>
       </section>
 
-      <section className="b225-services" aria-label="Services Movera">
-        {homeServices.map((service) => <button type="button" key={service.id}><span>{service.symbol}</span><strong>{service.label}</strong></button>)}
+      <section className="b225-services" aria-label="Services Movera" data-testid="home-services">
+        {homeServices.map((service) => (
+          <button type="button" key={service.id} className="b225-service-card">
+            <span className="b225-service-visual" aria-hidden="true">{service.symbol}</span>
+            <strong>{service.label}</strong>
+          </button>
+        ))}
       </section>
 
-      <section className="b225-section" data-testid="home-featured">
+      <section className="b225-section b225-featured-section" data-testid="home-featured">
         <div className="b225-section__title"><h2>Sélection d'Exception</h2></div>
-        <div className="b225-scroll">
-          {featured.length ? featured.map((item) => <ListingCard key={item.id} item={item} onOpen={openListing} />) : <p className="b225-empty">Aucune offre pour cette sélection.</p>}
+        <div className="b225-scroll b225-featured-scroll">
+          {featured.length ? featured.map((item) => <ListingCard key={item.id} item={item} onOpen={openListing} featured />) : <p className="b225-empty">Aucune offre pour cette sélection.</p>}
         </div>
       </section>
 
