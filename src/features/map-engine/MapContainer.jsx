@@ -10,6 +10,8 @@ import { selectListing } from './markerModel.js'
 import '../../styles/map-engine.css'
 
 const INITIAL_VIEWPORT = Object.freeze({ lat: 36.8065, lng: 10.1815, zoom: 11 })
+const MARKER_FOCUS_ZOOM = 10.5
+const CLUSTER_FOCUS_ZOOM = 11
 const INFRA_MARKERS = Object.freeze([
   { id: 'tunis-centre', label: 'Tunis centre', lat: 36.8065, lng: 10.1815 },
   { id: 'carthage', label: 'Carthage', lat: 36.8528, lng: 10.3233 },
@@ -49,18 +51,18 @@ export function MapContainer() {
     commitViewport(() => ({ ...INITIAL_VIEWPORT }))
   }, [commitViewport])
 
-  const focusPoint = useCallback((point, targetZoom = 12) => {
+  const focusPoint = useCallback((point, targetZoom) => {
     commitViewport((current) => ({
       ...current,
       lat: point.lat,
       lng: point.lng,
-      zoom: Math.max(current.zoom, targetZoom),
+      zoom: targetZoom,
     }))
   }, [commitViewport])
 
   const selectMarker = useCallback((marker) => {
     setSelectedListingId((current) => selectListing(current, marker.id))
-    focusPoint(marker, 12)
+    focusPoint(marker, MARKER_FOCUS_ZOOM)
   }, [focusPoint])
 
   const onLifecycle = useCallback(() => {
@@ -143,7 +145,7 @@ export function MapContainer() {
         onWheel={onWheel}
       >
         <TileLayer viewport={viewport} size={size} />
-        <ClusterLayer markers={INFRA_MARKERS} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, 11)} />
+        <ClusterLayer markers={INFRA_MARKERS} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
         {viewport.zoom > 10 ? (
           <MarkerLayer
             markers={INFRA_MARKERS}
