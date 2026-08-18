@@ -1,3 +1,4 @@
+import { MapContainer } from '../features/map-engine/MapContainer.jsx'
 import { HomePage } from './Home/HomePage.jsx'
 
 function PageFrame({ eyebrow, title, description, testId }) {
@@ -11,7 +12,13 @@ function PageFrame({ eyebrow, title, description, testId }) {
 }
 
 function MapPage() {
-  return <PageFrame eyebrow="Guest" title="Explorer la carte" description="Shell de la page carte." testId="page-map" />
+  return (
+    <section className="route-page route-page--map" data-testid="page-map">
+      <p className="route-page__eyebrow">Guest</p>
+      <h1>Explorer la carte</h1>
+      <MapContainer />
+    </section>
+  )
 }
 function ListingPage({ params }) {
   return <PageFrame eyebrow="Guest" title={`Annonce ${params.id}`} description="Shell du détail annonce." testId="page-listing" />
