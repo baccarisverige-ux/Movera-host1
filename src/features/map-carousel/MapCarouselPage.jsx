@@ -53,17 +53,3 @@ export function MapCarouselPage({ onNavigate }) {
     </section>
   )
 }
-
-export function ListingDetailPage({ params, onNavigate }) {
-  const listing = CAROUSEL_LISTINGS.find((item) => item.id === params.id)
-  return (
-    <section className="route-page" data-testid="page-listing" data-listing-id={params.id}>
-      <p className="route-page__eyebrow">Guest · Detail</p>
-      <h1>{listing?.title || `Annonce ${params.id}`}</h1>
-      <p>{listing?.price || 'Détail annonce'}</p>
-      <button type="button" className="route-link-button" data-testid="detail-back-map" onClick={() => onNavigate('/map')}>
-        Retour à la carte
-      </button>
-    </section>
-  )
-}
