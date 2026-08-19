@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from 'react'
+import { useLayoutEffect } from 'react'
 
 export function ResizeManager({ targetRef, onSize }) {
   useLayoutEffect(() => {
@@ -28,6 +28,5 @@ export function ResizeManager({ targetRef, onSize }) {
     }
   }, [targetRef, onSize])
 
-  useEffect(() => undefined, [])
   return null
 }
