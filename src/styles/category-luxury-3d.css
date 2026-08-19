@@ -2,10 +2,8 @@
   position:relative;
   isolation:isolate;
   overflow:visible;
-  min-height:54px!important;
-  padding-inline:20px!important;
   border:1px solid rgba(205,205,205,.72)!important;
-  border-radius:25px 25px 23px 23px!important;
+  border-radius:999px!important;
   background:linear-gradient(180deg,#fff 0%,#fff 54%,#f7f7f7 72%,#eeeeee 100%)!important;
   box-shadow:
     inset 0 2px 0 rgba(255,255,255,1),
@@ -25,8 +23,8 @@
   left:8px;
   right:8px;
   top:5px;
-  bottom:-5px;
-  border-radius:22px 22px 24px 24px;
+  bottom:-4px;
+  border-radius:999px;
   background:linear-gradient(180deg,rgba(245,245,245,.25) 45%,rgba(190,190,190,.72) 100%);
   box-shadow:0 4px 7px rgba(0,0,0,.11);
   pointer-events:none;
