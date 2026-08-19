@@ -12,17 +12,25 @@ const HOME_ACCESSIBLE_NAMES = {
 
 function HomeAccessibilityNames() {
   useEffect(() => {
-    const applyAccessibleNames = () => {
+    const applyAccessibilityFixes = () => {
       for (const [id, label] of Object.entries(HOME_ACCESSIBLE_NAMES)) {
         const element = document.getElementById(id)
         if (element && element.getAttribute('aria-label') !== label) {
           element.setAttribute('aria-label', label)
         }
       }
+
+      const featuredScroll = document.querySelector('.b225-featured-scroll')
+      if (featuredScroll) {
+        if (featuredScroll.tabIndex !== 0) featuredScroll.tabIndex = 0
+        if (!featuredScroll.getAttribute('aria-label')) {
+          featuredScroll.setAttribute('aria-label', "Sélection d'Exception")
+        }
+      }
     }
 
-    applyAccessibleNames()
-    const observer = new MutationObserver(applyAccessibleNames)
+    applyAccessibilityFixes()
+    const observer = new MutationObserver(applyAccessibilityFixes)
     observer.observe(document.body, { childList: true, subtree: true })
     return () => observer.disconnect()
   }, [])
