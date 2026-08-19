@@ -24,8 +24,10 @@ function AppLink({ children, className, href, onNavigate, active }) {
 }
 
 export function GuestLayout({ children, currentPath, onNavigate }) {
+  const isMapRoute = currentPath === '/map'
+
   return (
-    <div className="app-shell app-shell--guest">
+    <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}`}>
       <header className="app-shell__header">
         <strong>Movera Host</strong>
         <AppLink className="shell-switch" href="/host" onNavigate={onNavigate}>Mode hôte</AppLink>
