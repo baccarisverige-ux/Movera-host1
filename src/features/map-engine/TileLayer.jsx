@@ -21,21 +21,35 @@ export function TileLayer({ viewport, size }) {
 
   return (
     <div className="map-tiles" data-testid="map-tile-layer" data-tile-count={tiles.length} aria-hidden="true">
-      {tiles.map((tile) => (
-        <div
-          className="map-tile"
-          key={`${zoom}-${tile.x}-${tile.y}`}
-          style={{ transform: `translate3d(${tile.left}px, ${tile.top}px, 0)` }}
-        >
-          <img
-            alt=""
-            draggable="false"
-            loading="eager"
-            src={`https://tile.openstreetmap.org/${zoom}/${tile.wrappedX}/${tile.y}.png`}
-            onError={(event) => { event.currentTarget.style.display = 'none' }}
-          />
-        </div>
-      ))}
+      {tiles.map((tile) => {
+        const src = `https://tile.openstreetmap.org/${zoom}/${tile.wrappedX}/${tile.y}.png`
+        return (
+          <div
+            className="map-tile"
+            key={`${zoom}-${tile.x}-${tile.y}`}
+            style={{ transform: `translate3d(${tile.left}px, ${tile.top}px, 0)` }}
+          >
+            <img
+              alt=""
+              draggable="false"
+              loading="eager"
+              data-base-src={src}
+              src={src}
+              onLoad={(event) => { event.currentTarget.style.visibility = 'visible' }}
+              onError={(event) => {
+                const image = event.currentTarget
+                const retries = Number(image.dataset.retries || '0')
+                if (retries < 1) {
+                  image.dataset.retries = '1'
+                  image.src = `${image.dataset.baseSrc}?retry=1`
+                  return
+                }
+                image.style.visibility = 'hidden'
+              }}
+            />
+          </div>
+        )
+      })}
     </div>
   )
 }
