@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { authStore } from '../../features/account/authStore.js'
-import { GuestLayout } from '../../pages/layouts/GuestLayout.jsx'
-import { HostLayout } from '../../pages/layouts/HostLayout.jsx'
+import { GuestLayout } from '../layouts/GuestLayout.jsx'
+import { HostLayout } from '../layouts/HostLayout.jsx'
 import { routeDefinitions, NotFoundPage } from './routes.jsx'
 
 const BASE_PATH = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
