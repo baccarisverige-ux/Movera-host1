@@ -1,8 +1,6 @@
 name: Deploy B225 Preview
 
 on:
-  push:
-    branches: [b225-ui-home]
   workflow_dispatch:
 
 permissions:
