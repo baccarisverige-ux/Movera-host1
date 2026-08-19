@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { homeCategories } from '../../mocks/homeData.js'
 import '../../styles/map-b225.css'
 import { CarouselShell } from '../carousel/CarouselShell.jsx'
 import { CAROUSEL_LISTINGS } from '../carousel/carouselData.js'
@@ -17,11 +16,6 @@ const DESTINATION_VIEWPORTS = Object.freeze({
   djerba: { lat: 33.8076, lng: 10.8451, zoom: 11 },
   nabeul: { lat: 36.4561, lng: 10.7376, zoom: 12 },
   bizerte: { lat: 37.2746, lng: 9.8739, zoom: 12 },
-})
-const LISTING_CATEGORIES = Object.freeze({
-  'marsa-sea': ['beach', 'family'],
-  'carthage-suite': ['guesthouse', 'experience'],
-  'gammarth-house': ['prestige', 'partner'],
 })
 
 function SearchIcon() {
@@ -48,24 +42,12 @@ export function MapCarouselPage({ onNavigate }) {
   const initialViewport = destinationViewport || restored?.viewport || INITIAL_VIEWPORT
   const [selectedListingId, setSelectedListingId] = useState(restored?.selectedListingId || null)
   const [viewport, setViewport] = useState(initialViewport)
-  const [category, setCategory] = useState('all')
   const initialOpen = restored?.carouselOpen === true
-
-  const filteredListings = useMemo(() => category === 'all'
-    ? CAROUSEL_LISTINGS
-    : CAROUSEL_LISTINGS.filter((item) => LISTING_CATEGORIES[item.id]?.includes(category)), [category])
-  const filteredListingIds = useMemo(() => new Set(filteredListings.map((item) => item.id)), [filteredListings])
-  const filteredMarkers = useMemo(() => DEFAULT_MARKERS.filter((marker) => filteredListingIds.has(marker.id)), [filteredListingIds])
-  const effectiveSelectedListingId = selectedListingId && filteredListingIds.has(selectedListingId) ? selectedListingId : null
 
   useEffect(() => {
     if (shouldRestore && !destinationViewport) return
     try { window.sessionStorage.removeItem(STORAGE_KEY) } catch { /* storage unavailable */ }
   }, [destinationViewport, shouldRestore])
-
-  useEffect(() => {
-    if (selectedListingId && !filteredListingIds.has(selectedListingId)) setSelectedListingId(null)
-  }, [filteredListingIds, selectedListingId])
 
   const selectListing = useCallback((id) => setSelectedListingId(id), [])
   const openDetail = useCallback((id, phase) => {
@@ -78,36 +60,30 @@ export function MapCarouselPage({ onNavigate }) {
   }, [onNavigate, viewport])
 
   return (
-    <section className="b225-map-page" data-testid="page-map" data-official-flow="marker-carousel-detail" data-destination={requestedDestination || ''} data-category={category}>
+    <section className="b225-map-page" data-testid="page-map" data-official-flow="marker-carousel-detail" data-destination={requestedDestination || ''}>
       <div className="b225-map-top">
         <button type="button" className="b225-map-search" onClick={() => onNavigate('/')} aria-label="Modifier la recherche">
           <SearchIcon />
           <span className="b225-map-search__copy"><strong>Explorer la carte</strong><span>Grand Tunis · Dates · Voyageurs</span></span>
           <span className="b225-map-filter-button" aria-hidden="true">≡</span>
         </button>
-        <div className="b225-map-categories" aria-label="Filtres de carte">
-          {homeCategories.map((item) => (
-            <button key={item.id} type="button" data-active={category === item.id ? 'true' : 'false'} onClick={() => setCategory(item.id)}>{item.label}</button>
-          ))}
-        </div>
       </div>
 
       <MapContainer
-        markers={filteredMarkers}
-        selectedListingId={effectiveSelectedListingId}
+        markers={DEFAULT_MARKERS}
+        selectedListingId={selectedListingId}
         onSelectedListingChange={selectListing}
         initialViewport={initialViewport}
         onViewportChange={setViewport}
       />
 
-      {!effectiveSelectedListingId ? <div className="b225-map-badge">Déplacez la carte pour explorer</div> : null}
+      {!selectedListingId ? <div className="b225-map-badge">Déplacez la carte pour explorer</div> : null}
 
       <CarouselShell
-        key={`map-carousel-${category}`}
-        listings={filteredListings}
-        selectedListingId={effectiveSelectedListingId}
+        listings={CAROUSEL_LISTINGS}
+        selectedListingId={selectedListingId}
         onSelectedListingChange={selectListing}
-        initialOpen={initialOpen && Boolean(effectiveSelectedListingId)}
+        initialOpen={initialOpen && Boolean(selectedListingId)}
         onDetail={openDetail}
       />
     </section>
