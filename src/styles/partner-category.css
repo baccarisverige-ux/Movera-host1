@@ -21,9 +21,9 @@
   flex-basis:28px!important;
 }
 
-.b225-categories button[data-category-id="prestige"] > span[data-legacy-category-icon],
-.b225-categories button[data-category-id="experience"] > span[data-legacy-category-icon],
-.b225-categories button[data-category-id="partner"] > span[data-legacy-category-icon]{
+.b225-categories button[data-category-id="prestige"] > [data-legacy-category-icon],
+.b225-categories button[data-category-id="experience"] > [data-legacy-category-icon],
+.b225-categories button[data-category-id="partner"] > [data-legacy-category-icon]{
   display:none!important;
 }
 
