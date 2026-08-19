@@ -9,7 +9,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,10 +25,11 @@ jobs:
           echo $! > /tmp/movera-search-preview.pid
           for i in {1..20}; do curl --fail --silent http://127.0.0.1:4173/Movera-host1/ >/dev/null && exit 0; sleep 1; done
           cat /tmp/movera-search-preview.log; exit 1
-      - name: Install browsers
+      - name: Install browsers and WebKit dependencies
         run: |
           npm install --no-save playwright@1.55.0
-          npx playwright install chromium webkit
+          npx playwright install chromium
+          npx playwright install --with-deps webkit
       - name: Search transition E2E Chromium + WebKit
         run: |
           cat > search-transition-smoke.mjs <<'EOF'
