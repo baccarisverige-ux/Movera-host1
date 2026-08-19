@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   fast-quality:
-    name: Lint · Unit · Build
+    name: Architecture · Lint · Unit · Build · Bundle
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -31,15 +31,19 @@ jobs:
       - run: npm ci
       - name: Install unit test runner
         run: npm install --no-save --package-lock=false vitest@3.2.4
+      - name: Architecture contract
+        run: npm run quality:architecture
       - run: npm run lint
       - name: Unit tests
         run: npx vitest run tests/unit
       - run: npm run build
+      - name: Bundle budget
+        run: npm run quality:bundle
 
   browser-quality:
-    name: Mobile · E2E · A11y · Visual capture
+    name: Responsive · Mobile · E2E · A11y · Visual capture
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -51,7 +55,7 @@ jobs:
         run: npm install --no-save --package-lock=false @playwright/test@1.55.0 @axe-core/playwright@4.10.2
       - name: Install Chromium
         run: npx playwright install chromium
-      - name: E2E and accessibility
+      - name: E2E, responsive baseline and accessibility
         run: npx playwright test tests/e2e tests/accessibility --project=mobile-chromium --project=desktop-chromium
       - name: Capture visual references
         run: npx playwright test tests/visual --project=mobile-chromium
