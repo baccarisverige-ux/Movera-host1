@@ -1,37 +1,36 @@
-.b225-categories button[data-category-id="experience"]::before,
-.b225-categories button[data-category-id="experience"]:active::before,
-.b225-categories button[data-category-id="experience"]:focus::before,
-.b225-categories button[data-category-id="experience"][aria-pressed="true"]::before,
-.b225-categories button[data-category-id="experience"][data-active="true"]::before{
-  content:""!important;
-  position:static!important;
-  inset:auto!important;
+.b225-categories button[data-category-id="prestige"] > img[data-category-icon],
+.b225-categories button[data-category-id="experience"] > img[data-category-icon],
+.b225-categories button[data-category-id="partner"] > img[data-category-icon]{
   width:24px!important;
   height:24px!important;
-  padding:0!important;
   flex:0 0 24px!important;
   display:block!important;
+  object-fit:contain!important;
   border:0!important;
   border-radius:0!important;
-  background-color:transparent!important;
-  background-image:url('/Movera-host1/assets/prestige-category.webp')!important;
-  background-position:center!important;
-  background-repeat:no-repeat!important;
-  background-size:contain!important;
-  -webkit-mask:none!important;
-  mask:none!important;
+  background:transparent!important;
   box-shadow:none!important;
   filter:none!important;
   opacity:1!important;
   transform:none!important;
   pointer-events:none!important;
 }
-.b225-categories button[data-category-id="experience"]>span{display:none!important}
-.b225-categories button[data-category-id="partner"]>span{
-  width:28px;
-  height:24px;
-  display:block;
-  flex:0 0 28px;
-  font-size:0!important;
-  background:center/contain no-repeat url('/Movera-host1/assets/partner-category.png')!important;
+
+.b225-categories button[data-category-id="partner"] > img[data-category-icon]{
+  width:28px!important;
+  flex-basis:28px!important;
+}
+
+.b225-categories button[data-category-id="prestige"] > span[data-legacy-category-icon],
+.b225-categories button[data-category-id="experience"] > span[data-legacy-category-icon],
+.b225-categories button[data-category-id="partner"] > span[data-legacy-category-icon]{
+  display:none!important;
+}
+
+.b225-categories button[data-category-id="experience"]::before,
+.b225-categories button[data-category-id="prestige"]::before,
+.b225-categories button[data-category-id="partner"]::before{
+  content:none!important;
+  display:none!important;
+  background-image:none!important;
 }
