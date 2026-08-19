@@ -18,6 +18,11 @@ const DESTINATION_VIEWPORTS = Object.freeze({
   nabeul: { lat: 36.4561, lng: 10.7376, zoom: 12 },
   bizerte: { lat: 37.2746, lng: 9.8739, zoom: 12 },
 })
+const LISTING_CATEGORIES = Object.freeze({
+  'marsa-sea': ['beach', 'family'],
+  'carthage-suite': ['guesthouse', 'experience'],
+  'gammarth-house': ['prestige', 'partner'],
+})
 
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -44,10 +49,21 @@ export function MapCarouselPage({ onNavigate }) {
   const [category, setCategory] = useState('all')
   const initialOpen = restored?.carouselOpen === true
 
+  const filteredListings = useMemo(() => category === 'all'
+    ? CAROUSEL_LISTINGS
+    : CAROUSEL_LISTINGS.filter((item) => LISTING_CATEGORIES[item.id]?.includes(category)), [category])
+  const filteredListingIds = useMemo(() => new Set(filteredListings.map((item) => item.id)), [filteredListings])
+  const filteredMarkers = useMemo(() => DEFAULT_MARKERS.filter((marker) => filteredListingIds.has(marker.id)), [filteredListingIds])
+  const effectiveSelectedListingId = selectedListingId && filteredListingIds.has(selectedListingId) ? selectedListingId : null
+
   useEffect(() => {
     if (!destinationViewport) return
     try { window.sessionStorage.removeItem(STORAGE_KEY) } catch { /* storage unavailable */ }
   }, [destinationViewport])
+
+  useEffect(() => {
+    if (selectedListingId && !filteredListingIds.has(selectedListingId)) setSelectedListingId(null)
+  }, [filteredListingIds, selectedListingId])
 
   const selectListing = useCallback((id) => setSelectedListingId(id), [])
   const openDetail = useCallback((id, phase) => {
@@ -60,7 +76,7 @@ export function MapCarouselPage({ onNavigate }) {
   }, [onNavigate, viewport])
 
   return (
-    <section className="b225-map-page" data-testid="page-map" data-official-flow="marker-carousel-detail" data-destination={requestedDestination || ''}>
+    <section className="b225-map-page" data-testid="page-map" data-official-flow="marker-carousel-detail" data-destination={requestedDestination || ''} data-category={category}>
       <div className="b225-map-top">
         <button type="button" className="b225-map-search" onClick={() => onNavigate('/')} aria-label="Modifier la recherche">
           <SearchIcon />
@@ -75,20 +91,21 @@ export function MapCarouselPage({ onNavigate }) {
       </div>
 
       <MapContainer
-        markers={DEFAULT_MARKERS}
-        selectedListingId={selectedListingId}
+        markers={filteredMarkers}
+        selectedListingId={effectiveSelectedListingId}
         onSelectedListingChange={selectListing}
         initialViewport={initialViewport}
         onViewportChange={setViewport}
       />
 
-      {!selectedListingId ? <div className="b225-map-badge">Déplacez la carte pour explorer</div> : null}
+      {!effectiveSelectedListingId ? <div className="b225-map-badge">Déplacez la carte pour explorer</div> : null}
 
       <CarouselShell
-        listings={CAROUSEL_LISTINGS}
-        selectedListingId={selectedListingId}
+        key={`map-carousel-${category}`}
+        listings={filteredListings}
+        selectedListingId={effectiveSelectedListingId}
         onSelectedListingChange={selectListing}
-        initialOpen={initialOpen}
+        initialOpen={initialOpen && Boolean(effectiveSelectedListingId)}
         onDetail={openDetail}
       />
     </section>
