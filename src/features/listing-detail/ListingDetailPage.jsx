@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import { getListingDetail } from '../../entities/listing/listingRepository.js'
 import { favoritesStore } from '../account/favoritesStore.js'
 import { Gallery } from './components/Gallery.jsx'
 import { ListingHeader, ListingPricing, ListingSections } from './components/ListingSections.jsx'
-import { getListingDetail } from './listingDetailData.js'
 import { getPricingSummary } from './pricingService.js'
 import '../../styles/listing-detail.css'
 

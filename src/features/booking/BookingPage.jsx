@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { getListingDetail } from '../listing-detail/listingDetailData.js'
+import { getListingDetail } from '../../entities/listing/listingRepository.js'
 import { BookingInputs, BookingScenario, BookingSummary } from './components/BookingSections.jsx'
 import { calculateBookingTotal, nightsBetween, validateBooking } from './bookingEngine.js'
 import { dateInputFromToday } from './model/dateUtils.js'

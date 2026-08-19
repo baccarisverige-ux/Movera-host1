@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getListingDetail } from '../../listing-detail/listingDetailData.js'
+import { getListingDetail } from '../../../entities/listing/listingRepository.js'
 import { favoritesStore } from '../favoritesStore.js'
 import '../accountStyles.js'
 
