@@ -1,19 +1,29 @@
 # Phase 3 — Design tokens / CSS cleanup
 
-Status: in progress
+Status: completed — pending final phase-by-phase regression campaign
 
 ## Safety contract
 - No visual redesign.
 - No behavior change.
 - Only replace a literal with a token when the computed value is exactly equivalent.
 - Do not activate previously undefined CSS custom properties until their historical intended values are verified.
-- Validate each runtime CSS edit with the existing Search Transition build/E2E gate and CodeQL.
 
 ## Existing token system
-`src/styles/tokens.css` already defines the base palette, spacing, radii, shadows, typography, z-index, motion and breakpoints.
+`src/styles/tokens.css` defines the base palette, spacing, radii, shadows, typography, z-index, motion and breakpoints.
 
-## Audit findings
-The runtime styles already consume tokens heavily, but some referenced variables are not present in the current token contract. Examples observed in `globals.css` include:
+## Completed safe migrations
+- `globals.css`: pill radii use `--radius-pill`.
+- `account.css`: exact spacing/radius/surface literals use existing tokens.
+- `booking.css`: exact spacing/radius/surface literals use existing tokens; semantically incorrect radius/spacing substitution was explicitly avoided.
+- `carousel.css`: exact pill/spacing/surface literals use existing tokens while gradients, blur, dimensions and timings remain untouched.
+- `category-luxury-3d.css`: only the two exact pill radii were tokenized.
+- `collection-card-size.css`: the exact 14px card radius uses `--radius-md`.
+- `home-b225-block2.css`: only exact existing spacing and radius tokens were introduced; card dimensions, shadows, colors and the specific 24px radius remain literal.
+- `accessibility.css`: the exact brand color `#2d6a4f` uses `--color-brand-700`.
+- `home-b225-partner.css` and `guest-bottom-nav.css` were inspected and intentionally left unchanged because their literals are component-specific rather than safe global-token matches.
+
+## Deferred by design
+The following referenced variables remain intentionally undefined until their historical intended values can be proven without changing rendering:
 - `--color-surface-1`
 - `--color-surface-2`
 - `--color-border-subtle`
@@ -21,15 +31,7 @@ The runtime styles already consume tokens heavily, but some referenced variables
 - `--radius-xl`
 - `--blur-md`
 
-These are intentionally NOT added yet because assigning new values to previously undefined variables can change computed rendering. Their intended historical values must be verified first.
+No speculative token values were introduced.
 
-## First safe migration
-- Replaced literal `999px` pill radii in `src/styles/globals.css` with the already-defined `--radius-pill: 999px` token.
-- This is value-equivalent and should produce no visual change.
-
-## Next safe sequence
-1. Validate this exact-equivalence migration.
-2. Inventory exact repeated literals in smaller CSS files.
-3. Replace only exact matches with existing tokens.
-4. Separately investigate undefined token references before deciding whether they are legacy/dead styles or missing definitions.
-5. Keep large B225 CSS files isolated until the low-risk token layer is proven stable.
+## Result
+Phase 3 reduces literal duplication while preserving component-specific B225 styling. The runtime changes completed during this phase were individually green before the user requested that the remaining phases be executed first and tested afterward. The final regression campaign will re-test this phase as a whole.
