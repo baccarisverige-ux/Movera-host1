@@ -1,5 +1,7 @@
 let moveraScrollRaf = 0
 let moveraResizeObserver = null
+let moveraCategoryTravel = 0
+const MOVERA_CATEGORY_FOLLOW = 0.8
 
 function syncMoveraCategoryScroll() {
   moveraScrollRaf = 0
@@ -16,10 +18,14 @@ function syncMoveraCategoryScroll() {
   categories.classList.add('movera-categories-linked')
 
   const distanceAfterWelcomeExit = Math.max(0, -welcomeRect.bottom)
-  const upwardTravel = Math.min(distanceAfterWelcomeExit, categoriesHeight)
+  const targetTravel = Math.min(distanceAfterWelcomeExit, categoriesHeight)
+  moveraCategoryTravel += (targetTravel - moveraCategoryTravel) * MOVERA_CATEGORY_FOLLOW
+  if (Math.abs(targetTravel - moveraCategoryTravel) < 0.1) moveraCategoryTravel = targetTravel
 
-  document.documentElement.style.setProperty('--movera-category-upward-travel', `${upwardTravel}px`)
-  categories.classList.toggle('movera-categories-moving-under-header', upwardTravel > 0)
+  document.documentElement.style.setProperty('--movera-category-upward-travel', `${moveraCategoryTravel}px`)
+  categories.classList.toggle('movera-categories-moving-under-header', moveraCategoryTravel > 0.1)
+
+  if (Math.abs(targetTravel - moveraCategoryTravel) >= 0.1) requestMoveraCategorySync()
 
   if (!moveraResizeObserver && 'ResizeObserver' in window) {
     moveraResizeObserver = new ResizeObserver(requestMoveraCategorySync)
