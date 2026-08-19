@@ -41,6 +41,14 @@ jobs:
           await page.goto(`${base}/`,{waitUntil:'networkidle'})
           await page.getByTestId('page-home').waitFor()
           if(await page.locator('.b225-categories button').count()<7) throw new Error('B225 categories incomplete')
+          for(const id of ['prestige','experience','partner']){
+            const button=page.locator(`.b225-categories button[data-category-id="${id}"]`)
+            if(await button.count()!==1) throw new Error(`category identity missing: ${id}`)
+            const icon=button.locator('img[data-category-icon]')
+            if(await icon.count()!==1) throw new Error(`real category icon missing: ${id}`)
+            const state=await icon.evaluate(img=>({src:img.getAttribute('src'),naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight,display:getComputedStyle(img).display,opacity:getComputedStyle(img).opacity}))
+            if(!state.src||state.naturalWidth<1||state.naturalHeight<1||state.display==='none'||state.opacity==='0') throw new Error(`category icon not rendered: ${id} ${JSON.stringify(state)}`)
+          }
           if(await page.locator('.b225-city').count()<10) throw new Error('B225 destinations incomplete')
           if(await page.getByTestId('home-services').locator('.b225-service-card').count()!==4) throw new Error('B225 services incomplete')
           if(await page.getByTestId('home-featured').locator('.b225-featured-card').count()<3) throw new Error('B225 featured incomplete')
