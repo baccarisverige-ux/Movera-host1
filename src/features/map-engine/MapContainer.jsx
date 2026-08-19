@@ -49,7 +49,6 @@ export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: con
   }, [])
 
   const zoomBy = useCallback((delta) => commitViewport((current) => zoomViewport(current, delta)), [commitViewport])
-  const reset = useCallback(() => { setSelected(null); commitViewport(() => ({ ...INITIAL_VIEWPORT })) }, [commitViewport, setSelected])
   const focusPoint = useCallback((point, targetZoom) => commitViewport((current) => ({ ...current, lat: point.lat, lng: point.lng, zoom: targetZoom })), [commitViewport])
   const selectMarker = useCallback((marker) => { setSelected(marker.id); focusPoint(marker, MARKER_FOCUS_ZOOM) }, [focusPoint, setSelected])
 
@@ -105,7 +104,7 @@ export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: con
       <TileLayer viewport={viewport} size={size} />
       <ClusterLayer markers={markers} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
       {viewport.zoom > 10 ? <MarkerLayer markers={markers} viewport={viewport} size={size} selectedListingId={selectedListingId} onSelect={selectMarker} /> : null}
-      <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} onReset={reset} />
+      <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} />
       <div className="map-attribution">© OpenStreetMap contributors</div>
       <ResizeManager targetRef={surfaceRef} onSize={setSize} />
       <ViewportController onLifecycle={() => setLifecycleEvents((count) => count + 1)} />
