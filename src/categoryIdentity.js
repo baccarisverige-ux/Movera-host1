@@ -39,16 +39,18 @@ function applyCategoryIds(root = document) {
   const categories = root.querySelector?.('.b225-categories')
   if (!categories) return false
 
+  let matched = 0
   categories.querySelectorAll('button').forEach((button) => {
     const label = button.textContent?.trim()
     const id = CATEGORY_IDS_BY_LABEL.get(label)
     if (!id) return
 
+    matched += 1
     button.dataset.categoryId = id
     ensureRealCategoryIcon(button, id)
   })
 
-  return true
+  return matched === CATEGORY_IDS_BY_LABEL.size
 }
 
 if (!applyCategoryIds()) {
