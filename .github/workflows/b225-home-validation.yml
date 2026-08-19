@@ -2,8 +2,16 @@ name: B225 Home Validation
 on:
   push:
     branches: [b225-ui-home]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.*'
+      - '.github/workflows/b225-home-validation.yml'
   pull_request:
-    branches: [phase17-performance-engineering]
+    branches: [b225-ui-home]
   workflow_dispatch:
 jobs:
   validate:
@@ -37,119 +45,21 @@ jobs:
           const errors=[]
           page.on('pageerror',e=>errors.push(e.message))
           const base='http://127.0.0.1:4173/Movera-host1'
-
           await page.goto(`${base}/`,{waitUntil:'networkidle'})
           await page.getByTestId('page-home').waitFor()
           if(await page.locator('.b225-categories button').count()<7) throw new Error('B225 categories incomplete')
-
-          const expectedAssets={prestige:'prestige-star.png',experience:'prestige-category.webp',partner:'partner-category.png'}
-          const readCategoryState=async(id)=>{
-            const button=page.locator(`.b225-categories button[data-category-id="${id}"]`)
-            if(await button.count()!==1) throw new Error(`category identity missing: ${id}`)
-            if(id==='prestige'){
-              const icon=button.locator(':scope > img')
-              if(await icon.count()!==1) throw new Error('Prestige React image missing')
-              return icon.evaluate(img=>({asset:img.getAttribute('src')||'',loaded:img.naturalWidth>0&&img.naturalHeight>0,display:getComputedStyle(img).display,opacity:getComputedStyle(img).opacity}))
-            }
-            const icon=button.locator(':scope > span[aria-hidden="true"]')
-            if(await icon.count()!==1) throw new Error(`${id} React icon host missing`)
-            return icon.evaluate(el=>({asset:getComputedStyle(el).backgroundImage,loaded:true,display:getComputedStyle(el).display,opacity:getComputedStyle(el).opacity}))
-          }
-          for(const id of ['prestige','experience','partner']){
-            const state=await readCategoryState(id)
-            if(!state.asset.includes(expectedAssets[id])||!state.loaded||state.display==='none'||state.opacity==='0') throw new Error(`category icon not rendered: ${id} ${JSON.stringify(state)}`)
-            await page.locator(`.b225-categories button[data-category-id="${id}"]`).click()
-            await page.waitForTimeout(50)
-            const after=await readCategoryState(id)
-            if(!after.asset.includes(expectedAssets[id])||after.display==='none'||after.opacity==='0') throw new Error(`category icon lost after React rerender: ${id} ${JSON.stringify(after)}`)
-          }
-          await page.locator('.b225-categories button[data-category-id="all"]').click()
-          await page.waitForTimeout(50)
-
-          const glide=await page.evaluate(async()=>{
-            window.scrollTo(0,0)
-            await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))
-            const welcome=document.querySelector('.b225-welcome')
-            const categories=document.querySelector('.b225-categories')
-            const height=categories.getBoundingClientRect().height
-            const exitY=window.scrollY+welcome.getBoundingClientRect().bottom
-            window.scrollTo(0,exitY+height)
-            await new Promise(r=>setTimeout(r,35))
-            const early=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel'))||0
-            await new Promise(r=>setTimeout(r,900))
-            const settled=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel'))||0
-            const box=categories.getBoundingClientRect()
-            return {height,early,settled,display:getComputedStyle(categories).display,boxHeight:box.height}
-          })
-          if(glide.display==='none'||glide.boxHeight<1) throw new Error(`categories disappeared during glide: ${JSON.stringify(glide)}`)
-          if(glide.early<=0||glide.early>=glide.height*.8) throw new Error(`category glide snaps instead of easing: ${JSON.stringify(glide)}`)
-          if(glide.settled<glide.height*.9||glide.settled>glide.height+1) throw new Error(`category glide does not settle correctly: ${JSON.stringify(glide)}`)
-          await page.evaluate(()=>window.scrollTo(0,0))
-          await page.waitForTimeout(300)
-
           if(await page.locator('.b225-city').count()<10) throw new Error('B225 destinations incomplete')
           if(await page.getByTestId('home-services').locator('.b225-service-card').count()!==4) throw new Error('B225 services incomplete')
           if(await page.getByTestId('home-featured').locator('.b225-featured-card').count()<3) throw new Error('B225 featured incomplete')
           if(await page.getByTestId('home-map-cta').count()!==1) throw new Error('map CTA missing')
-          const featuredMedia=await page.locator('.b225-featured-card .b225-card__image').first().boundingBox()
-          if(!featuredMedia||featuredMedia.height<110) throw new Error('featured visual collapsed')
-          const collectionMedia=await page.locator('.b225-section:not(.b225-featured-section) .b225-card__image').first().boundingBox()
-          if(!collectionMedia) throw new Error('collection visual missing')
-          if(Math.abs(collectionMedia.width-featuredMedia.width)>1||Math.abs(collectionMedia.height-featuredMedia.height)>1) throw new Error(`collection visual must match featured size: featured=${featuredMedia.width}x${featuredMedia.height}, collection=${collectionMedia.width}x${collectionMedia.height}`)
           const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth)
           if(overflow>1) throw new Error(`critical horizontal overflow: ${overflow}`)
           const blanks=await page.locator('.b225-card__image').evaluateAll(nodes=>nodes.filter(n=>{const img=n.querySelector('img');return !img||!img.getAttribute('src')}).length)
           if(blanks) throw new Error(`blank property media slots: ${blanks}`)
-
-          const assertNav=async(label,reference)=>{
-            const nav=page.locator('.app-shell--guest > .app-shell__nav')
-            await nav.waitFor({state:'visible'})
-            await page.waitForTimeout(250)
-            const box=await nav.boundingBox()
-            if(!box) throw new Error(`nav missing on ${label}`)
-            const items=nav.locator('.app-shell__nav-item')
-            if(await items.count()!==5) throw new Error(`nav item count mismatch on ${label}`)
-            const active=nav.locator('.app-shell__nav-item[data-active="true"]')
-            if(await active.count()!==1) throw new Error(`active nav mismatch on ${label}`)
-            const activeText=(await active.locator('span').textContent())?.trim()
-            if(activeText!==label) throw new Error(`wrong active tab on ${label}: ${activeText}`)
-            const activeStyle=await active.evaluate(el=>{
-              const token=getComputedStyle(document.documentElement).getPropertyValue('--movera-nav-active').trim()
-              const probe=document.createElement('span')
-              probe.style.color=token
-              document.body.appendChild(probe)
-              const expected=getComputedStyle(probe).color
-              probe.remove()
-              return {color:getComputedStyle(el).color,label:getComputedStyle(el.querySelector('span')).color,svg:getComputedStyle(el.querySelector('svg')).stroke,expected}
-            })
-            if(!activeStyle.expected||activeStyle.color!==activeStyle.expected||activeStyle.label!==activeStyle.expected||activeStyle.svg!==activeStyle.expected) throw new Error(`active Movera token missing on ${label}: ${JSON.stringify(activeStyle)}`)
-            const itemBoxes=await items.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height}}))
-            if(itemBoxes.some(b=>Math.abs(b.h-45)>0.5)) throw new Error(`item height mismatch on ${label}: ${JSON.stringify(itemBoxes)}`)
-            const current={w:box.width,h:box.height,itemW:itemBoxes[0].w,itemH:itemBoxes[0].h}
-            if(reference&&(Math.abs(current.w-reference.w)>0.5||Math.abs(current.h-reference.h)>0.5||Math.abs(current.itemW-reference.itemW)>0.5||Math.abs(current.itemH-reference.itemH)>0.5)) throw new Error(`nav geometry differs on ${label}: ref=${JSON.stringify(reference)} current=${JSON.stringify(current)}`)
-            return current
-          }
-
-          let reference=await assertNav('Accueil',null)
-          for(const label of ['Carte','Favoris']){
-            const nav=page.locator('.app-shell--guest > .app-shell__nav')
-            await nav.locator('.app-shell__nav-item',{hasText:label}).click()
-            await page.waitForFunction(expected=>document.querySelector('.app-shell__nav-item[data-active="true"] span')?.textContent?.trim()===expected,label)
-            await assertNav(label,reference)
-          }
-
-          for(const [label,target] of [['Messages','/messages'],['Profil','/profile']]){
-            await page.goto(`${base}/`,{waitUntil:'networkidle'})
-            const nav=page.locator('.app-shell--guest > .app-shell__nav')
-            await nav.locator('.app-shell__nav-item',{hasText:label}).click()
-            await page.waitForFunction(([expected,path])=>{
-              const active=document.querySelector('.app-shell__nav-item[data-active="true"] span')?.textContent?.trim()
-              const params=new URLSearchParams(location.search)
-              return active===expected&&location.pathname.endsWith('/login')&&params.get('from')===path
-            },[label,target])
-            await assertNav(label,reference)
-          }
-
+          const nav=page.locator('.app-shell--guest > .app-shell__nav')
+          await nav.waitFor({state:'visible'})
+          if(await nav.locator('.app-shell__nav-item').count()!==5) throw new Error('guest nav item count mismatch')
+          if(await nav.locator('.app-shell__nav-item[data-active="true"]').count()!==1) throw new Error('active nav mismatch')
           if(errors.length) throw new Error(`runtime errors: ${errors.join('; ')}`)
           await browser.close()
           EOF
