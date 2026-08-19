@@ -55,18 +55,16 @@ jobs:
           const blanks=await page.locator('.b225-card__image').evaluateAll(nodes=>nodes.filter(n=>{const img=n.querySelector('img');return !img||!img.getAttribute('src')}).length)
           if(blanks) throw new Error(`blank property media slots: ${blanks}`)
 
-          const routes=[
-            ['/', 'Accueil'],
-            ['/map', 'Carte'],
-            ['/favorites', 'Favoris'],
-            ['/messages', 'Messages'],
-            ['/profile', 'Profil'],
-          ]
+          const labels=['Accueil','Carte','Favoris','Messages','Profil']
           let reference=null
-          for(const [route,label] of routes){
-            await page.goto(`${base}${route}`,{waitUntil:'domcontentloaded'})
+          for(const label of labels){
             const nav=page.locator('.app-shell--guest > .app-shell__nav')
             await nav.waitFor({state:'visible'})
+            const target=nav.locator('.app-shell__nav-item',{hasText:label})
+            if(label!=='Accueil'){
+              await target.click()
+              await page.waitForFunction(expected=>document.querySelector('.app-shell__nav-item[data-active="true"] span')?.textContent?.trim()===expected,label)
+            }
             const box=await nav.boundingBox()
             if(!box) throw new Error(`nav missing on ${label}`)
             const items=nav.locator('.app-shell__nav-item')
