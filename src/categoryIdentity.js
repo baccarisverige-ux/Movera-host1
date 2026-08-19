@@ -14,6 +14,14 @@ const CATEGORY_ICON_BY_ID = {
   partner: '/Movera-host1/assets/partner-category.png',
 }
 
+function getCategoryLabel(button) {
+  return Array.from(button.childNodes)
+    .filter((node) => node.nodeType === Node.TEXT_NODE)
+    .map((node) => node.textContent || '')
+    .join('')
+    .trim()
+}
+
 function ensureRealCategoryIcon(button, id) {
   const src = CATEGORY_ICON_BY_ID[id]
   if (!src) return
@@ -41,7 +49,7 @@ function applyCategoryIds(root = document) {
 
   let matched = 0
   categories.querySelectorAll('button').forEach((button) => {
-    const label = button.textContent?.trim()
+    const label = getCategoryLabel(button)
     const id = CATEGORY_IDS_BY_LABEL.get(label)
     if (!id) return
 
