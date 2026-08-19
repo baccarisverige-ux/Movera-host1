@@ -3,12 +3,19 @@ name: Movera Quality Gate
 on:
   push:
     branches: [b225-ui-home]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
   pull_request:
-    branches: [phase17-performance-engineering]
+    branches: [b225-ui-home]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: movera-quality-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   fast-quality:
