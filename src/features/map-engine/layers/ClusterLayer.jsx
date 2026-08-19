@@ -1,4 +1,4 @@
-import { screenPoint } from './geometry.js'
+import { screenPoint } from '../geometry/geometry.js'
 
 export function ClusterLayer({ markers, viewport, size, onFocus }) {
   if (viewport.zoom > 10 || markers.length === 0) return null

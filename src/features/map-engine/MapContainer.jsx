@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ClusterLayer } from './ClusterLayer.jsx'
-import { MapControls } from './MapControls.jsx'
-import { MarkerLayer } from './MarkerLayer.jsx'
-import { ResizeManager } from './ResizeManager.jsx'
-import { TileLayer } from './TileLayer.jsx'
-import { ViewportController } from './ViewportController.jsx'
-import { panViewport, zoomViewport } from './geometry.js'
+import { ClusterLayer } from './layers/ClusterLayer.jsx'
+import { MapControls } from './controls/MapControls.jsx'
+import { MarkerLayer } from './layers/MarkerLayer.jsx'
+import { ResizeManager } from './lifecycle/ResizeManager.jsx'
+import { TileLayer } from './layers/TileLayer.jsx'
+import { ViewportController } from './lifecycle/ViewportController.jsx'
+import { panViewport, zoomViewport } from './geometry/geometry.js'
 import '../../styles/map-engine.css'
 
 export const INITIAL_VIEWPORT = Object.freeze({ lat: 36.8065, lng: 10.1815, zoom: 11 })

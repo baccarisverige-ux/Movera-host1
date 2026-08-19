@@ -1,4 +1,4 @@
-import { TILE_SIZE, project } from './geometry.js'
+import { TILE_SIZE, project } from '../geometry/geometry.js'
 
 export function TileLayer({ viewport, size }) {
   const zoom = Math.round(viewport.zoom)

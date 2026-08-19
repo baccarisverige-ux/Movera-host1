@@ -1,5 +1,5 @@
-import { screenPoint } from './geometry.js'
-import { getMarkerState, MarkerState } from './markerModel.js'
+import { screenPoint } from '../geometry/geometry.js'
+import { getMarkerState, MarkerState } from '../model/markerModel.js'
 
 export function MarkerLayer({ markers, viewport, size, selectedListingId, onSelect, hiddenIds = new Set() }) {
   return (
