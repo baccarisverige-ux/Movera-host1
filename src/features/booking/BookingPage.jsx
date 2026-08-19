@@ -5,6 +5,9 @@ import '../../styles/booking.css'
 
 export function BookingPage({ params, onNavigate }) {
   const listing = getListingDetail(params.id)
+  const fromMap = new URLSearchParams(window.location.search).get('from') === 'map'
+  const detailReturnPath = fromMap ? `/listing/${params.id}?from=map` : `/listing/${params.id}`
+  const mapReturnPath = fromMap ? '/map?restore=1' : '/map'
   const [checkIn, setCheckIn] = useState('2026-08-20')
   const [checkOut, setCheckOut] = useState('2026-08-22')
   const [guests, setGuests] = useState(2)
@@ -17,7 +20,7 @@ export function BookingPage({ params, onNavigate }) {
   const pricing = useMemo(() => calculateBookingTotal({ nightlyRate: listing?.nightlyRate || 0, nights, fees: listing?.fees || 0, discounts: nights >= 7 ? 25 : 0 }), [listing, nights])
 
   if (!listing) {
-    return <section className="booking-page" data-testid="booking-missing"><h1>Annonce indisponible</h1><button type="button" onClick={() => onNavigate('/map')}>Retour à la carte</button></section>
+    return <section className="booking-page" data-testid="booking-missing"><h1>Annonce indisponible</h1><button type="button" onClick={() => onNavigate(mapReturnPath)}>Retour à la carte</button></section>
   }
 
   const submit = async () => {
@@ -45,7 +48,7 @@ export function BookingPage({ params, onNavigate }) {
       </div>
       {error ? <p className="booking-error" role="alert" data-testid="booking-error">{error}</p> : null}
       {confirmation ? <div className="booking-confirmation" data-testid="booking-confirmation"><strong>Réservation confirmée</strong><span>{confirmation.id}</span><span>{confirmation.total} {listing.currency}</span></div> : null}
-      <div className="booking-actions"><button type="button" onClick={() => onNavigate(`/listing/${listing.id}`)}>Retour au détail</button><button type="button" data-testid="booking-submit" disabled={status === 'submitting' || status === 'confirmed'} onClick={submit}>{status === 'submitting' ? 'Confirmation…' : status === 'confirmed' ? 'Confirmée' : 'Confirmer la réservation'}</button></div>
+      <div className="booking-actions"><button type="button" onClick={() => onNavigate(detailReturnPath)}>Retour au détail</button><button type="button" data-testid="booking-submit" disabled={status === 'submitting' || status === 'confirmed'} onClick={submit}>{status === 'submitting' ? 'Confirmation…' : status === 'confirmed' ? 'Confirmée' : 'Confirmer la réservation'}</button></div>
     </section>
   )
 }
