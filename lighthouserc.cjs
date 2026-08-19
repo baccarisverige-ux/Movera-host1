@@ -23,6 +23,6 @@ module.exports = {
         'largest-contentful-paint': ['warn', { maxNumericValue: 4500 }],
       },
     },
-    upload: { target: 'temporary-public-storage' },
+    upload: { target: 'filesystem', outputDir: './lhci-report' },
   },
 }
