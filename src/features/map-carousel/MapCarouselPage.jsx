@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
 import '../../styles/map-b225.css'
 import { INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
 
-const STORAGE_KEY = 'movera-map-back-state-v1'
 const DESTINATION_VIEWPORTS = Object.freeze({
   'la-marsa': { lat: 36.8782, lng: 10.3247, zoom: 13 },
   'sidi-bou-said': { lat: 36.8687, lng: 10.3417, zoom: 13 },
@@ -20,30 +18,11 @@ function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
 }
 
-function readBackState() {
-  try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch { return null }
-}
-
-export function persistMapBackState(state) {
-  window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-}
-
 export function MapCarouselPage({ onNavigate }) {
   const searchParams = new URLSearchParams(window.location.search)
   const requestedDestination = searchParams.get('destination')
-  const shouldRestore = searchParams.get('restore') === '1'
   const destinationViewport = requestedDestination ? DESTINATION_VIEWPORTS[requestedDestination] || null : null
-  const restored = useMemo(() => (!destinationViewport && shouldRestore) ? readBackState() : null, [destinationViewport, shouldRestore])
-  const initialViewport = destinationViewport || restored?.viewport || INITIAL_VIEWPORT
-  const [viewport, setViewport] = useState(initialViewport)
-
-  useEffect(() => {
-    if (shouldRestore && !destinationViewport) return
-    try { window.sessionStorage.removeItem(STORAGE_KEY) } catch { /* storage unavailable */ }
-  }, [destinationViewport, shouldRestore])
+  const initialViewport = destinationViewport || INITIAL_VIEWPORT
 
   return (
     <section className="b225-map-page" data-testid="page-map" data-destination={requestedDestination || ''}>
@@ -55,10 +34,7 @@ export function MapCarouselPage({ onNavigate }) {
         </button>
       </div>
 
-      <MapContainer
-        initialViewport={initialViewport}
-        onViewportChange={setViewport}
-      />
+      <MapContainer initialViewport={initialViewport} />
     </section>
   )
 }
