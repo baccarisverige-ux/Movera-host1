@@ -41,14 +41,64 @@ jobs:
           await page.goto(`${base}/`,{waitUntil:'networkidle'})
           await page.getByTestId('page-home').waitFor()
           if(await page.locator('.b225-categories button').count()<7) throw new Error('B225 categories incomplete')
-          for(const id of ['prestige','experience','partner']){
+
+          const expectedAssets={
+            prestige:'prestige-star.png',
+            experience:'prestige-category.webp',
+            partner:'partner-category.png',
+          }
+          const readCategoryState=async(id)=>{
             const button=page.locator(`.b225-categories button[data-category-id="${id}"]`)
             if(await button.count()!==1) throw new Error(`category identity missing: ${id}`)
-            const icon=button.locator('img[data-category-icon]')
-            if(await icon.count()!==1) throw new Error(`real category icon missing: ${id}`)
-            const state=await icon.evaluate(img=>({src:img.getAttribute('src'),naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight,display:getComputedStyle(img).display,opacity:getComputedStyle(img).opacity}))
-            if(!state.src||state.naturalWidth<1||state.naturalHeight<1||state.display==='none'||state.opacity==='0') throw new Error(`category icon not rendered: ${id} ${JSON.stringify(state)}`)
+            if(id==='prestige'){
+              const icon=button.locator(':scope > img')
+              if(await icon.count()!==1) throw new Error('Prestige React image missing')
+              return icon.evaluate(img=>({
+                asset:img.getAttribute('src')||'',
+                loaded:img.naturalWidth>0&&img.naturalHeight>0,
+                display:getComputedStyle(img).display,
+                opacity:getComputedStyle(img).opacity,
+              }))
+            }
+            const icon=button.locator(':scope > span[aria-hidden="true"]')
+            if(await icon.count()!==1) throw new Error(`${id} React icon host missing`)
+            return icon.evaluate(el=>({
+              asset:getComputedStyle(el).backgroundImage,
+              loaded:true,
+              display:getComputedStyle(el).display,
+              opacity:getComputedStyle(el).opacity,
+            }))
           }
+          for(const id of ['prestige','experience','partner']){
+            const state=await readCategoryState(id)
+            if(!state.asset.includes(expectedAssets[id])||!state.loaded||state.display==='none'||state.opacity==='0') throw new Error(`category icon not rendered: ${id} ${JSON.stringify(state)}`)
+            await page.locator(`.b225-categories button[data-category-id="${id}"]`).click()
+            await page.waitForTimeout(50)
+            const after=await readCategoryState(id)
+            if(!after.asset.includes(expectedAssets[id])||after.display==='none'||after.opacity==='0') throw new Error(`category icon lost after React rerender: ${id} ${JSON.stringify(after)}`)
+          }
+
+          const glide=await page.evaluate(async()=>{
+            window.scrollTo(0,0)
+            await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))
+            const welcome=document.querySelector('.b225-welcome')
+            const categories=document.querySelector('.b225-categories')
+            const height=categories.getBoundingClientRect().height
+            const exitY=window.scrollY+welcome.getBoundingClientRect().bottom
+            window.scrollTo(0,exitY+height)
+            await new Promise(r=>setTimeout(r,35))
+            const early=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel'))||0
+            await new Promise(r=>setTimeout(r,900))
+            const settled=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel'))||0
+            const box=categories.getBoundingClientRect()
+            return {height,early,settled,display:getComputedStyle(categories).display,boxHeight:box.height}
+          })
+          if(glide.display==='none'||glide.boxHeight<1) throw new Error(`categories disappeared during glide: ${JSON.stringify(glide)}`)
+          if(glide.early<=0||glide.early>=glide.height*.8) throw new Error(`category glide snaps instead of easing: ${JSON.stringify(glide)}`)
+          if(glide.settled<glide.height*.9||glide.settled>glide.height+1) throw new Error(`category glide does not settle correctly: ${JSON.stringify(glide)}`)
+          await page.evaluate(()=>window.scrollTo(0,0))
+          await page.waitForTimeout(300)
+
           if(await page.locator('.b225-city').count()<10) throw new Error('B225 destinations incomplete')
           if(await page.getByTestId('home-services').locator('.b225-service-card').count()!==4) throw new Error('B225 services incomplete')
           if(await page.getByTestId('home-featured').locator('.b225-featured-card').count()<3) throw new Error('B225 featured incomplete')
