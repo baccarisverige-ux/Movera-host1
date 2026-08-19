@@ -8,15 +8,22 @@ function syncMoveraCategoryScroll() {
   if (!header || !categories || !welcome) return
 
   const headerRect = header.getBoundingClientRect()
+  const welcomeRect = welcome.getBoundingClientRect()
+  const categoriesHeight = categories.getBoundingClientRect().height
+
   document.documentElement.style.setProperty('--movera-home-header-height', `${headerRect.height}px`)
   categories.classList.add('movera-categories-linked')
 
-  // Keep categories visible until the ENTIRE welcome card has passed
-  // behind the sticky search/header area. Only then release categories
-  // so they continue moving naturally upward underneath the header.
-  const welcomeBottom = welcome.getBoundingClientRect().bottom
-  const release = welcomeBottom <= headerRect.bottom + 0.5
-  categories.classList.toggle('movera-categories-release', release)
+  // Exact requested trigger: the categories do not start moving until
+  // the ENTIRE "Bienvenue chez Movera" card has left the viewport.
+  // After that point, move categories upward continuously with scroll so
+  // the search/header progressively covers them. No fade, hide, collapse,
+  // position switch or jump. Scrolling upward reverses the same motion.
+  const distanceAfterWelcomeExit = Math.max(0, -welcomeRect.bottom)
+  const upwardTravel = Math.min(distanceAfterWelcomeExit, categoriesHeight)
+
+  document.documentElement.style.setProperty('--movera-category-upward-travel', `${upwardTravel}px`)
+  categories.classList.toggle('movera-categories-moving-under-header', upwardTravel > 0)
 }
 
 function requestMoveraCategorySync() {
