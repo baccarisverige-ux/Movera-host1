@@ -1,34 +1,30 @@
 let moveraScrollRaf = 0
 let moveraResizeObserver = null
 let moveraCategoryTravel = 0
-const MOVERA_CATEGORY_FOLLOW = 0.25
+let moveraLastFrameTime = 0
+let moveraWelcomeExitScrollY = 0
+let moveraCategoriesHeight = 0
+let moveraHeaderHeight = 0
+const MOVERA_CATEGORY_FOLLOW_MS = 220
 
-function syncMoveraCategoryScroll() {
-  moveraScrollRaf = 0
+function measureMoveraCategoryScroll() {
   const header = document.querySelector('.b225-home-header')
   const categories = document.querySelector('.b225-categories')
   const welcome = document.querySelector('.b225-welcome')
   if (!header || !categories || !welcome) return false
 
-  const headerRect = header.getBoundingClientRect()
-  const welcomeRect = welcome.getBoundingClientRect()
-  const categoriesHeight = categories.getBoundingClientRect().height
+  moveraHeaderHeight = header.getBoundingClientRect().height
+  moveraCategoriesHeight = categories.getBoundingClientRect().height
+  moveraWelcomeExitScrollY = window.scrollY + welcome.getBoundingClientRect().bottom
 
-  document.documentElement.style.setProperty('--movera-home-header-height', `${headerRect.height}px`)
+  document.documentElement.style.setProperty('--movera-home-header-height', `${moveraHeaderHeight}px`)
   categories.classList.add('movera-categories-linked')
 
-  const distanceAfterWelcomeExit = Math.max(0, -welcomeRect.bottom)
-  const targetTravel = Math.min(distanceAfterWelcomeExit, categoriesHeight)
-  moveraCategoryTravel += (targetTravel - moveraCategoryTravel) * MOVERA_CATEGORY_FOLLOW
-  if (Math.abs(targetTravel - moveraCategoryTravel) < 0.1) moveraCategoryTravel = targetTravel
-
-  document.documentElement.style.setProperty('--movera-category-upward-travel', `${moveraCategoryTravel}px`)
-  categories.classList.toggle('movera-categories-moving-under-header', moveraCategoryTravel > 0.1)
-
-  if (Math.abs(targetTravel - moveraCategoryTravel) >= 0.1) requestMoveraCategorySync()
-
   if (!moveraResizeObserver && 'ResizeObserver' in window) {
-    moveraResizeObserver = new ResizeObserver(requestMoveraCategorySync)
+    moveraResizeObserver = new ResizeObserver(() => {
+      measureMoveraCategoryScroll()
+      requestMoveraCategorySync()
+    })
     moveraResizeObserver.observe(header)
     moveraResizeObserver.observe(categories)
     moveraResizeObserver.observe(welcome)
@@ -37,18 +33,50 @@ function syncMoveraCategoryScroll() {
   return true
 }
 
+function syncMoveraCategoryScroll(timestamp = performance.now()) {
+  moveraScrollRaf = 0
+  const categories = document.querySelector('.b225-categories')
+  if (!categories && !measureMoveraCategoryScroll()) return false
+  if (!moveraCategoriesHeight && !measureMoveraCategoryScroll()) return false
+
+  const distanceAfterWelcomeExit = Math.max(0, window.scrollY - moveraWelcomeExitScrollY)
+  const targetTravel = Math.min(distanceAfterWelcomeExit, moveraCategoriesHeight)
+  const elapsed = moveraLastFrameTime ? Math.min(64, Math.max(1, timestamp - moveraLastFrameTime)) : 16.67
+  moveraLastFrameTime = timestamp
+  const follow = 1 - Math.exp(-elapsed / MOVERA_CATEGORY_FOLLOW_MS)
+
+  moveraCategoryTravel += (targetTravel - moveraCategoryTravel) * follow
+  if (Math.abs(targetTravel - moveraCategoryTravel) < 0.08) moveraCategoryTravel = targetTravel
+
+  document.documentElement.style.setProperty('--movera-category-upward-travel', `${moveraCategoryTravel}px`)
+  categories.classList.toggle('movera-categories-moving-under-header', moveraCategoryTravel > 0.08)
+
+  if (Math.abs(targetTravel - moveraCategoryTravel) >= 0.08) requestMoveraCategorySync()
+  return true
+}
+
 function requestMoveraCategorySync() {
   if (moveraScrollRaf) return
   moveraScrollRaf = requestAnimationFrame(syncMoveraCategoryScroll)
 }
 
-window.addEventListener('scroll', requestMoveraCategorySync, { passive: true })
-window.addEventListener('resize', requestMoveraCategorySync, { passive: true })
-window.addEventListener('popstate', requestMoveraCategorySync)
+function refreshMoveraCategoryScroll() {
+  moveraLastFrameTime = 0
+  if (measureMoveraCategoryScroll()) requestMoveraCategorySync()
+}
 
-if (!syncMoveraCategoryScroll()) {
+window.addEventListener('scroll', requestMoveraCategorySync, { passive: true })
+window.addEventListener('resize', refreshMoveraCategoryScroll, { passive: true })
+window.addEventListener('popstate', refreshMoveraCategoryScroll)
+
+if (!measureMoveraCategoryScroll()) {
   const bootObserver = new MutationObserver(() => {
-    if (syncMoveraCategoryScroll()) bootObserver.disconnect()
+    if (measureMoveraCategoryScroll()) {
+      bootObserver.disconnect()
+      requestMoveraCategorySync()
+    }
   })
   bootObserver.observe(document.documentElement, { childList: true, subtree: true })
+} else {
+  requestMoveraCategorySync()
 }
