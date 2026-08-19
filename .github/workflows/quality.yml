@@ -43,7 +43,7 @@ jobs:
       - name: Install browser quality tools
         run: npm install --no-save --package-lock=false @playwright/test@1.55.0 @axe-core/playwright@4.10.2
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
       - name: E2E and accessibility
         run: npx playwright test tests/e2e tests/accessibility --project=mobile-chromium --project=desktop-chromium
       - name: Capture visual references
