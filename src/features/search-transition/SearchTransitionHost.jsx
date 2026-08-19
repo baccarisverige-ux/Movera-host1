@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
+import { MapContainer } from '../map-engine/MapContainer.jsx'
 import { GuestSelector } from './GuestSelector.jsx'
 import { SearchCalendar } from './SearchCalendar.jsx'
 import { SEARCH_DESTINATIONS } from './searchData.js'
@@ -8,9 +8,11 @@ import { buildMapSearchPath, createSearchState, isDateRangeValid, totalTraveller
 import './searchTransition.css'
 import './searchTransition-stability.css'
 
-const OPEN_MS = 960
+const OPEN_MS = 980
 const COMPLETE_MS = 560
+const READY_MS = 820
 const RECENT_KEY = 'movera-search-recents-v1'
+const SEARCH_OVERVIEW_VIEWPORT = Object.freeze({ lat: 34.15, lng: 9.55, zoom: 7 })
 
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -31,7 +33,8 @@ function formatDate(value) {
 }
 
 function guestSummary(state) {
-  const parts = [`${totalTravellers(state)} voyageur${totalTravellers(state) > 1 ? 's' : ''}`]
+  const travellers = totalTravellers(state)
+  const parts = [`${travellers} voyageur${travellers > 1 ? 's' : ''}`]
   if (state.infants) parts.push(`${state.infants} bébé${state.infants > 1 ? 's' : ''}`)
   if (state.pets) parts.push(`${state.pets} animal${state.pets > 1 ? 'aux' : ''}`)
   return parts.join(' · ')
@@ -53,18 +56,21 @@ function destinationById(id) {
 export function SearchTransitionHost({ onNavigate }) {
   const [active, setActive] = useState(false)
   const [open, setOpen] = useState(false)
+  const [ready, setReady] = useState(false)
   const [complete, setComplete] = useState(false)
   const [step, setStep] = useState('destination')
   const [state, setState] = useState(createSearchState)
   const [origin, setOrigin] = useState({ top: 72, left: 14, width: 362, height: 52 })
+  const [lockedViewportHeight, setLockedViewportHeight] = useState(760)
   const [destinationQuery, setDestinationQuery] = useState('')
   const [recentSearches, setRecentSearches] = useState(readRecents)
   const closeTimerRef = useRef(0)
   const completeTimerRef = useRef(0)
   const stepTimerRef = useRef(0)
+  const readyTimerRef = useRef(0)
   const lockedScrollYRef = useRef(0)
 
-  const selectedViewport = state.destination?.viewport || INITIAL_VIEWPORT
+  const selectedViewport = state.destination?.viewport || SEARCH_OVERVIEW_VIEWPORT
   const datesValid = isDateRangeValid(state.checkin, state.checkout)
   const minDate = useMemo(() => {
     const now = new Date()
@@ -75,19 +81,23 @@ export function SearchTransitionHost({ onNavigate }) {
   }, [])
   const filteredDestinations = useMemo(() => {
     const query = destinationQuery.trim().toLocaleLowerCase('fr')
-    if (!query) return SEARCH_DESTINATIONS
-    return SEARCH_DESTINATIONS.filter((destination) => `${destination.label} ${destination.subtitle}`.toLocaleLowerCase('fr').includes(query))
+    const matches = query
+      ? SEARCH_DESTINATIONS.filter((destination) => `${destination.label} ${destination.subtitle}`.toLocaleLowerCase('fr').includes(query))
+      : SEARCH_DESTINATIONS
+    return matches.slice(0, 4)
   }, [destinationQuery])
 
   const clearTimers = () => {
     window.clearTimeout(closeTimerRef.current)
     window.clearTimeout(completeTimerRef.current)
     window.clearTimeout(stepTimerRef.current)
+    window.clearTimeout(readyTimerRef.current)
   }
 
   const closeTransition = () => {
     if (!active || complete) return
     clearTimers()
+    setReady(false)
     setOpen(false)
     closeTimerRef.current = window.setTimeout(() => {
       setActive(false)
@@ -104,14 +114,20 @@ export function SearchTransitionHost({ onNavigate }) {
       event.stopPropagation()
       clearTimers()
       const rect = trigger.getBoundingClientRect()
+      const viewportHeight = Math.round(window.visualViewport?.height || window.innerHeight || 760)
       setOrigin({ top: rect.top, left: rect.left, width: rect.width, height: rect.height })
+      setLockedViewportHeight(viewportHeight)
       setState(createSearchState())
       setRecentSearches(readRecents())
       setDestinationQuery('')
       setStep('destination')
       setComplete(false)
+      setReady(false)
       setActive(true)
-      requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)))
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        setOpen(true)
+        readyTimerRef.current = window.setTimeout(() => setReady(true), READY_MS)
+      }))
     }
     document.addEventListener('click', onSearchClick, true)
     return () => document.removeEventListener('click', onSearchClick, true)
@@ -128,40 +144,56 @@ export function SearchTransitionHost({ onNavigate }) {
       bodyLeft: body.style.left,
       bodyRight: body.style.right,
       bodyWidth: body.style.width,
+      bodyHeight: body.style.height,
       bodyOverflow: body.style.overflow,
       bodyOverscroll: body.style.overscrollBehavior,
+      htmlHeight: html.style.height,
       htmlOverflow: html.style.overflow,
       htmlOverscroll: html.style.overscrollBehavior,
     }
+
+    html.dataset.moveraSearchLock = 'true'
+    body.dataset.moveraSearchLock = 'true'
+    html.style.height = `${lockedViewportHeight}px`
+    html.style.overflow = 'hidden'
+    html.style.overscrollBehavior = 'none'
     body.style.position = 'fixed'
     body.style.top = `-${lockedScrollYRef.current}px`
     body.style.left = '0'
     body.style.right = '0'
     body.style.width = '100%'
+    body.style.height = `${lockedViewportHeight}px`
     body.style.overflow = 'hidden'
     body.style.overscrollBehavior = 'none'
-    html.style.overflow = 'hidden'
-    html.style.overscrollBehavior = 'none'
 
     const preventMove = (event) => event.preventDefault()
+    const keepScrollLocked = () => {
+      if (window.scrollY !== lockedScrollYRef.current) window.scrollTo(0, lockedScrollYRef.current)
+    }
     document.addEventListener('touchmove', preventMove, { passive: false })
     document.addEventListener('wheel', preventMove, { passive: false })
+    window.addEventListener('scroll', keepScrollLocked, { passive: true })
 
     return () => {
       document.removeEventListener('touchmove', preventMove)
       document.removeEventListener('wheel', preventMove)
+      window.removeEventListener('scroll', keepScrollLocked)
+      delete html.dataset.moveraSearchLock
+      delete body.dataset.moveraSearchLock
       body.style.position = previous.bodyPosition
       body.style.top = previous.bodyTop
       body.style.left = previous.bodyLeft
       body.style.right = previous.bodyRight
       body.style.width = previous.bodyWidth
+      body.style.height = previous.bodyHeight
       body.style.overflow = previous.bodyOverflow
       body.style.overscrollBehavior = previous.bodyOverscroll
+      html.style.height = previous.htmlHeight
       html.style.overflow = previous.htmlOverflow
       html.style.overscrollBehavior = previous.htmlOverscroll
       window.scrollTo(0, lockedScrollYRef.current)
     }
-  }, [active])
+  }, [active, lockedViewportHeight])
 
   useEffect(() => {
     if (!active) return undefined
@@ -216,6 +248,7 @@ export function SearchTransitionHost({ onNavigate }) {
     if (!state.destination || !datesValid || state.adults < 1) return
     clearTimers()
     saveRecent()
+    setReady(false)
     setComplete(true)
     setOpen(false)
     const path = buildMapSearchPath(state)
@@ -229,19 +262,22 @@ export function SearchTransitionHost({ onNavigate }) {
 
   if (!active) return null
 
+  const panelHeight = Math.min(570, Math.max(455, Math.round(lockedViewportHeight * 0.64)))
   const rootStyle = {
     '--st-origin-top': `${origin.top}px`,
     '--st-origin-left': `${origin.left}px`,
     '--st-origin-width': `${origin.width}px`,
     '--st-origin-height': `${origin.height}px`,
+    '--st-locked-vh': `${lockedViewportHeight}px`,
+    '--st-panel-height': `${panelHeight}px`,
   }
-  const rootClass = ['movera-st', open ? 'movera-st--open' : '', complete ? 'movera-st--complete' : ''].filter(Boolean).join(' ')
+  const rootClass = ['movera-st', open ? 'movera-st--open' : '', ready ? 'movera-st--ready' : '', complete ? 'movera-st--complete' : ''].filter(Boolean).join(' ')
   const stepIndex = step === 'destination' ? 1 : step === 'dates' ? 2 : 3
 
   return createPortal(
-    <div className={rootClass} style={rootStyle} data-testid="search-transition" data-step={step}>
+    <div className={rootClass} style={rootStyle} data-testid="search-transition" data-step={step} data-ready={ready ? 'true' : 'false'}>
       <div className="movera-st__map-stage" aria-hidden="true">
-        <MapContainer key={state.destination?.id || 'search-default'} initialViewport={selectedViewport} />
+        <MapContainer key={state.destination?.id || 'search-overview'} initialViewport={selectedViewport} />
       </div>
       <div className="movera-st__map-veil" aria-hidden="true" />
 
@@ -269,7 +305,7 @@ export function SearchTransitionHost({ onNavigate }) {
                 {!destinationQuery ? (
                   <div className="movera-st__recent-block">
                     <span className="movera-st__section-label">Recherches récentes</span>
-                    {recentSearches.length ? <div className="movera-st__recents">{recentSearches.map((recent) => <button type="button" key={`${recent.destinationId}-${recent.checkin}`} className="movera-st__recent" onClick={() => applyRecent(recent)}><span className="movera-st__recent-pin"><PinIcon /></span><span><strong>{recent.label}</strong><small>{recent.checkin && recent.checkout ? `${formatDate(recent.checkin)} – ${formatDate(recent.checkout)} · ${Math.max(1, Number(recent.adults) || 1) + Math.max(0, Number(recent.children) || 0)} voyageur(s)` : 'Recherche précédente'}</small></span><b>›</b></button>)}</div> : <div className="movera-st__recent-empty">Aucune recherche récente pour le moment</div>}
+                    {recentSearches.length ? <div className="movera-st__recents">{recentSearches.slice(0, 1).map((recent) => <button type="button" key={`${recent.destinationId}-${recent.checkin}`} className="movera-st__recent" onClick={() => applyRecent(recent)}><span className="movera-st__recent-pin"><PinIcon /></span><span><strong>{recent.label}</strong><small>{recent.checkin && recent.checkout ? `${formatDate(recent.checkin)} – ${formatDate(recent.checkout)} · ${Math.max(1, Number(recent.adults) || 1) + Math.max(0, Number(recent.children) || 0)} voyageur(s)` : 'Recherche précédente'}</small></span><b>›</b></button>)}</div> : <div className="movera-st__recent-empty">Aucune recherche récente pour le moment</div>}
                   </div>
                 ) : null}
                 <span className="movera-st__section-label movera-st__section-label--suggestions">Destinations suggérées</span>
