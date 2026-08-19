@@ -40,9 +40,11 @@ export function persistMapBackState(state) {
 }
 
 export function MapCarouselPage({ onNavigate }) {
-  const requestedDestination = new URLSearchParams(window.location.search).get('destination')
+  const searchParams = new URLSearchParams(window.location.search)
+  const requestedDestination = searchParams.get('destination')
+  const shouldRestore = searchParams.get('restore') === '1'
   const destinationViewport = requestedDestination ? DESTINATION_VIEWPORTS[requestedDestination] || null : null
-  const restored = useMemo(() => destinationViewport ? null : readBackState(), [destinationViewport])
+  const restored = useMemo(() => (!destinationViewport && shouldRestore) ? readBackState() : null, [destinationViewport, shouldRestore])
   const initialViewport = destinationViewport || restored?.viewport || INITIAL_VIEWPORT
   const [selectedListingId, setSelectedListingId] = useState(restored?.selectedListingId || null)
   const [viewport, setViewport] = useState(initialViewport)
@@ -57,9 +59,9 @@ export function MapCarouselPage({ onNavigate }) {
   const effectiveSelectedListingId = selectedListingId && filteredListingIds.has(selectedListingId) ? selectedListingId : null
 
   useEffect(() => {
-    if (!destinationViewport) return
+    if (shouldRestore && !destinationViewport) return
     try { window.sessionStorage.removeItem(STORAGE_KEY) } catch { /* storage unavailable */ }
-  }, [destinationViewport])
+  }, [destinationViewport, shouldRestore])
 
   useEffect(() => {
     if (selectedListingId && !filteredListingIds.has(selectedListingId)) setSelectedListingId(null)
@@ -72,7 +74,7 @@ export function MapCarouselPage({ onNavigate }) {
       selectedListingId: id,
       carouselOpen: phase !== 'closed' && phase !== 'closing',
     })
-    onNavigate(`/listing/${id}`)
+    onNavigate(`/listing/${id}?from=map`)
   }, [onNavigate, viewport])
 
   return (
