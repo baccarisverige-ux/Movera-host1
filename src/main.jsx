@@ -6,7 +6,7 @@ import './styles/category-luxury-3d.css'
 import './styles/collection-card-size.css'
 import './styles/home-scroll-link.css'
 import './categoryIdentity.js'
-import './homeScrollLink.js'
+import './features/home/homeScrollLink.js'
 import App from './app/App.jsx'
 
 createRoot(document.getElementById('root')).render(
