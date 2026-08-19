@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
+import { GuestSelector } from './GuestSelector.jsx'
+import { SearchCalendar } from './SearchCalendar.jsx'
 import { SEARCH_DESTINATIONS } from './searchData.js'
-import { buildMapSearchPath, createSearchState, isDateRangeValid } from './searchState.js'
+import { buildMapSearchPath, createSearchState, isDateRangeValid, totalTravellers } from './searchState.js'
 import './searchTransition.css'
 
 const OPEN_MS = 860
 const COMPLETE_MS = 560
+const RECENT_KEY = 'movera-search-recents-v1'
 
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -26,6 +29,26 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(date)
 }
 
+function guestSummary(state) {
+  const parts = [`${totalTravellers(state)} voyageur${totalTravellers(state) > 1 ? 's' : ''}`]
+  if (state.infants) parts.push(`${state.infants} bébé${state.infants > 1 ? 's' : ''}`)
+  if (state.pets) parts.push(`${state.pets} animal${state.pets > 1 ? 'aux' : ''}`)
+  return parts.join(' · ')
+}
+
+function readRecents() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(RECENT_KEY) || '[]')
+    return Array.isArray(parsed) ? parsed.slice(0, 3) : []
+  } catch {
+    return []
+  }
+}
+
+function destinationById(id) {
+  return SEARCH_DESTINATIONS.find((destination) => destination.id === id) || null
+}
+
 export function SearchTransitionHost({ onNavigate }) {
   const [active, setActive] = useState(false)
   const [open, setOpen] = useState(false)
@@ -34,13 +57,20 @@ export function SearchTransitionHost({ onNavigate }) {
   const [state, setState] = useState(createSearchState)
   const [origin, setOrigin] = useState({ top: 72, left: 14, width: 362, height: 52 })
   const [destinationQuery, setDestinationQuery] = useState('')
+  const [recentSearches, setRecentSearches] = useState(readRecents)
   const closeTimerRef = useRef(0)
   const completeTimerRef = useRef(0)
   const stepTimerRef = useRef(0)
 
   const selectedViewport = state.destination?.viewport || INITIAL_VIEWPORT
   const datesValid = isDateRangeValid(state.checkin, state.checkout)
-  const minDate = useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const minDate = useMemo(() => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }, [])
   const filteredDestinations = useMemo(() => {
     const query = destinationQuery.trim().toLocaleLowerCase('fr')
     if (!query) return SEARCH_DESTINATIONS
@@ -74,6 +104,7 @@ export function SearchTransitionHost({ onNavigate }) {
       const rect = trigger.getBoundingClientRect()
       setOrigin({ top: rect.top, left: rect.left, width: rect.width, height: rect.height })
       setState(createSearchState())
+      setRecentSearches(readRecents())
       setDestinationQuery('')
       setStep('destination')
       setComplete(false)
@@ -108,9 +139,42 @@ export function SearchTransitionHost({ onNavigate }) {
     stepTimerRef.current = window.setTimeout(() => setStep('dates'), 220)
   }
 
+  const applyRecent = (recent) => {
+    const destination = destinationById(recent.destinationId)
+    if (!destination) return
+    setState({
+      destination,
+      checkin: recent.checkin || '',
+      checkout: recent.checkout || '',
+      adults: Math.max(1, Number(recent.adults) || 1),
+      children: Math.max(0, Number(recent.children) || 0),
+      infants: Math.max(0, Number(recent.infants) || 0),
+      pets: Math.max(0, Number(recent.pets) || 0),
+    })
+    setStep(recent.checkin && recent.checkout ? 'guests' : 'dates')
+  }
+
+  const saveRecent = () => {
+    if (!state.destination) return
+    const entry = {
+      destinationId: state.destination.id,
+      label: state.destination.label,
+      checkin: state.checkin,
+      checkout: state.checkout,
+      adults: state.adults,
+      children: state.children,
+      infants: state.infants,
+      pets: state.pets,
+    }
+    const next = [entry, ...recentSearches.filter((item) => item.destinationId !== entry.destinationId)].slice(0, 3)
+    setRecentSearches(next)
+    try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(next)) } catch { /* stockage indisponible */ }
+  }
+
   const submitSearch = () => {
     if (!state.destination || !datesValid || state.adults < 1) return
     clearTimers()
+    saveRecent()
     setComplete(true)
     setOpen(false)
     const path = buildMapSearchPath(state)
@@ -130,13 +194,12 @@ export function SearchTransitionHost({ onNavigate }) {
     '--st-origin-width': `${origin.width}px`,
     '--st-origin-height': `${origin.height}px`,
   }
-
   const rootClass = ['movera-st', open ? 'movera-st--open' : '', complete ? 'movera-st--complete' : ''].filter(Boolean).join(' ')
   const stepIndex = step === 'destination' ? 1 : step === 'dates' ? 2 : 3
 
   return createPortal(
     <div className={rootClass} style={rootStyle} data-testid="search-transition" data-step={step}>
-      <div className="movera-st__map-stage" aria-hidden="true">
+      <div className="movera-st__map-stage">
         <MapContainer key={state.destination?.id || 'search-default'} initialViewport={selectedViewport} />
       </div>
       <div className="movera-st__map-veil" aria-hidden="true" />
@@ -159,49 +222,37 @@ export function SearchTransitionHost({ onNavigate }) {
 
           <div className="movera-st__body">
             {step === 'destination' ? (
-              <div className="movera-st__screen" data-testid="search-step-destination">
+              <div className="movera-st__screen movera-st__screen--destination" data-testid="search-step-destination">
                 <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Où allez-vous ?</h2><p className="movera-st__sub">Trouvez votre prochaine adresse Movera.</p></div><PinIcon /></div>
-                <label className="movera-st__destination-search">
-                  <SearchIcon />
-                  <input value={destinationQuery} onChange={(event) => setDestinationQuery(event.target.value)} placeholder="Rechercher une destination" autoComplete="off" />
-                </label>
+                <label className="movera-st__destination-search"><SearchIcon /><input value={destinationQuery} onChange={(event) => setDestinationQuery(event.target.value)} placeholder="Rechercher une destination" autoComplete="off" /></label>
+                {!destinationQuery ? (
+                  <div className="movera-st__recent-block">
+                    <span className="movera-st__section-label">Recherches récentes</span>
+                    {recentSearches.length ? <div className="movera-st__recents">{recentSearches.map((recent) => <button type="button" key={`${recent.destinationId}-${recent.checkin}`} className="movera-st__recent" onClick={() => applyRecent(recent)}><span className="movera-st__recent-pin"><PinIcon /></span><span><strong>{recent.label}</strong><small>{recent.checkin && recent.checkout ? `${formatDate(recent.checkin)} – ${formatDate(recent.checkout)} · ${Math.max(1, Number(recent.adults) || 1) + Math.max(0, Number(recent.children) || 0)} voyageur(s)` : 'Recherche précédente'}</small></span><b>›</b></button>)}</div> : <div className="movera-st__recent-empty">Aucune recherche récente pour le moment</div>}
+                  </div>
+                ) : null}
+                <span className="movera-st__section-label movera-st__section-label--suggestions">Destinations suggérées</span>
                 <div className="movera-st__destinations">
-                  {filteredDestinations.map((destination) => (
-                    <button key={destination.id} type="button" className="movera-st__destination" data-destination={destination.id} onClick={() => chooseDestination(destination)}>
-                      <span className="movera-st__destination-pin"><PinIcon /></span>
-                      <span className="movera-st__destination-copy"><strong>{destination.label}</strong><small>{destination.subtitle}</small></span>
-                      <span className="movera-st__chevron" aria-hidden="true">›</span>
-                    </button>
-                  ))}
+                  {filteredDestinations.map((destination) => <button key={destination.id} type="button" className="movera-st__destination" data-destination={destination.id} onClick={() => chooseDestination(destination)}><span className="movera-st__destination-pin"><PinIcon /></span><span className="movera-st__destination-copy"><strong>{destination.label}</strong><small>{destination.subtitle}</small></span><span className="movera-st__chevron" aria-hidden="true">›</span></button>)}
                   {filteredDestinations.length === 0 ? <div className="movera-st__empty">Aucune destination trouvée</div> : null}
                 </div>
               </div>
             ) : null}
 
             {step === 'dates' ? (
-              <div className="movera-st__screen" data-testid="search-step-dates">
-                <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Vos dates</h2><p className="movera-st__sub">{state.destination?.label} · arrivée puis départ.</p></div><CalendarIcon /></div>
-                <div className="movera-st__date-grid">
-                  <label className="movera-st__field"><span className="movera-st__field-label">Arrivée</span><strong>{formatDate(state.checkin)}</strong><input aria-label="Date d'arrivée" type="date" min={minDate} value={state.checkin} onChange={(event) => setState((current) => ({ ...current, checkin: event.target.value, checkout: current.checkout && current.checkout <= event.target.value ? '' : current.checkout }))} /></label>
-                  <label className="movera-st__field"><span className="movera-st__field-label">Départ</span><strong>{formatDate(state.checkout)}</strong><input aria-label="Date de départ" type="date" min={state.checkin || minDate} value={state.checkout} onChange={(event) => setState((current) => ({ ...current, checkout: event.target.value }))} /></label>
-                </div>
+              <div className="movera-st__screen movera-st__screen--dates" data-testid="search-step-dates">
+                <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Choisissez vos dates</h2><p className="movera-st__sub">{state.destination?.label} · sélectionnez l’arrivée puis le départ.</p></div><CalendarIcon /></div>
+                <SearchCalendar checkin={state.checkin} checkout={state.checkout} minDate={minDate} onChange={({ checkin, checkout }) => setState((current) => ({ ...current, checkin, checkout }))} />
                 <div className="movera-st__tripline"><span>{state.destination?.label}</span><i /><strong>{formatDate(state.checkin)} → {formatDate(state.checkout)}</strong></div>
                 <button type="button" className="movera-st__action" disabled={!datesValid} onClick={() => setStep('guests')}>Continuer vers les voyageurs <span>›</span></button>
               </div>
             ) : null}
 
             {step === 'guests' ? (
-              <div className="movera-st__screen" data-testid="search-step-guests">
-                <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Voyageurs</h2><p className="movera-st__sub">Dernière étape avant la carte.</p></div><span className="movera-st__people" aria-hidden="true">••</span></div>
-                <div className="movera-st__guest-card">
-                  <div className="movera-st__guest-copy"><strong>Adultes</strong><span>13 ans et plus</span></div>
-                  <div className="movera-st__counter">
-                    <button type="button" aria-label="Retirer un adulte" disabled={state.adults <= 1} onClick={() => setState((current) => ({ ...current, adults: Math.max(1, current.adults - 1) }))}>−</button>
-                    <strong data-testid="search-adult-count">{state.adults}</strong>
-                    <button type="button" aria-label="Ajouter un adulte" disabled={state.adults >= 16} onClick={() => setState((current) => ({ ...current, adults: Math.min(16, current.adults + 1) }))}>+</button>
-                  </div>
-                </div>
-                <div className="movera-st__tripline"><span>{state.destination?.label}</span><i /><strong>{formatDate(state.checkin)} → {formatDate(state.checkout)}</strong><i /><span>{state.adults} adulte{state.adults > 1 ? 's' : ''}</span></div>
+              <div className="movera-st__screen movera-st__screen--guests" data-testid="search-step-guests">
+                <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Qui voyage ?</h2><p className="movera-st__sub">Ajoutez les voyageurs et vos animaux.</p></div><span className="movera-st__people" aria-hidden="true">••</span></div>
+                <GuestSelector state={state} onChange={setState} />
+                <div className="movera-st__tripline"><span>{state.destination?.label}</span><i /><strong>{formatDate(state.checkin)} → {formatDate(state.checkout)}</strong><i /><span>{guestSummary(state)}</span></div>
                 <button type="button" className="movera-st__action movera-st__action--search" onClick={submitSearch}><SearchIcon /><span>Rechercher sur la carte</span></button>
               </div>
             ) : null}
