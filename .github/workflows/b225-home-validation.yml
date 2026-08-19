@@ -64,6 +64,7 @@ jobs:
             if(label!=='Accueil'){
               await target.click()
               await page.waitForFunction(expected=>document.querySelector('.app-shell__nav-item[data-active="true"] span')?.textContent?.trim()===expected,label)
+              await page.waitForTimeout(250)
             }
             const box=await nav.boundingBox()
             if(!box) throw new Error(`nav missing on ${label}`)
@@ -73,8 +74,8 @@ jobs:
             if(await active.count()!==1) throw new Error(`active nav mismatch on ${label}`)
             const activeText=(await active.locator('span').textContent())?.trim()
             if(activeText!==label) throw new Error(`wrong active tab on ${label}: ${activeText}`)
-            const activeStyle=await active.evaluate(el=>({color:getComputedStyle(el).color,svg:getComputedStyle(el.querySelector('svg')).stroke}))
-            if(activeStyle.color!=='rgb(116, 198, 157)'||activeStyle.svg!=='rgb(116, 198, 157)') throw new Error(`active green missing on ${label}: ${JSON.stringify(activeStyle)}`)
+            const activeStyle=await active.evaluate(el=>({color:getComputedStyle(el).color,label:getComputedStyle(el.querySelector('span')).color,svg:getComputedStyle(el.querySelector('svg')).stroke}))
+            if(activeStyle.color!=='rgb(116, 198, 157)'||activeStyle.label!=='rgb(116, 198, 157)'||activeStyle.svg!=='rgb(116, 198, 157)') throw new Error(`active green missing on ${label}: ${JSON.stringify(activeStyle)}`)
             const itemBoxes=await items.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height}}))
             if(itemBoxes.some(b=>Math.abs(b.h-45)>0.5)) throw new Error(`item height mismatch on ${label}: ${JSON.stringify(itemBoxes)}`)
             const current={w:box.width,h:box.height,itemW:itemBoxes[0].w,itemH:itemBoxes[0].h}
