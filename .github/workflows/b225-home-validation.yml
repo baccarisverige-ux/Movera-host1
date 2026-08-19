@@ -113,8 +113,16 @@ jobs:
             if(await active.count()!==1) throw new Error(`active nav mismatch on ${label}`)
             const activeText=(await active.locator('span').textContent())?.trim()
             if(activeText!==label) throw new Error(`wrong active tab on ${label}: ${activeText}`)
-            const activeStyle=await active.evaluate(el=>({color:getComputedStyle(el).color,label:getComputedStyle(el.querySelector('span')).color,svg:getComputedStyle(el.querySelector('svg')).stroke}))
-            if(activeStyle.color!=='rgb(116, 198, 157)'||activeStyle.label!=='rgb(116, 198, 157)'||activeStyle.svg!=='rgb(116, 198, 157)') throw new Error(`active green missing on ${label}: ${JSON.stringify(activeStyle)}`)
+            const activeStyle=await active.evaluate(el=>{
+              const token=getComputedStyle(document.documentElement).getPropertyValue('--movera-nav-active').trim()
+              const probe=document.createElement('span')
+              probe.style.color=token
+              document.body.appendChild(probe)
+              const expected=getComputedStyle(probe).color
+              probe.remove()
+              return {color:getComputedStyle(el).color,label:getComputedStyle(el.querySelector('span')).color,svg:getComputedStyle(el.querySelector('svg')).stroke,expected}
+            })
+            if(!activeStyle.expected||activeStyle.color!==activeStyle.expected||activeStyle.label!==activeStyle.expected||activeStyle.svg!==activeStyle.expected) throw new Error(`active Movera token missing on ${label}: ${JSON.stringify(activeStyle)}`)
             const itemBoxes=await items.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height}}))
             if(itemBoxes.some(b=>Math.abs(b.h-45)>0.5)) throw new Error(`item height mismatch on ${label}: ${JSON.stringify(itemBoxes)}`)
             const current={w:box.width,h:box.height,itemW:itemBoxes[0].w,itemH:itemBoxes[0].h}
