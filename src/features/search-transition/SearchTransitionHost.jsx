@@ -6,8 +6,9 @@ import { SearchCalendar } from './SearchCalendar.jsx'
 import { SEARCH_DESTINATIONS } from './searchData.js'
 import { buildMapSearchPath, createSearchState, isDateRangeValid, totalTravellers } from './searchState.js'
 import './searchTransition.css'
+import './searchTransition-stability.css'
 
-const OPEN_MS = 860
+const OPEN_MS = 960
 const COMPLETE_MS = 560
 const RECENT_KEY = 'movera-search-recents-v1'
 
@@ -61,6 +62,7 @@ export function SearchTransitionHost({ onNavigate }) {
   const closeTimerRef = useRef(0)
   const completeTimerRef = useRef(0)
   const stepTimerRef = useRef(0)
+  const lockedScrollYRef = useRef(0)
 
   const selectedViewport = state.destination?.viewport || INITIAL_VIEWPORT
   const datesValid = isDateRangeValid(state.checkin, state.checkout)
@@ -117,9 +119,48 @@ export function SearchTransitionHost({ onNavigate }) {
 
   useEffect(() => {
     if (!active) return undefined
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = previousOverflow }
+    const body = document.body
+    const html = document.documentElement
+    lockedScrollYRef.current = window.scrollY
+    const previous = {
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyLeft: body.style.left,
+      bodyRight: body.style.right,
+      bodyWidth: body.style.width,
+      bodyOverflow: body.style.overflow,
+      bodyOverscroll: body.style.overscrollBehavior,
+      htmlOverflow: html.style.overflow,
+      htmlOverscroll: html.style.overscrollBehavior,
+    }
+    body.style.position = 'fixed'
+    body.style.top = `-${lockedScrollYRef.current}px`
+    body.style.left = '0'
+    body.style.right = '0'
+    body.style.width = '100%'
+    body.style.overflow = 'hidden'
+    body.style.overscrollBehavior = 'none'
+    html.style.overflow = 'hidden'
+    html.style.overscrollBehavior = 'none'
+
+    const preventMove = (event) => event.preventDefault()
+    document.addEventListener('touchmove', preventMove, { passive: false })
+    document.addEventListener('wheel', preventMove, { passive: false })
+
+    return () => {
+      document.removeEventListener('touchmove', preventMove)
+      document.removeEventListener('wheel', preventMove)
+      body.style.position = previous.bodyPosition
+      body.style.top = previous.bodyTop
+      body.style.left = previous.bodyLeft
+      body.style.right = previous.bodyRight
+      body.style.width = previous.bodyWidth
+      body.style.overflow = previous.bodyOverflow
+      body.style.overscrollBehavior = previous.bodyOverscroll
+      html.style.overflow = previous.htmlOverflow
+      html.style.overscrollBehavior = previous.htmlOverscroll
+      window.scrollTo(0, lockedScrollYRef.current)
+    }
   }, [active])
 
   useEffect(() => {
@@ -199,7 +240,7 @@ export function SearchTransitionHost({ onNavigate }) {
 
   return createPortal(
     <div className={rootClass} style={rootStyle} data-testid="search-transition" data-step={step}>
-      <div className="movera-st__map-stage">
+      <div className="movera-st__map-stage" aria-hidden="true">
         <MapContainer key={state.destination?.id || 'search-default'} initialViewport={selectedViewport} />
       </div>
       <div className="movera-st__map-veil" aria-hidden="true" />
