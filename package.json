@@ -11,6 +11,7 @@
     "test:unit": "npx --yes vitest@3.2.4 run",
     "test:e2e": "npx --yes @playwright/test@1.55.0 test",
     "test:e2e:mobile": "npx --yes @playwright/test@1.55.0 test --project=mobile-chromium",
+    "test:responsive": "npx --yes @playwright/test@1.55.0 test tests/e2e/responsive-baseline.spec.js --project=desktop-chromium",
     "test:a11y": "npx --yes @playwright/test@1.55.0 test tests/accessibility",
     "test:all": "npm run test:unit && npm run test:e2e && npm run test:a11y",
     "quality:architecture": "node scripts/check-architecture.mjs",
