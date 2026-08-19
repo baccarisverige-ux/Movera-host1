@@ -42,32 +42,18 @@ jobs:
           await page.getByTestId('page-home').waitFor()
           if(await page.locator('.b225-categories button').count()<7) throw new Error('B225 categories incomplete')
 
-          const expectedAssets={
-            prestige:'prestige-star.png',
-            experience:'prestige-category.webp',
-            partner:'partner-category.png',
-          }
+          const expectedAssets={prestige:'prestige-star.png',experience:'prestige-category.webp',partner:'partner-category.png'}
           const readCategoryState=async(id)=>{
             const button=page.locator(`.b225-categories button[data-category-id="${id}"]`)
             if(await button.count()!==1) throw new Error(`category identity missing: ${id}`)
             if(id==='prestige'){
               const icon=button.locator(':scope > img')
               if(await icon.count()!==1) throw new Error('Prestige React image missing')
-              return icon.evaluate(img=>({
-                asset:img.getAttribute('src')||'',
-                loaded:img.naturalWidth>0&&img.naturalHeight>0,
-                display:getComputedStyle(img).display,
-                opacity:getComputedStyle(img).opacity,
-              }))
+              return icon.evaluate(img=>({asset:img.getAttribute('src')||'',loaded:img.naturalWidth>0&&img.naturalHeight>0,display:getComputedStyle(img).display,opacity:getComputedStyle(img).opacity}))
             }
             const icon=button.locator(':scope > span[aria-hidden="true"]')
             if(await icon.count()!==1) throw new Error(`${id} React icon host missing`)
-            return icon.evaluate(el=>({
-              asset:getComputedStyle(el).backgroundImage,
-              loaded:true,
-              display:getComputedStyle(el).display,
-              opacity:getComputedStyle(el).opacity,
-            }))
+            return icon.evaluate(el=>({asset:getComputedStyle(el).backgroundImage,loaded:true,display:getComputedStyle(el).display,opacity:getComputedStyle(el).opacity}))
           }
           for(const id of ['prestige','experience','partner']){
             const state=await readCategoryState(id)
@@ -77,6 +63,8 @@ jobs:
             const after=await readCategoryState(id)
             if(!after.asset.includes(expectedAssets[id])||after.display==='none'||after.opacity==='0') throw new Error(`category icon lost after React rerender: ${id} ${JSON.stringify(after)}`)
           }
+          await page.locator('.b225-categories button[data-category-id="all"]').click()
+          await page.waitForTimeout(50)
 
           const glide=await page.evaluate(async()=>{
             window.scrollTo(0,0)
