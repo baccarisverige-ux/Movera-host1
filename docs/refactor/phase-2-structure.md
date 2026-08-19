@@ -1,6 +1,6 @@
 # Phase 2 — Structural refactor
 
-Status: in progress
+Status: completed
 
 ## Safety contract
 - No visual redesign.
@@ -21,5 +21,7 @@ Status: in progress
 - Home category identity behavior moved from the source root into `src/features/home/categoryIdentity.js`.
 - Home accessibility behavior moved out of `src/app/App.jsx` into `src/features/home/HomeAccessibility.jsx`.
 - Duplicate placeholder directories were removed instead of creating parallel Search/Map architectures.
+- No speculative helper was retained: extracted modules must be integrated before they remain in the tree.
 
-Runtime extraction remains incremental and must be validated after every move. Shared code will only be introduced when a component or utility is demonstrably reused.
+## Result
+The application now has explicit feature boundaries without duplicating the already modular Search and Map architecture. `App.jsx` is reduced to application orchestration, while Home-specific runtime behavior lives under the Home feature. Further decomposition of large feature internals belongs to later focused phases and must continue to use the same regression gates.
