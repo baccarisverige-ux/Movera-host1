@@ -1,4 +1,4 @@
-:root{--movera-nav-active:#74c69d}
+:root{--movera-nav-active:#4b795f}
 
 .app-shell--guest > .app-shell__nav{
   position:fixed!important;
@@ -46,7 +46,7 @@
   border:0!important;
   border-radius:12px!important;
   background:transparent!important;
-  color:#9a9a9d!important;
+  color:#66666a!important;
   font-size:9.5px!important;
   font-weight:500!important;
   line-height:1!important;
