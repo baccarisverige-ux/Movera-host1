@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import '../../styles/map-b225.css'
-import { CarouselShell } from '../carousel/CarouselShell.jsx'
-import { CAROUSEL_LISTINGS } from '../carousel/carouselData.js'
-import { DEFAULT_MARKERS, INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
+import { INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
 
 const STORAGE_KEY = 'movera-map-back-state-v1'
 const DESTINATION_VIEWPORTS = Object.freeze({
@@ -40,27 +38,15 @@ export function MapCarouselPage({ onNavigate }) {
   const destinationViewport = requestedDestination ? DESTINATION_VIEWPORTS[requestedDestination] || null : null
   const restored = useMemo(() => (!destinationViewport && shouldRestore) ? readBackState() : null, [destinationViewport, shouldRestore])
   const initialViewport = destinationViewport || restored?.viewport || INITIAL_VIEWPORT
-  const [selectedListingId, setSelectedListingId] = useState(restored?.selectedListingId || null)
   const [viewport, setViewport] = useState(initialViewport)
-  const initialOpen = restored?.carouselOpen === true
 
   useEffect(() => {
     if (shouldRestore && !destinationViewport) return
     try { window.sessionStorage.removeItem(STORAGE_KEY) } catch { /* storage unavailable */ }
   }, [destinationViewport, shouldRestore])
 
-  const selectListing = useCallback((id) => setSelectedListingId(id), [])
-  const openDetail = useCallback((id, phase) => {
-    persistMapBackState({
-      viewport,
-      selectedListingId: id,
-      carouselOpen: phase !== 'closed' && phase !== 'closing',
-    })
-    onNavigate(`/listing/${id}?from=map`)
-  }, [onNavigate, viewport])
-
   return (
-    <section className="b225-map-page" data-testid="page-map" data-official-flow="marker-carousel-detail" data-destination={requestedDestination || ''}>
+    <section className="b225-map-page" data-testid="page-map" data-destination={requestedDestination || ''}>
       <div className="b225-map-top">
         <button type="button" className="b225-map-search" onClick={() => onNavigate('/')} aria-label="Modifier la recherche">
           <SearchIcon />
@@ -70,21 +56,8 @@ export function MapCarouselPage({ onNavigate }) {
       </div>
 
       <MapContainer
-        markers={DEFAULT_MARKERS}
-        selectedListingId={selectedListingId}
-        onSelectedListingChange={selectListing}
         initialViewport={initialViewport}
         onViewportChange={setViewport}
-      />
-
-      {!selectedListingId ? <div className="b225-map-badge">Déplacez la carte pour explorer</div> : null}
-
-      <CarouselShell
-        listings={CAROUSEL_LISTINGS}
-        selectedListingId={selectedListingId}
-        onSelectedListingChange={selectListing}
-        initialOpen={initialOpen && Boolean(selectedListingId)}
-        onDetail={openDetail}
       />
     </section>
   )
