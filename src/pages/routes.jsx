@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { HomePage } from './Home/HomePage.jsx'
+import { HomePage } from '../features/home/HomePage.jsx'
 
 const lazyNamed = (loader, name) => lazy(() => loader().then((module) => ({ default: module[name] })))
 
