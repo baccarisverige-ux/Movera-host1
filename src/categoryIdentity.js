@@ -14,6 +14,8 @@ const CATEGORY_ICON_BY_ID = {
   partner: '/Movera-host1/assets/partner-category.png',
 }
 
+let scheduled = false
+
 function getCategoryLabel(button) {
   return Array.from(button.childNodes)
     .filter((node) => node.nodeType === Node.TEXT_NODE)
@@ -26,7 +28,11 @@ function ensureRealCategoryIcon(button, id) {
   const src = CATEGORY_ICON_BY_ID[id]
   if (!src) return
 
-  let icon = button.querySelector(':scope > img[data-category-icon]')
+  button.dataset.categoryId = id
+
+  const directImages = Array.from(button.querySelectorAll(':scope > img'))
+  let icon = directImages.find((image) => image.dataset.categoryIcon === id) || null
+
   if (!icon) {
     icon = document.createElement('img')
     icon.dataset.categoryIcon = id
@@ -38,32 +44,42 @@ function ensureRealCategoryIcon(button, id) {
 
   if (icon.getAttribute('src') !== src) icon.setAttribute('src', src)
 
+  directImages.forEach((image) => {
+    if (image !== icon) image.dataset.legacyCategoryIcon = 'true'
+  })
+
   button.querySelectorAll(':scope > span[aria-hidden="true"]').forEach((span) => {
     span.dataset.legacyCategoryIcon = 'true'
   })
 }
 
-function applyCategoryIds(root = document) {
-  const categories = root.querySelector?.('.b225-categories')
-  if (!categories) return false
+function applyCategoryIdentity() {
+  const categories = document.querySelector('.b225-categories')
+  if (!categories) return
 
-  let matched = 0
-  categories.querySelectorAll('button').forEach((button) => {
+  categories.querySelectorAll(':scope > button').forEach((button) => {
     const label = getCategoryLabel(button)
     const id = CATEGORY_IDS_BY_LABEL.get(label)
     if (!id) return
 
-    matched += 1
     button.dataset.categoryId = id
     ensureRealCategoryIcon(button, id)
   })
-
-  return matched === CATEGORY_IDS_BY_LABEL.size
 }
 
-if (!applyCategoryIds()) {
-  const observer = new MutationObserver(() => {
-    if (applyCategoryIds()) observer.disconnect()
+function scheduleApply() {
+  if (scheduled) return
+  scheduled = true
+  requestAnimationFrame(() => {
+    scheduled = false
+    applyCategoryIdentity()
   })
-  observer.observe(document.documentElement, { childList: true, subtree: true })
 }
+
+scheduleApply()
+
+const observer = new MutationObserver(scheduleApply)
+observer.observe(document.documentElement, {
+  childList: true,
+  subtree: true,
+})
