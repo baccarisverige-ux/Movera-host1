@@ -9,7 +9,7 @@ const OPEN_MS = 720
 const COMPLETE_MS = 520
 
 function SearchIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+  return <svg viewBox="0 0 24 24" aria-hidden="true" style={{width:15,height:15,fill:'none',stroke:'currentColor',strokeWidth:2,verticalAlign:'middle',marginRight:6}}><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
 }
 
 function formatDate(value) {
@@ -160,7 +160,7 @@ export function SearchTransitionHost({ onNavigate }) {
                   </div>
                 </div>
                 <p className="movera-st__summary"><strong>{state.destination?.label}</strong><span>{formatDate(state.checkin)} → {formatDate(state.checkout)} · {state.adults} adulte{state.adults > 1 ? 's' : ''}</span></p>
-                <button type="button" className="movera-st__action" onClick={submitSearch}><SearchIcon /> Rechercher sur la carte</button>
+                <button type="button" className="movera-st__action" onClick={submitSearch}><SearchIcon />Rechercher sur la carte</button>
               </div>
             ) : null}
           </div>
