@@ -7,6 +7,6 @@
 .b225-section .b225-scroll:not(.b225-featured-scroll) > .b225-card .b225-card__image{
   width:146px!important;
   height:124px!important;
-  border-radius:14px!important;
+  border-radius:var(--radius-md)!important;
   box-shadow:0 5px 16px rgba(0,0,0,.06)!important;
 }
