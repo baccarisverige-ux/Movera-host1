@@ -1,7 +1,7 @@
 let moveraScrollRaf = 0
 let moveraResizeObserver = null
 let moveraCategoryTravel = 0
-const MOVERA_CATEGORY_FOLLOW = 0.42
+const MOVERA_CATEGORY_FOLLOW = 0.25
 
 function syncMoveraCategoryScroll() {
   moveraScrollRaf = 0
