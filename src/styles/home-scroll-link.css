@@ -1,1 +1,1 @@
-.b225-categories.movera-categories-linked{position:sticky;top:var(--movera-home-header-height,0px);z-index:34}.b225-categories.movera-categories-linked.movera-categories-release{position:relative;top:auto;z-index:1}
+.b225-categories.movera-categories-linked{position:sticky;top:var(--movera-home-header-height,0px);z-index:34;transform:translateY(calc(-1 * var(--movera-category-upward-travel,0px)));will-change:transform}.b225-categories.movera-categories-linked.movera-categories-moving-under-header{z-index:34}
