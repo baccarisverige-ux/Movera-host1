@@ -42,9 +42,9 @@ export const homeFeatured = [
 const byCategory = (category) => homeFeatured.filter((item) => item.category.split(' ').includes(category))
 
 export const homeCollections = [
-  { id: 'beach', title: 'Vues Panoramiques & Littoral', items: byCategory('beach') },
-  { id: 'popular', title: 'Adresses Remarquables', items: [homeFeatured[2], homeFeatured[4], homeFeatured[0]] },
-  { id: 'guesthouse', title: 'Hôtes Privilégiés', items: byCategory('guesthouse') },
-  { id: 'prestige', title: 'Villas & Propriétés de Prestige', items: byCategory('prestige') },
-  { id: 'family', title: "Résidences Familiales d'Exception", items: [homeFeatured[2]] },
+  { id: 'beach', title: "Maison d’hôte", items: byCategory('beach') },
+  { id: 'popular', title: 'Plage', items: [homeFeatured[2], homeFeatured[4], homeFeatured[0]] },
+  { id: 'guesthouse', title: 'Famille', items: byCategory('guesthouse') },
+  { id: 'prestige', title: 'Prestige', items: byCategory('prestige') },
+  { id: 'family', title: 'Expérience', items: [homeFeatured[2]] },
 ]
