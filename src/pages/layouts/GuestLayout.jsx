@@ -26,6 +26,13 @@ function AppLink({ children, className, href, onNavigate, active }) {
 }
 
 export function GuestLayout({ children, currentPath, onNavigate }) {
+  const requestedPath = currentPath === '/login'
+    ? new URLSearchParams(window.location.search).get('from')
+    : null
+  const activePath = requestedPath === '/messages' || requestedPath === '/profile'
+    ? requestedPath
+    : currentPath
+
   return (
     <div className="app-shell app-shell--guest">
       <header className="app-shell__header">
@@ -36,7 +43,7 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
       <nav className="app-shell__nav" aria-label="Navigation principale">
         {guestNav.map(({ label, path, icon }) => (
           <AppLink
-            active={currentPath === path}
+            active={activePath === path}
             className="app-shell__nav-item"
             href={path}
             key={path}
