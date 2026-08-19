@@ -55,9 +55,9 @@ jobs:
           const blanks=await page.locator('.b225-card__image').evaluateAll(nodes=>nodes.filter(n=>{const img=n.querySelector('img');return !img||!img.getAttribute('src')}).length)
           if(blanks) throw new Error(`blank property media slots: ${blanks}`)
 
-          const labels=['Accueil','Carte','Favoris','Messages','Profil']
+          const publicLabels=['Accueil','Carte','Favoris']
           let reference=null
-          for(const label of labels){
+          for(const label of publicLabels){
             const nav=page.locator('.app-shell--guest > .app-shell__nav')
             await nav.waitFor({state:'visible'})
             const target=nav.locator('.app-shell__nav-item',{hasText:label})
@@ -81,6 +81,24 @@ jobs:
             const current={w:box.width,h:box.height,itemW:itemBoxes[0].w,itemH:itemBoxes[0].h}
             if(!reference) reference=current
             else if(Math.abs(current.w-reference.w)>0.5||Math.abs(current.h-reference.h)>0.5||Math.abs(current.itemW-reference.itemW)>0.5||Math.abs(current.itemH-reference.itemH)>0.5) throw new Error(`nav geometry differs on ${label}: ref=${JSON.stringify(reference)} current=${JSON.stringify(current)}`)
+          }
+
+          const nav=page.locator('.app-shell--guest > .app-shell__nav')
+          for(const label of ['Messages','Profil']){
+            const item=nav.locator('.app-shell__nav-item',{hasText:label})
+            const style=await item.evaluate(el=>{
+              const previous=document.querySelector('.app-shell__nav-item[data-active="true"]')
+              previous?.setAttribute('data-active','false')
+              el.setAttribute('data-active','true')
+              return new Promise(resolve=>setTimeout(()=>resolve({
+                color:getComputedStyle(el).color,
+                label:getComputedStyle(el.querySelector('span')).color,
+                svg:getComputedStyle(el.querySelector('svg')).stroke,
+                h:el.getBoundingClientRect().height,
+              }),250))
+            })
+            if(style.color!=='rgb(116, 198, 157)'||style.label!=='rgb(116, 198, 157)'||style.svg!=='rgb(116, 198, 157)') throw new Error(`protected active green missing on ${label}: ${JSON.stringify(style)}`)
+            if(Math.abs(style.h-45)>0.5) throw new Error(`protected item height mismatch on ${label}: ${style.h}`)
           }
 
           if(errors.length) throw new Error(`runtime errors: ${errors.join('; ')}`)
