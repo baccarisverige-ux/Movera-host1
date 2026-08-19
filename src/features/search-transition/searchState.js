@@ -11,7 +11,9 @@ export function createSearchState() {
 
 export function isDateRangeValid(checkin, checkout) {
   if (!checkin || !checkout) return false
-  return new Date(`${checkout}T12:00:00`).getTime() >= new Date(`${checkin}T12:00:00`).getTime()
+  const start = new Date(`${checkin}T12:00:00`).getTime()
+  const end = new Date(`${checkout}T12:00:00`).getTime()
+  return Number.isFinite(start) && Number.isFinite(end) && end > start
 }
 
 export function buildMapSearchPath(state) {
@@ -19,7 +21,7 @@ export function buildMapSearchPath(state) {
   if (state.destination?.id) params.set('destination', state.destination.id)
   if (state.checkin) params.set('checkin', state.checkin)
   if (state.checkout) params.set('checkout', state.checkout)
-  params.set('guests', String(state.adults || 1))
+  params.set('guests', String(Math.max(1, Number(state.adults) || 1)))
   params.set('search', '1')
   return `/map?${params.toString()}`
 }
