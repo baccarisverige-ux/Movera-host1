@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:unit": "npx --yes vitest@3.2.4 run",
+    "test:e2e": "npx --yes @playwright/test@1.55.0 test",
+    "test:e2e:mobile": "npx --yes @playwright/test@1.55.0 test --project=mobile-chromium",
+    "test:a11y": "npx --yes @playwright/test@1.55.0 test tests/accessibility",
+    "quality:fast": "npm run lint && npm run test:unit && npm run build"
   },
   "dependencies": {
     "react": "^19.2.8",
