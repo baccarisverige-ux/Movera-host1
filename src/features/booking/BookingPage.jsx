@@ -3,13 +3,23 @@ import { getListingDetail } from '../listing-detail/listingDetailData.js'
 import { calculateBookingTotal, nightsBetween, validateBooking } from './bookingEngine.js'
 import '../../styles/booking.css'
 
+function dateInputFromToday(days) {
+  const date = new Date()
+  date.setHours(12, 0, 0, 0)
+  date.setDate(date.getDate() + days)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export function BookingPage({ params, onNavigate }) {
   const listing = getListingDetail(params.id)
   const fromMap = new URLSearchParams(window.location.search).get('from') === 'map'
   const detailReturnPath = fromMap ? `/listing/${params.id}?from=map` : `/listing/${params.id}`
   const mapReturnPath = fromMap ? '/map?restore=1' : '/map'
-  const [checkIn, setCheckIn] = useState('2026-08-20')
-  const [checkOut, setCheckOut] = useState('2026-08-22')
+  const [checkIn, setCheckIn] = useState(() => dateInputFromToday(1))
+  const [checkOut, setCheckOut] = useState(() => dateInputFromToday(3))
   const [guests, setGuests] = useState(2)
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
@@ -44,7 +54,7 @@ export function BookingPage({ params, onNavigate }) {
         <section className="booking-card" data-testid="booking-dates"><h2>Dates</h2><label>Arrivée<input aria-label="Arrivée" type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} /></label><label>Départ<input aria-label="Départ" type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} /></label></section>
         <section className="booking-card" data-testid="booking-guests"><h2>Voyageurs</h2><label>Nombre<input aria-label="Voyageurs" type="number" min="1" max="6" value={guests} onChange={(e) => setGuests(Number(e.target.value))} /></label></section>
         <section className="booking-card" data-testid="booking-summary"><h2>Résumé</h2><p>{listing.nightlyRate} {listing.currency} × {nights} nuit(s)</p><p>Frais : {pricing.fees} {listing.currency}</p><p>Réduction : {pricing.discounts} {listing.currency}</p><strong>Total : {pricing.total} {listing.currency}</strong></section>
-        <section className="booking-card booking-card--test" aria-label="Scénario de validation"><label>Scénario<select aria-label="Scénario" value={scenario} onChange={(e) => setScenario(e.target.value)}><option value="success">Succès</option><option value="unavailable">Indisponible</option><option value="network">Réseau</option><option value="session">Session expirée</option></select></label></section>
+        {import.meta.env.DEV ? <section className="booking-card booking-card--test" aria-label="Scénario de validation"><label>Scénario<select aria-label="Scénario" value={scenario} onChange={(e) => setScenario(e.target.value)}><option value="success">Succès</option><option value="unavailable">Indisponible</option><option value="network">Réseau</option><option value="session">Session expirée</option></select></label></section> : null}
       </div>
       {error ? <p className="booking-error" role="alert" data-testid="booking-error">{error}</p> : null}
       {confirmation ? <div className="booking-confirmation" data-testid="booking-confirmation"><strong>Réservation confirmée</strong><span>{confirmation.id}</span><span>{confirmation.total} {listing.currency}</span></div> : null}
