@@ -1,7 +1,8 @@
 import { ResilienceLayer } from '../features/resilience/ResilienceLayer.jsx'
+import { SearchTransitionHost } from '../features/search-transition/SearchTransitionHost.jsx'
 import { GlobalErrorBoundary } from './error-boundary/GlobalErrorBoundary.jsx'
 import { AppProviders } from './providers/AppProviders.jsx'
-import { AppRouter } from './router/index.jsx'
+import { AppRouter, navigate } from './router/index.jsx'
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
       <ResilienceLayer>
         <AppProviders>
           <AppRouter />
+          <SearchTransitionHost onNavigate={navigate} />
         </AppProviders>
       </ResilienceLayer>
     </GlobalErrorBoundary>
