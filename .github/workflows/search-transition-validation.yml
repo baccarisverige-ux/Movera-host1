@@ -1,0 +1,87 @@
+name: Search Transition Validation
+on:
+  push:
+    branches: [b225-ui-home]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-search-preview.log 2>&1 &
+          echo $! > /tmp/movera-search-preview.pid
+          for i in {1..20}; do curl --fail --silent http://127.0.0.1:4173/Movera-host1/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/movera-search-preview.log; exit 1
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Search transition E2E
+        run: |
+          cat > search-transition-smoke.mjs <<'EOF'
+          import { chromium } from 'playwright'
+          const browser=await chromium.launch({headless:true})
+          const page=await browser.newPage({viewport:{width:390,height:844}})
+          const errors=[]
+          page.on('pageerror',error=>errors.push(error.message))
+          const base='http://127.0.0.1:4173/Movera-host1'
+
+          await page.goto(`${base}/`,{waitUntil:'networkidle'})
+          await page.getByTestId('page-home').waitFor()
+          const homeBefore=await page.locator('[data-testid="page-home"]').count()
+          if(homeBefore!==1) throw new Error('Home missing before search transition')
+
+          await page.locator('.b225-search').click({position:{x:80,y:25}})
+          const transition=page.getByTestId('search-transition')
+          await transition.waitFor({state:'visible'})
+          await page.waitForTimeout(800)
+
+          const panel=page.locator('.movera-st__panel')
+          const panelBox=await panel.boundingBox()
+          if(!panelBox) throw new Error('Expanded search panel missing')
+          const ratio=panelBox.height/844
+          if(ratio<0.35||ratio>0.43) throw new Error(`Search panel is not approximately 40% viewport: ${ratio}`)
+          if(await page.getByTestId('map-engine').count()<1) throw new Error('Map not visible below expanded search')
+          const mapFilter=await page.locator('.movera-st__map-stage').evaluate(el=>getComputedStyle(el).filter)
+          if(!mapFilter.includes('blur')) throw new Error(`Map blur missing during search: ${mapFilter}`)
+          if(await page.getByTestId('search-step-destination').count()!==1) throw new Error('Destination must be first search step')
+
+          await page.locator('[data-destination="la-marsa"]').click()
+          await page.getByTestId('search-step-dates').waitFor()
+          const dateInputs=page.getByTestId('search-step-dates').locator('input[type="date"]')
+          await dateInputs.nth(0).fill('2026-09-10')
+          await dateInputs.nth(1).fill('2026-09-14')
+          await page.getByTestId('search-step-dates').locator('.movera-st__action').click()
+          await page.getByTestId('search-step-guests').waitFor()
+          await page.getByRole('button',{name:'Ajouter un adulte'}).click()
+          if((await page.getByTestId('search-adult-count').textContent())?.trim()!=='2') throw new Error('Adult counter failed')
+          await page.getByRole('button',{name:/Rechercher sur la carte/}).click()
+          await page.waitForURL(url=>url.pathname.endsWith('/map')&&url.searchParams.get('destination')==='la-marsa'&&url.searchParams.get('checkin')==='2026-09-10'&&url.searchParams.get('checkout')==='2026-09-14'&&url.searchParams.get('guests')==='2',{timeout:5000})
+          await page.getByTestId('page-map').waitFor()
+          if(errors.length) throw new Error(`Runtime errors: ${errors.join('; ')}`)
+
+          await page.goto(`${base}/`,{waitUntil:'networkidle'})
+          await page.locator('.b225-search').click({position:{x:80,y:25}})
+          await transition.waitFor({state:'visible'})
+          await page.waitForTimeout(760)
+          await page.getByRole('button',{name:'Fermer'}).click()
+          await transition.waitFor({state:'detached',timeout:2500})
+          await page.getByTestId('page-home').waitFor()
+
+          await browser.close()
+          EOF
+          node search-transition-smoke.mjs
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/movera-search-preview.pid) || true
