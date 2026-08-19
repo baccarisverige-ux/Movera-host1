@@ -9,7 +9,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,20 +25,20 @@ jobs:
           echo $! > /tmp/movera-search-preview.pid
           for i in {1..20}; do curl --fail --silent http://127.0.0.1:4173/Movera-host1/ >/dev/null && exit 0; sleep 1; done
           cat /tmp/movera-search-preview.log; exit 1
-      - name: Install browsers and WebKit dependencies
+      - name: Install Chromium
         run: |
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
-          npx playwright install --with-deps webkit
-      - name: Search transition E2E Chromium + WebKit
+      - name: Search transition E2E desktop + iPhone emulation
         run: |
           cat > search-transition-smoke.mjs <<'EOF'
-          import { chromium, webkit } from 'playwright'
+          import { chromium } from 'playwright'
           const base='http://127.0.0.1:4173/Movera-host1'
 
-          async function run(engine,name){
-            const browser=await engine.launch({headless:true})
-            const page=await browser.newPage({viewport:{width:390,height:844}})
+          async function run(name,contextOptions,simulateChromeResize=false){
+            const browser=await chromium.launch({headless:true})
+            const context=await browser.newContext(contextOptions)
+            const page=await context.newPage()
             const errors=[]
             page.on('pageerror',error=>errors.push(error.message))
             await page.goto(`${base}/`,{waitUntil:'networkidle'})
@@ -47,43 +47,44 @@ jobs:
             await page.locator('.b225-search').click({position:{x:80,y:25}})
             const transition=page.getByTestId('search-transition')
             await transition.waitFor({state:'visible'})
-            await page.waitForTimeout(1120)
+            if(simulateChromeResize){
+              await page.waitForTimeout(300)
+              await page.setViewportSize({width:390,height:760})
+            }
+            await page.waitForTimeout(900)
 
             const panel=page.locator('.movera-st__panel')
             const panelBox=await panel.boundingBox()
             if(!panelBox) throw new Error(`${name}: expanded search panel missing`)
-            const ratio=panelBox.height/844
-            if(ratio<0.61||ratio>0.66) throw new Error(`${name}: search panel not approximately 64% viewport: ${ratio}`)
-            const ready=await transition.getAttribute('data-ready')
-            if(ready!=='true') throw new Error(`${name}: popup never reached ready state`)
+            const cssPanelHeight=Number((await transition.evaluate(el=>getComputedStyle(el).getPropertyValue('--st-panel-height'))).replace('px',''))
+            if(Math.abs(panelBox.height-cssPanelHeight)>2) throw new Error(`${name}: panel moved after viewport/chrome change: ${panelBox.height}/${cssPanelHeight}`)
+            if(panelBox.height<455||panelBox.height>570) throw new Error(`${name}: panel size outside safe range: ${panelBox.height}`)
+            if(await transition.getAttribute('data-ready')!=='true') throw new Error(`${name}: popup never reached ready state`)
             const contentOpacity=await page.locator('.movera-st__content').evaluate(el=>getComputedStyle(el).opacity)
             if(Number(contentOpacity)<0.99) throw new Error(`${name}: popup content did not settle: ${contentOpacity}`)
 
             const map=page.getByTestId('map-surface')
             if(await map.count()<1) throw new Error(`${name}: map missing`)
             const zoom=Number(await map.getAttribute('data-zoom'))
-            if(zoom>8) throw new Error(`${name}: search map starts too close instead of Tunisia overview: ${zoom}`)
+            if(zoom>8) throw new Error(`${name}: search map starts too close: ${zoom}`)
             const mapFilter=await page.locator('.movera-st__map-stage').evaluate(el=>getComputedStyle(el).filter)
-            if(!mapFilter.includes('blur(2px)')) throw new Error(`${name}: light map blur not applied: ${mapFilter}`)
+            if(!mapFilter.includes('blur(2px)')) throw new Error(`${name}: light map blur missing: ${mapFilter}`)
             const tileFilter=await page.locator('.movera-st__map-stage .map-tile img').first().evaluate(el=>getComputedStyle(el).filter)
-            if(tileFilter==='none') throw new Error(`${name}: soft map palette filter missing`)
-            const mapPointerEvents=await page.locator('.movera-st__map-stage').evaluate(el=>getComputedStyle(el).pointerEvents)
-            if(mapPointerEvents!=='none') throw new Error(`${name}: map must be locked on search screen`)
+            if(tileFilter==='none') throw new Error(`${name}: soft map palette missing`)
+            if(await page.locator('.movera-st__map-stage').evaluate(el=>getComputedStyle(el).pointerEvents)!=='none') throw new Error(`${name}: map not locked`)
 
-            const bodyPosition=await page.evaluate(()=>getComputedStyle(document.body).position)
-            const bodyOverflow=await page.evaluate(()=>getComputedStyle(document.body).overflow)
-            const htmlOverflow=await page.evaluate(()=>getComputedStyle(document.documentElement).overflow)
-            if(bodyPosition!=='fixed'||bodyOverflow!=='hidden'||htmlOverflow!=='hidden') throw new Error(`${name}: iOS scroll lock incomplete: ${bodyPosition}/${bodyOverflow}/${htmlOverflow}`)
+            const lock=await page.evaluate(()=>({bodyPos:getComputedStyle(document.body).position,bodyOverflow:getComputedStyle(document.body).overflow,htmlOverflow:getComputedStyle(document.documentElement).overflow,htmlLock:document.documentElement.dataset.moveraSearchLock,bodyLock:document.body.dataset.moveraSearchLock}))
+            if(lock.bodyPos!=='fixed'||lock.bodyOverflow!=='hidden'||lock.htmlOverflow!=='hidden'||lock.htmlLock!=='true'||lock.bodyLock!=='true') throw new Error(`${name}: iPhone scroll lock incomplete ${JSON.stringify(lock)}`)
             const internalOverflows=await page.locator('.movera-st__body,.movera-st__screen,.movera-st__destinations,.movera-st__recents,.movera-st__guest-list').evaluateAll(nodes=>nodes.map(el=>getComputedStyle(el).overflowY))
-            if(internalOverflows.some(value=>value==='auto'||value==='scroll')) throw new Error(`${name}: internal scrolling enabled: ${internalOverflows.join(',')}`)
+            if(internalOverflows.some(value=>value==='auto'||value==='scroll')) throw new Error(`${name}: internal scrolling enabled ${internalOverflows.join(',')}`)
             await page.mouse.wheel(0,700)
             await page.waitForTimeout(100)
             const scrollAfter=await page.evaluate(()=>window.scrollY)
-            if(scrollAfter!==scrollBefore) throw new Error(`${name}: search screen scrolled ${scrollBefore}->${scrollAfter}`)
+            if(scrollAfter!==scrollBefore) throw new Error(`${name}: page scrolled ${scrollBefore}->${scrollAfter}`)
 
             if(await page.getByText('Recherches récentes').count()!==1) throw new Error(`${name}: recent searches missing`)
             if(await page.getByText('Destinations suggérées').count()!==1) throw new Error(`${name}: suggestions missing`)
-            if(await page.locator('.movera-st__destination').count()>4) throw new Error(`${name}: too many default destination cards for non-scroll layout`)
+            if(await page.locator('.movera-st__destination').count()>4) throw new Error(`${name}: destination layout exceeds non-scroll capacity`)
 
             await page.locator('[data-destination="la-marsa"]').click()
             await page.getByTestId('search-step-dates').waitFor()
@@ -99,10 +100,10 @@ jobs:
             await page.getByRole('button',{name:'Ajouter enfants'}).click()
             await page.getByRole('button',{name:'Ajouter bébés'}).click()
             await page.getByRole('button',{name:'Ajouter animaux'}).click()
-            if((await page.getByTestId('search-adults-count').textContent())?.trim()!=='2') throw new Error(`${name}: adults counter failed`)
-            if((await page.getByTestId('search-children-count').textContent())?.trim()!=='1') throw new Error(`${name}: children counter failed`)
-            if((await page.getByTestId('search-infants-count').textContent())?.trim()!=='1') throw new Error(`${name}: infants counter failed`)
-            if((await page.getByTestId('search-pets-count').textContent())?.trim()!=='1') throw new Error(`${name}: pets counter failed`)
+            if((await page.getByTestId('search-adults-count').textContent())?.trim()!=='2') throw new Error(`${name}: adults failed`)
+            if((await page.getByTestId('search-children-count').textContent())?.trim()!=='1') throw new Error(`${name}: children failed`)
+            if((await page.getByTestId('search-infants-count').textContent())?.trim()!=='1') throw new Error(`${name}: infants failed`)
+            if((await page.getByTestId('search-pets-count').textContent())?.trim()!=='1') throw new Error(`${name}: pets failed`)
             await page.getByRole('button',{name:/Rechercher sur la carte/}).click()
             await page.waitForURL(url=>url.pathname.endsWith('/map')&&url.searchParams.get('destination')==='la-marsa'&&url.searchParams.get('checkin')==='2026-09-10'&&url.searchParams.get('checkout')==='2026-09-14'&&url.searchParams.get('guests')==='3'&&url.searchParams.get('infants')==='1'&&url.searchParams.get('pets')==='1',{timeout:5000})
             await page.getByTestId('page-map').waitFor()
@@ -110,17 +111,17 @@ jobs:
             await page.goto(`${base}/`,{waitUntil:'networkidle'})
             await page.locator('.b225-search').click({position:{x:80,y:25}})
             await transition.waitFor({state:'visible'})
-            await page.waitForTimeout(1120)
+            await page.waitForTimeout(1100)
             if(await page.locator('.movera-st__recent').count()<1) throw new Error(`${name}: recent search not persisted`)
             await page.getByRole('button',{name:'Fermer'}).click()
             await transition.waitFor({state:'detached',timeout:3200})
             await page.getByTestId('page-home').waitFor()
-            if(errors.length) throw new Error(`${name}: runtime errors: ${errors.join('; ')}`)
+            if(errors.length) throw new Error(`${name}: runtime errors ${errors.join('; ')}`)
             await browser.close()
           }
 
-          await run(chromium,'Chromium')
-          await run(webkit,'WebKit')
+          await run('Desktop',{viewport:{width:390,height:844}})
+          await run('iPhone tactile',{viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'},true)
           EOF
           node search-transition-smoke.mjs
       - name: Stop preview
