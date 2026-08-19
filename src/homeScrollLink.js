@@ -11,8 +11,11 @@ function syncMoveraCategoryScroll() {
   document.documentElement.style.setProperty('--movera-home-header-height', `${headerRect.height}px`)
   categories.classList.add('movera-categories-linked')
 
-  const welcomeTop = welcome.getBoundingClientRect().top
-  const release = welcomeTop <= headerRect.bottom + 0.5
+  // Keep categories visible until the ENTIRE welcome card has passed
+  // behind the sticky search/header area. Only then release categories
+  // so they continue moving naturally upward underneath the header.
+  const welcomeBottom = welcome.getBoundingClientRect().bottom
+  const release = welcomeBottom <= headerRect.bottom + 0.5
   categories.classList.toggle('movera-categories-release', release)
 }
 
