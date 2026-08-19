@@ -2,6 +2,9 @@
   position:relative;
   isolation:isolate;
   overflow:visible;
+  scale:.9;
+  transform-origin:center;
+  margin-inline:-3px;
   border:1px solid rgba(205,205,205,.72)!important;
   border-radius:999px!important;
   background:linear-gradient(180deg,#fff 0%,#fff 54%,#f7f7f7 72%,#eeeeee 100%)!important;
