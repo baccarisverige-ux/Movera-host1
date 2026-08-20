@@ -1,0 +1,22 @@
+/* Search close hand-off: reveal the real Home UI before portal teardown. */
+.movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__map-veil{
+  opacity:0!important;
+  transition:opacity 100ms ease-out!important;
+}
+
+.movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__map-stage{
+  opacity:0!important;
+  transition:
+    transform 500ms var(--st-motion-close),
+    filter 360ms ease-out,
+    opacity 140ms ease-out 160ms!important;
+}
+
+.movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__panel{
+  opacity:0!important;
+  transition:
+    transform 500ms var(--st-motion-close),
+    border-radius 430ms var(--st-motion-close),
+    box-shadow 430ms var(--st-motion-close),
+    opacity 120ms ease-in 285ms!important;
+}
