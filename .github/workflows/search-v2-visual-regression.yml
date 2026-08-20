@@ -1,0 +1,83 @@
+name: Search V2 Visual Regression
+
+on:
+  push:
+    branches: [phase-7-visual-regression]
+    paths:
+      - 'src/features/search/**'
+      - 'src/shared/ui/**'
+      - 'src/shared/motion/**'
+      - 'src/styles/**'
+      - 'src/index.css'
+      - 'tests/visual/**'
+      - 'playwright.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/search-v2-visual-regression.yml'
+  pull_request:
+    paths:
+      - 'src/features/search/**'
+      - 'src/shared/ui/**'
+      - 'src/shared/motion/**'
+      - 'src/styles/**'
+      - 'src/index.css'
+      - 'tests/visual/**'
+      - 'playwright.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/search-v2-visual-regression.yml'
+  workflow_dispatch:
+
+jobs:
+  visual-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Generate baselines when missing
+        shell: bash
+        run: |
+          if find tests/visual -type d -name '*-snapshots' -print -quit | grep -q .; then
+            echo 'Existing visual baselines found.'
+          else
+            echo 'No visual baselines found; generating them on this branch.'
+            npm run test:visual:update
+          fi
+
+      - name: Run visual regression
+        run: npm run test:visual
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-v2-playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload visual diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-v2-visual-diffs
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
