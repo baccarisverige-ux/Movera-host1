@@ -3,6 +3,7 @@ import { Button, Counter, SearchField, Stepper, Surface } from '../../shared/ui/
 import { MotionPresence, MotionSurface } from '../../shared/motion/index.jsx'
 import { PremiumCalendar } from './PremiumCalendar.jsx'
 import './search-v2.css'
+import './search-premium-compact.css'
 
 const STEPS=['Destination','Dates','Voyageurs']
 const DESTINATIONS=['Sidi Bou Saïd','La Marsa','Hammamet','Sousse','Djerba']
