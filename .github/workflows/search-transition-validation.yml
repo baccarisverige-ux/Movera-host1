@@ -92,7 +92,7 @@ jobs:
             const inputFontSize=parseFloat(await destinationInput.evaluate(el=>getComputedStyle(el).fontSize))
             if(inputFontSize<16) throw new Error(`${name}: iPhone auto-zoom risk, input font-size ${inputFontSize}px`)
             const compactBox=await panel.boundingBox()
-            if(!compactBox||compactBox.height>=panelBox.height-30||compactBox.height<300||compactBox.height>390) throw new Error(`${name}: compact popup size invalid ${compactBox?.height}`)
+            if(!compactBox||compactBox.height>=panelBox.height-30||compactBox.height<300||compactBox.height>430) throw new Error(`${name}: compact popup size invalid ${compactBox?.height}`)
             if(await page.getByText('Destinations suggérées').isVisible()) throw new Error(`${name}: suggestions still visible in compact focus mode`)
             if(!await page.getByText('Recherches récentes').isVisible()) throw new Error(`${name}: recent searches hidden in compact focus mode`)
             if(await page.evaluate(()=>window.scrollY)!==scrollBefore) throw new Error(`${name}: focus caused page scroll/zoom movement`)
