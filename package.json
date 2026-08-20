@@ -11,7 +11,8 @@
     "test:visual": "playwright test tests/visual",
     "test:visual:update": "playwright test tests/visual --update-snapshots",
     "test:interaction": "playwright test tests/interaction",
-    "test:performance": "playwright test tests/performance"
+    "test:performance": "playwright test tests/performance",
+    "test:a11y": "playwright test tests/accessibility"
   },
   "dependencies": {
     "motion": "^13.1.0",
@@ -19,6 +20,7 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@playwright/test": "^1.55.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
