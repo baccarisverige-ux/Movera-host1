@@ -16,8 +16,7 @@ const mountedSearchV2 = (app.match(/<SearchExperience\b/g) || []).length
 
 const transitionCss = read('src/features/search/searchTransition.css')
 const stabilityCss = read('src/features/search/searchTransition-stability.css')
-const premiumCss = fs.existsSync(path.join(root, 'src/features/search/searchTransition-premium.css')) ? read('src/features/search/searchTransition-premium.css') : ''
-const importantCount = [transitionCss, stabilityCss, premiumCss].reduce((sum, css) => sum + (css.match(/!important/g) || []).length, 0)
+const importantCount = [transitionCss, stabilityCss].reduce((sum, css) => sum + (css.match(/!important/g) || []).length, 0)
 
 const deployWorkflows = []
 for (const file of workflowFiles) {
@@ -32,7 +31,7 @@ const report = {
   mountedTransitions,
   mountedSearchV2,
   searchImplementations,
-  cssLayers: ['searchTransition.css', 'searchTransition-stability.css', ...(premiumCss ? ['searchTransition-premium.css'] : [])],
+  cssLayers: ['searchTransition.css', 'searchTransition-stability.css'],
   importantCount,
   deployWorkflows,
   findings: [],
