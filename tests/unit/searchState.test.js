@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildMapSearchPath, createSearchState, isDateRangeValid, totalTravellers } from '../../src/features/search-transition/searchState.js'
+import { buildMapSearchPath, createSearchState, isDateRangeValid, totalTravellers } from '../../src/features/search/searchState.js'
 
 describe('search state', () => {
   it('creates safe defaults', () => {
