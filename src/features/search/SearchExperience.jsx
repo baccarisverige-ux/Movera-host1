@@ -43,7 +43,8 @@ export function SearchExperience({open,onClose,onNavigate}){
   return ()=>{
    document.removeEventListener('keydown',onKeyDown)
    document.body.style.overflow=previousOverflow
-   previousFocusRef.current?.focus?.()
+   const target=previousFocusRef.current
+   requestAnimationFrame(()=>target?.focus?.({preventScroll:true}))
   }
  },[open,onClose])
 
