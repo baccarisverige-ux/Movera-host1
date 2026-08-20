@@ -43,8 +43,11 @@ const expectedDeployWorkflow = 'deploy-pages-direct.yml'
 const directDeploy = deployWorkflows.find((item) => item.file === expectedDeployWorkflow)
 const legacyBranchPublish = deployWorkflows.filter((item) => item.branchPublish)
 const legacyPhaseWorkflows = workflowFiles.filter((file) => /^phase-(?:\d+(?:-\d+)?)-validation\.ya?ml$/.test(file))
+const redundantPermanentWorkflows = workflowFiles.filter((file) => ['b225-home-validation.yml', 'live-e2e-uat-cleanup.yml'].includes(file))
 const permanentCriticalRegression = 'tests/e2e/critical-regressions.spec.js'
 const hasPermanentCriticalRegression = fs.existsSync(path.join(root, permanentCriticalRegression))
+const qualityWorkflow = read('.github/workflows/quality.yml')
+const qualityHasCleanupAudit = /node scripts\/audit-live-cleanup\.mjs/.test(qualityWorkflow)
 
 const report = {
   liveSearch: 'SearchTransitionHost',
@@ -60,8 +63,10 @@ const report = {
   deployWorkflows,
   expectedDeployWorkflow,
   legacyPhaseWorkflows,
+  redundantPermanentWorkflows,
   permanentCriticalRegression,
   hasPermanentCriticalRegression,
+  qualityHasCleanupAudit,
   findings: [],
 }
 
@@ -75,7 +80,9 @@ if (deployWorkflows.length !== 1) report.findings.push(`Expected exactly one dep
 if (!directDeploy?.directPages) report.findings.push(`Expected ${expectedDeployWorkflow} to use direct GitHub Pages deployment`)
 if (legacyBranchPublish.length) report.findings.push(`Legacy deploy/github-pages publishing detected: ${legacyBranchPublish.map((x) => x.file).join(', ')}`)
 if (legacyPhaseWorkflows.length) report.findings.push(`Legacy phase validation workflows detected: ${legacyPhaseWorkflows.join(', ')}`)
+if (redundantPermanentWorkflows.length) report.findings.push(`Redundant permanent workflows detected: ${redundantPermanentWorkflows.join(', ')}`)
 if (!hasPermanentCriticalRegression) report.findings.push(`Permanent critical regression suite missing: ${permanentCriticalRegression}`)
+if (!qualityHasCleanupAudit) report.findings.push('Movera Quality Gate is missing the permanent cleanup audit')
 
 console.log(JSON.stringify(report, null, 2))
 
@@ -89,5 +96,7 @@ if (
   !directDeploy?.directPages ||
   legacyBranchPublish.length ||
   legacyPhaseWorkflows.length ||
-  !hasPermanentCriticalRegression
+  redundantPermanentWorkflows.length ||
+  !hasPermanentCriticalRegression ||
+  !qualityHasCleanupAudit
 ) process.exit(1)
