@@ -12,7 +12,8 @@
     "test:visual:update": "playwright test tests/visual --update-snapshots",
     "test:interaction": "playwright test tests/interaction",
     "test:performance": "playwright test tests/performance",
-    "test:a11y": "playwright test tests/accessibility"
+    "test:a11y": "playwright test tests/accessibility",
+    "test:architecture:ui": "playwright test tests/architecture/ui-generalisation.spec.js"
   },
   "dependencies": {
     "motion": "^13.1.0",
