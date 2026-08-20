@@ -4,7 +4,7 @@ on:
   push:
     branches: [b225-ui-home]
   pull_request:
-    branches: [phase17-performance-engineering]
+    branches: [b225-ui-home]
   schedule:
     - cron: '17 4 * * 1'
 
