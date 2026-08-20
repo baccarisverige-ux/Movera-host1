@@ -10,6 +10,7 @@ import './searchTransition.css'
 import './searchTransition-stability.css'
 
 const OPEN_MS = 980
+const CLOSE_MS = 520
 const COMPLETE_MS = 560
 const READY_MS = 820
 const RECENT_KEY = 'movera-search-recents-v1'
@@ -99,7 +100,7 @@ export function SearchTransitionHost({ onNavigate }) {
     closeTimerRef.current = window.setTimeout(() => {
       setActive(false)
       setDestinationQuery('')
-    }, OPEN_MS)
+    }, CLOSE_MS)
   }
 
   useEffect(() => {
