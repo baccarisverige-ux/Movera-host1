@@ -9,17 +9,7 @@ PREVIEW=PASS
 BROWSER_INSTALL=START
 BROWSER_INSTALL=PASS
 E2E=START
-file:///home/runner/work/Movera-host1/Movera-host1/category-e2e.mjs:38
-    throw new Error(`${viewport.name}: category order mismatch: ${JSON.stringify(normalized)}`)
-          ^
-
-Error: iphone-390: category order mismatch: ["Tout","Maison d’hôte","Plage","♡Famille","◇Prestige","✦Expérience","○Partenaire"]
-    at file:///home/runner/work/Movera-host1/Movera-host1/category-e2e.mjs:38:11
-    at runNextTicks (node:internal/process/task_queues:64:5)
-    at process.processImmediate (node:internal/timers:452:9)
-    at process.callbackTrampoline (node:internal/async_hooks:130:17)
-
-Node.js v22.23.2
+CATEGORY_E2E_PASS: 7 categories x 2 viewports, Motion isolation, filtering, stress switching, no runtime/console errors
 E2E=PASS
 JOB_STATUS=success
-TESTED_SHA=22ae2dba6dc6fdf7bc123525dcf2a4e4c54b558d
+TESTED_SHA=982c402c5060fc3ce1ed7869b05fe4c4bb86c5a2
