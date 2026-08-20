@@ -2,7 +2,7 @@ name: Search V2 Interaction QA
 
 on:
   push:
-    branches: [phase-8-interaction-qa]
+    branches: [phase-8-interaction-qa, phase-12-generalisation]
   pull_request:
   workflow_dispatch:
 

@@ -2,7 +2,7 @@ name: Search V2 Accessibility
 
 on:
   push:
-    branches: [phase-10-accessibility-premium]
+    branches: [phase-10-accessibility-premium, phase-12-generalisation]
   pull_request:
   workflow_dispatch:
 

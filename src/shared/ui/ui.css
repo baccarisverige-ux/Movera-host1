@@ -54,7 +54,7 @@
 .ui-drawer{position:absolute;top:0;right:0;bottom:0;width:min(380px,90vw);padding:calc(var(--space-6) + var(--safe-top)) var(--space-6) calc(var(--space-6) + var(--safe-bottom));overflow:auto}
 
 .ui-stepper{list-style:none;display:grid;grid-template-columns:repeat(var(--ui-step-count,3),minmax(0,1fr));gap:var(--space-2);padding:0;margin:0}
-.ui-stepper__item{min-width:0;display:flex;align-items:center;gap:var(--space-2);color:var(--color-text-tertiary);font-size:var(--font-size-sm);font-weight:var(--font-weight-medium)}
+.ui-stepper__item{min-width:0;display:flex;align-items:center;gap:var(--space-2);color:var(--color-text-secondary);font-size:var(--font-size-sm);font-weight:var(--font-weight-medium)}
 .ui-stepper__dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:var(--color-surface-100);border:1px solid var(--color-border);font-size:var(--font-size-xs)}
 .ui-stepper__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ui-stepper__item--current{color:var(--color-text-primary)}

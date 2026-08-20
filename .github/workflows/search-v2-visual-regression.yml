@@ -2,7 +2,7 @@ name: Search V2 Visual Regression
 
 on:
   push:
-    branches: [phase-7-visual-regression]
+    branches: [phase-7-visual-regression, phase-12-generalisation]
     paths:
       - 'src/features/search/**'
       - 'src/shared/ui/**'

@@ -1,32 +1,31 @@
-name: Deploy B225 Preview
+name: Deploy Search Premium Preview
 
 on:
-  push:
-    branches: [b225-ui-home]
+  pull_request:
+    branches: [phase-12-generalisation]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: b225-pages-preview
+  group: search-premium-pages-preview
   cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout B225 UI branch
+      - name: Checkout PR preview
         uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
       - name: Install
-        run: npm ci
+        run: npm install
 
       - name: Lint
         run: npm run lint
@@ -38,7 +37,6 @@ jobs:
         run: |
           test -f dist/index.html
           test -d dist/assets
-          grep -q '/Movera-host1/assets/' dist/index.html
 
       - name: Publish compiled dist to GitHub Pages branch
         uses: JamesIves/github-pages-deploy-action@v4
