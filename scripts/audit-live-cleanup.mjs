@@ -39,6 +39,10 @@ for (const file of workflowFiles) {
   }
 }
 
+const expectedDeployWorkflow = 'deploy-pages-direct.yml'
+const directDeploy = deployWorkflows.find((item) => item.file === expectedDeployWorkflow)
+const legacyBranchPublish = deployWorkflows.filter((item) => item.branchPublish)
+
 const report = {
   liveSearch: 'SearchTransitionHost',
   mountedTransitions,
@@ -51,6 +55,7 @@ const report = {
   cssLayers,
   importantCount,
   deployWorkflows,
+  expectedDeployWorkflow,
   findings: [],
 }
 
@@ -60,7 +65,9 @@ if (unexpectedSearchFiles.length) report.findings.push(`Unexpected Search files 
 if (missingSearchFiles.length) report.findings.push(`Expected Search files missing: ${missingSearchFiles.join(', ')}`)
 if (cssLayers.length !== 2) report.findings.push(`Expected exactly 2 Search CSS layers, found ${cssLayers.length}: ${cssLayers.join(', ')}`)
 if (importantCount > 35) report.findings.push(`High CSS override debt: ${importantCount} !important declarations across Search CSS layers`)
-if (deployWorkflows.length > 1) report.findings.push(`Multiple deployment workflows detected: ${deployWorkflows.map((x) => x.file).join(', ')}`)
+if (deployWorkflows.length !== 1) report.findings.push(`Expected exactly one deployment workflow, found ${deployWorkflows.length}: ${deployWorkflows.map((x) => x.file).join(', ')}`)
+if (!directDeploy?.directPages) report.findings.push(`Expected ${expectedDeployWorkflow} to use direct GitHub Pages deployment`)
+if (legacyBranchPublish.length) report.findings.push(`Legacy deploy/github-pages publishing detected: ${legacyBranchPublish.map((x) => x.file).join(', ')}`)
 
 console.log(JSON.stringify(report, null, 2))
 
@@ -69,5 +76,8 @@ if (
   mountedSearchV2 !== 0 ||
   unexpectedSearchFiles.length ||
   missingSearchFiles.length ||
-  cssLayers.length !== 2
+  cssLayers.length !== 2 ||
+  deployWorkflows.length !== 1 ||
+  !directDeploy?.directPages ||
+  legacyBranchPublish.length
 ) process.exit(1)
