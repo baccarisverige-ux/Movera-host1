@@ -1,5 +1,6 @@
 name: Phase 12 UI Generalisation
 
+# CI trigger: final Phase 12 validation
 on:
   push:
     branches: [phase-12-generalisation]
