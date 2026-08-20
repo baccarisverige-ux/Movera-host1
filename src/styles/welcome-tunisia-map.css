@@ -1,1 +1,1 @@
-.b225-welcome__visual{background:linear-gradient(145deg,#eef1ed,#e7ece6)!important;overflow:hidden}.b225-welcome__visual span{width:100%!important;height:100%!important;border-radius:0!important;background:transparent url('/Movera-host1/assets/movera-tunisia-3d-v2.svg') center/55.2% auto no-repeat!important;color:transparent!important;box-shadow:none!important;font-size:0!important;mix-blend-mode:multiply}
+.b225-welcome{grid-template-columns:1fr!important}.b225-welcome__visual{display:none!important}
