@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   categories-e2e:
@@ -29,34 +29,49 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: |
+          : > category-motion-e2e-result.txt
+          echo 'INSTALL=START' >> category-motion-e2e-result.txt
+          npm install --no-audit --no-fund
+          echo 'INSTALL=PASS' >> category-motion-e2e-result.txt
 
       - name: Lint
-        run: npm run lint
+        run: |
+          echo 'LINT=START' >> category-motion-e2e-result.txt
+          npm run lint
+          echo 'LINT=PASS' >> category-motion-e2e-result.txt
 
       - name: Build
-        run: npm run build
+        run: |
+          echo 'BUILD=START' >> category-motion-e2e-result.txt
+          npm run build
+          echo 'BUILD=PASS' >> category-motion-e2e-result.txt
 
       - name: Start preview
         run: |
+          echo 'PREVIEW=START' >> category-motion-e2e-result.txt
           npm run preview -- --host 127.0.0.1 > /tmp/movera-category-preview.log 2>&1 &
           echo $! > /tmp/movera-category-preview.pid
           for i in {1..30}; do
             if curl --fail --silent http://127.0.0.1:4173/Movera-host1/ >/dev/null; then
+              echo 'PREVIEW=PASS' >> category-motion-e2e-result.txt
               exit 0
             fi
             sleep 1
           done
-          cat /tmp/movera-category-preview.log
+          tail -80 /tmp/movera-category-preview.log >> category-motion-e2e-result.txt || true
           exit 1
 
       - name: Install Playwright Chromium
         run: |
+          echo 'BROWSER_INSTALL=START' >> category-motion-e2e-result.txt
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
+          echo 'BROWSER_INSTALL=PASS' >> category-motion-e2e-result.txt
 
       - name: Categories E2E
         run: |
+          echo 'E2E=START' >> category-motion-e2e-result.txt
           cat > category-e2e.mjs <<'EOF'
           import { chromium } from 'playwright'
 
@@ -180,7 +195,8 @@ jobs:
           await browser.close()
           console.log('CATEGORY_E2E_PASS: 7 categories x 2 viewports, Motion isolation, filtering, stress switching, no runtime/console errors')
           EOF
-          node category-e2e.mjs
+          node category-e2e.mjs 2>&1 | tee -a category-motion-e2e-result.txt
+          echo 'E2E=PASS' >> category-motion-e2e-result.txt
 
       - name: Stop preview
         if: always()
@@ -188,3 +204,18 @@ jobs:
           if [ -f /tmp/movera-category-preview.pid ]; then
             kill $(cat /tmp/movera-category-preview.pid) || true
           fi
+
+      - name: Record CI result on test branch
+        if: always()
+        run: |
+          touch category-motion-e2e-result.txt
+          echo "JOB_STATUS=${{ job.status }}" >> category-motion-e2e-result.txt
+          echo "TESTED_SHA=${{ github.sha }}" >> category-motion-e2e-result.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- category-motion-e2e-result.txt
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'test: record category Motion E2E result'
+          git push origin HEAD:feat/category-motion
