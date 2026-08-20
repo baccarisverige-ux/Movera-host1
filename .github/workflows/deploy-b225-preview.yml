@@ -3,6 +3,8 @@ name: Deploy Search Premium Preview
 on:
   push:
     branches: [search-ui-premium-polish]
+  pull_request:
+    branches: [phase-12-generalisation]
   workflow_dispatch:
 
 permissions:
