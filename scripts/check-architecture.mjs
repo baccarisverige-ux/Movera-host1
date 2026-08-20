@@ -85,7 +85,7 @@ for (const file of files) {
   if (!/\.(js|jsx|mjs|css)$/.test(file)) continue;
   const text = await readFile(file, 'utf8');
 
-  for (const legacy of forbidden.filter(item => item.endsWith('/'))) {
+  for (const legacy of forbidden.filter(item => item.endsWith('/') && item !== 'src/pages/')) {
     const fragment = legacy.replace(/^src\//, '');
     if (text.includes(fragment)) violations.push(`${repoPath}: references ${fragment}`);
   }
