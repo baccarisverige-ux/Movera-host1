@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Counter, SearchField, Stepper, Surface } from '../../shared/ui/index.jsx'
 import { MotionPresence, MotionSurface } from '../../shared/motion/index.jsx'
 import { PremiumCalendar } from './PremiumCalendar.jsx'
@@ -14,13 +14,42 @@ export function SearchExperience({open,onClose,onNavigate}){
  const [departure,setDeparture]=useState('')
  const [adults,setAdults]=useState(2)
  const [children,setChildren]=useState(0)
+ const panelRef=useRef(null)
+ const previousFocusRef=useRef(null)
  const canContinue=step===0?destination.trim().length>0:step===1?Boolean(arrival&&departure):true
  const summary=useMemo(()=>`${adults+children} voyageur${adults+children>1?'s':''}`,[adults,children])
+
+ useEffect(()=>{
+  if(!open)return undefined
+  previousFocusRef.current=document.activeElement
+  const onKeyDown=event=>{
+   if(event.key==='Escape'){
+    event.preventDefault()
+    onClose?.()
+    return
+   }
+   if(event.key!=='Tab')return
+   const focusable=panelRef.current?.querySelectorAll('button:not([disabled]),input:not([disabled]),[href],[tabindex]:not([tabindex="-1"])')
+   if(!focusable?.length)return
+   const first=focusable[0],last=focusable[focusable.length-1]
+   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+  }
+  document.addEventListener('keydown',onKeyDown)
+  const previousOverflow=document.body.style.overflow
+  document.body.style.overflow='hidden'
+  return ()=>{
+   document.removeEventListener('keydown',onKeyDown)
+   document.body.style.overflow=previousOverflow
+   previousFocusRef.current?.focus?.()
+  }
+ },[open,onClose])
+
  if(!open)return null
  const next=()=>{if(step<2)setStep(step+1);else{const q=new URLSearchParams({destination,arrival,departure,guests:String(adults+children)});onClose?.();onNavigate(`/map?${q.toString()}`)}}
  return <div className="search-v2" role="dialog" aria-modal="true" aria-label="Recherche Movera">
    <button className="search-v2__backdrop" aria-label="Fermer la recherche" onClick={onClose}/>
-   <MotionSurface className="search-v2__panel" variant="rise">
+   <MotionSurface ref={panelRef} className="search-v2__panel" variant="rise">
     <header className="search-v2__header"><button className="search-v2__close" onClick={onClose} aria-label="Fermer">×</button><div><span>Planifier votre séjour</span><strong>{STEPS[step]}</strong></div></header>
     <div className="search-v2__progress"><Stepper steps={STEPS} current={step}/></div>
     <div className="search-v2__content">
