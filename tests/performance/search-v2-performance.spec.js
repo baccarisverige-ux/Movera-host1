@@ -5,7 +5,7 @@ const APP = '/Movera-host1/'
 async function openSearch(page) {
   await page.goto(APP, { waitUntil: 'networkidle' })
   await page.getByTestId('home-search').click()
-  await expect(page.getByRole('dialog', { name: 'Recherche Movera' })).toBeVisible()
+  await expect(page.getByRole('dialog', { name: 'Destination' })).toBeVisible()
 }
 
 test.describe('Search V2 performance budgets', () => {
@@ -29,6 +29,7 @@ test.describe('Search V2 performance budgets', () => {
     await openSearch(page)
     await page.getByPlaceholder('Ville, plage ou région').fill('Hammamet')
     await page.getByRole('button', { name: 'Continuer' }).click()
+    await expect(page.getByRole('dialog', { name: 'Dates' })).toBeVisible()
     await expect(page.getByText('Choisissez vos dates')).toBeVisible()
     await page.getByRole('button', { name: 'Mois suivant' }).click()
     await page.getByRole('button', { name: 'Mois précédent' }).click()
@@ -50,12 +51,13 @@ test.describe('Search V2 performance budgets', () => {
 
     const openStart = Date.now()
     await page.getByTestId('home-search').click()
-    await expect(page.getByRole('dialog', { name: 'Recherche Movera' })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Destination' })).toBeVisible()
     const openElapsed = Date.now() - openStart
 
     await page.getByPlaceholder('Ville, plage ou région').fill('La Marsa')
     const stepStart = Date.now()
     await page.getByRole('button', { name: 'Continuer' }).click()
+    await expect(page.getByRole('dialog', { name: 'Dates' })).toBeVisible()
     await expect(page.getByText('Choisissez vos dates')).toBeVisible()
     const stepElapsed = Date.now() - stepStart
 
