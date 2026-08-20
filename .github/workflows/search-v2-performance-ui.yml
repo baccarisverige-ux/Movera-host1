@@ -2,9 +2,8 @@ name: Search V2 Performance UI
 
 on:
   push:
-    branches: [phase-9-performance-ui]
+    branches: [phase-9-performance-ui, phase-12-generalisation]
   pull_request:
-    branches: [phase-8-interaction-qa, main]
   workflow_dispatch:
 
 jobs:
@@ -16,8 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run build
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
