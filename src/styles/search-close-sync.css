@@ -1,27 +1,27 @@
-/* Search close hand-off: keep the slow reverse motion visible, then reveal Home only near the end. */
+/* Search close hand-off: balanced reverse motion, then reveal Home near the end. */
 .movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__map-veil{
   opacity:0!important;
-  transition:opacity 260ms ease-out 1180ms!important;
+  transition:opacity 190ms ease-out 730ms!important;
 }
 
 .movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__map-stage{
   opacity:0!important;
   transition:
-    transform 1450ms var(--st-motion-close),
-    filter 900ms ease-out,
-    opacity 280ms ease-out 1160ms!important;
+    transform 900ms var(--st-motion-close),
+    filter 620ms ease-out,
+    opacity 210ms ease-out 710ms!important;
 }
 
 .movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__panel{
   opacity:0!important;
   transition:
-    transform 1450ms var(--st-motion-close),
-    border-radius 1250ms var(--st-motion-close),
-    box-shadow 1250ms var(--st-motion-close),
-    opacity 280ms ease-in 1160ms!important;
+    transform 900ms var(--st-motion-close),
+    border-radius 820ms var(--st-motion-close),
+    box-shadow 820ms var(--st-motion-close),
+    opacity 210ms ease-in 710ms!important;
 }
 
-/* Content can leave earlier, but the physical panel remains visible through the reverse motion. */
+/* Content leaves first while the physical panel finishes its reverse motion. */
 .movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__content{
-  transition:opacity 260ms ease-in,transform 620ms var(--st-motion-close)!important;
+  transition:opacity 190ms ease-in,transform 430ms var(--st-motion-close)!important;
 }
