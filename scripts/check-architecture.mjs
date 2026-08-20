@@ -1,7 +1,8 @@
 import { access, readdir, readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { join, relative } from 'node:path';
 
-const src = new URL('../src/', import.meta.url);
+const src = fileURLToPath(new URL('../src/', import.meta.url));
 const forbidden = [
   'src/pages/',
   'src/features/search-transition/',
@@ -36,7 +37,8 @@ const required = [
   'src/features/account/pages/ProfilePage.jsx',
   'src/features/host/dashboard/HostDashboardPage.jsx',
   'src/features/host/listings/HostListingsPage.jsx',
-  'src/features/host/listings/HostListingFormPage.jsx',
+  'src/features/host/listings/HostListingCreatePage.jsx',
+  'src/features/host/listings/HostListingEditPage.jsx',
   'src/features/host/reservations/HostReservationsPage.jsx',
   'src/features/host/calendar/HostCalendarPage.jsx',
   'src/features/host/earnings/HostEarningsPage.jsx',
@@ -75,7 +77,7 @@ for (const requiredPath of required) {
 
 const files = await walk(src);
 for (const file of files) {
-  const repoPath = `src/${relative(src.pathname, file).replaceAll('\\', '/')}`;
+  const repoPath = `src/${relative(src, file).replaceAll('\\', '/')}`;
   for (const legacy of forbidden) {
     if (legacy.endsWith('/') && `${repoPath}/`.startsWith(legacy)) violations.push(`${repoPath}: legacy path`);
     if (!legacy.endsWith('/') && repoPath === legacy) violations.push(`${repoPath}: retired file`);
