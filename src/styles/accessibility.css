@@ -3,15 +3,28 @@ body, #root { width: 100%; max-width: 100%; overflow-x: clip; }
 *, *::before, *::after { min-width: 0; }
 img, svg, video, canvas { max-width: 100%; height: auto; }
 
-:where(a, button, input, select, textarea, [tabindex]):focus,
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid #2d6a4f !important;
+  outline: 3px solid var(--color-focus, #2d6a4f) !important;
   outline-offset: 3px !important;
-  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.24) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus, #2d6a4f) 24%, transparent) !important;
 }
 
 :where(button, a, input, select, textarea) { touch-action: manipulation; }
 :where(button, a.app-shell__nav-item, a.host-shell__rail-item, .shell-switch, .route-link-button) { min-height: 44px; }
+:where(.ui-icon-button, .search-v2__close, .premium-calendar__grid button) { min-width: 44px; min-height: 44px; }
+:where(button, [role='button'])[disabled], :where(button, [role='button'])[aria-disabled='true'] { cursor: not-allowed; }
+
+.ui-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
 
 .app-shell__header {
   padding-left: max(var(--space-4), env(safe-area-inset-left));
@@ -54,5 +67,12 @@ img, svg, video, canvas { max-width: 100%; height: auto; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid CanvasText !important;
+    box-shadow: none !important;
   }
 }
