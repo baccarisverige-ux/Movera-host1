@@ -1,3 +1,4 @@
+// Permanent live-cleanup guard. Keep this audit in the global quality gate.
 import fs from 'node:fs'
 import path from 'node:path'
 
