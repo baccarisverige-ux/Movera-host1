@@ -1,0 +1,104 @@
+name: Search Motion Targeted E2E
+on:
+  push:
+    branches: [b225-ui-home]
+  workflow_dispatch:
+
+jobs:
+  search-motion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-search-motion.log 2>&1 &
+          echo $! > /tmp/movera-search-motion.pid
+          for i in {1..25}; do curl --fail --silent http://127.0.0.1:4173/Movera-host1/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/movera-search-motion.log; exit 1
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: E2E UAT open close desktop and iPhone
+        run: |
+          cat > /tmp/search-motion-targeted.mjs <<'EOF'
+          import { chromium } from 'playwright'
+          const base='http://127.0.0.1:4173/Movera-host1/'
+
+          async function run(label, contextOptions) {
+            const browser=await chromium.launch({headless:true})
+            const context=await browser.newContext(contextOptions)
+            const page=await context.newPage()
+            const runtimeErrors=[]
+            page.on('pageerror',e=>runtimeErrors.push(e.message))
+            await page.goto(base,{waitUntil:'networkidle'})
+            await page.getByTestId('page-home').waitFor()
+            const trigger=page.locator('.b225-search').first()
+            await trigger.click({position:{x:80,y:25}})
+            const popup=page.getByTestId('search-transition')
+            const panel=page.locator('.movera-st__panel')
+            const input=page.locator('.movera-st__destination-search input')
+            await popup.waitFor({state:'visible'})
+
+            // UAT 1: no automatic destination focus / keyboard request after opening.
+            await page.waitForTimeout(250)
+            const autoFocused=await input.evaluate(el=>document.activeElement===el)
+            if(autoFocused) throw new Error(`${label}: destination input auto-focused on open`)
+
+            // E2E 1: slow opening must still be moving well before the final state.
+            const earlyBox=await panel.boundingBox()
+            await page.waitForTimeout(500)
+            const midBox=await panel.boundingBox()
+            if(!earlyBox||!midBox) throw new Error(`${label}: panel missing during opening`)
+            if(Math.abs(midBox.height-earlyBox.height)<8) throw new Error(`${label}: opening is not visibly progressive`)
+
+            // Do not assert final geometry at the legacy 900 ms point. Wait for the real slow motion to settle.
+            await page.waitForTimeout(1050)
+            const finalBox=await panel.boundingBox()
+            const cssHeight=Number((await popup.evaluate(el=>getComputedStyle(el).getPropertyValue('--st-panel-height'))).replace('px',''))
+            if(!finalBox||Math.abs(finalBox.height-cssHeight)>3) throw new Error(`${label}: opening did not settle ${finalBox?.height}/${cssHeight}`)
+            if(Number(await page.locator('.movera-st__content').evaluate(el=>getComputedStyle(el).opacity))<0.99) throw new Error(`${label}: content not visible after open`)
+            if(await input.evaluate(el=>document.activeElement===el)) throw new Error(`${label}: input focused without explicit user tap`)
+
+            // Intentional user interaction must still focus normally.
+            await input.click()
+            if(!await input.evaluate(el=>document.activeElement===el)) throw new Error(`${label}: intentional input focus failed`)
+            await input.blur()
+            await page.waitForTimeout(500)
+
+            // UAT 2: close must stay visible through most of the 1.5 s reverse motion.
+            await page.getByRole('button',{name:'Fermer'}).click()
+            await page.waitForTimeout(650)
+            if(await popup.count()!==1) throw new Error(`${label}: popup detached too early during close`)
+            const closeMidOpacity=Number(await panel.evaluate(el=>getComputedStyle(el).opacity))
+            if(closeMidOpacity<0.85) throw new Error(`${label}: panel faded too early during close (${closeMidOpacity})`)
+            const closeMidBox=await panel.boundingBox()
+            if(!closeMidBox) throw new Error(`${label}: panel missing mid-close`)
+            if(Math.abs(closeMidBox.height-finalBox.height)<8) throw new Error(`${label}: close reverse motion is not visibly progressing`)
+
+            // Handoff is allowed only near the end, then teardown must complete.
+            await page.waitForTimeout(650)
+            if(await popup.count()!==1) throw new Error(`${label}: popup detached before final handoff window`)
+            const lateOpacity=Number(await panel.evaluate(el=>getComputedStyle(el).opacity))
+            if(lateOpacity>0.95) throw new Error(`${label}: final Home handoff did not start near close end`)
+            await popup.waitFor({state:'detached',timeout:1200})
+            await page.getByTestId('page-home').waitFor()
+            if(runtimeErrors.length) throw new Error(`${label}: runtime errors: ${runtimeErrors.join('; ')}`)
+            await browser.close()
+          }
+
+          await run('Desktop',{viewport:{width:390,height:844}})
+          await run('iPhone',{viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'})
+          console.log('PASS: Search open/close targeted E2E/UAT desktop + iPhone')
+          EOF
+          node /tmp/search-motion-targeted.mjs
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/movera-search-motion.pid) || true
