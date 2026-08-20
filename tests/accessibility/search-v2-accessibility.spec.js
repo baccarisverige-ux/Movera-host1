@@ -9,6 +9,10 @@ async function openSearch(page){
   await expect(page.getByRole('dialog', {name:'Destination'})).toBeVisible()
 }
 
+function destinationSuggestion(page,name='Sidi Bou Saïd'){
+  return page.getByLabel('Suggestions de destinations').getByRole('button',{name,exact:true})
+}
+
 async function runAxe(page){
   const results=await new AxeBuilder({page}).include('.search-v2').analyze()
   expect(results.violations, JSON.stringify(results.violations,null,2)).toEqual([])
@@ -22,7 +26,7 @@ test.describe('Search V2 accessibility',()=>{
 
   test('dates step has no Axe violations',async({page})=>{
     await openSearch(page)
-    await page.getByRole('button',{name:'Sidi Bou Saïd'}).click()
+    await destinationSuggestion(page).click()
     await page.getByRole('button',{name:'Continuer'}).click()
     await expect(page.getByRole('dialog',{name:'Dates'})).toBeVisible()
     await runAxe(page)
@@ -30,7 +34,7 @@ test.describe('Search V2 accessibility',()=>{
 
   test('travellers step has no Axe violations',async({page})=>{
     await openSearch(page)
-    await page.getByRole('button',{name:'Sidi Bou Saïd'}).click()
+    await destinationSuggestion(page).click()
     await page.getByRole('button',{name:'Continuer'}).click()
     const enabledDays=page.locator('.premium-calendar__grid button:not([disabled])')
     await enabledDays.nth(2).click()
@@ -66,8 +70,8 @@ test.describe('Search V2 accessibility',()=>{
     const context=await browser.newContext({reducedMotion:'reduce',viewport:{width:390,height:844}})
     const page=await context.newPage()
     await openSearch(page)
-    const duration=await page.locator('.search-v2__panel').evaluate(node=>getComputedStyle(node).transitionDuration)
-    expect(duration==='0s' || duration==='0.00001s' || duration==='0.001s').toBeTruthy()
+    const duration=await page.locator('.search-v2__panel').evaluate(node=>getComputedStyle(node).transitionDuration.split(',').map(value=>parseFloat(value)||0))
+    expect(Math.max(...duration)).toBeLessThanOrEqual(0.001)
     await context.close()
   })
 })
