@@ -1,7 +1,8 @@
 import { readdir, stat } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { extname, join } from 'node:path';
 
-const root = new URL('../dist/', import.meta.url);
+const root = fileURLToPath(new URL('../dist/', import.meta.url));
 const budgets = {
   '.js': 1_500_000,
   '.css': 1_000_000,
