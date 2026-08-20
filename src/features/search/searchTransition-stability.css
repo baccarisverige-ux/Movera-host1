@@ -72,3 +72,6 @@ html[data-movera-search-lock="true"],body[data-movera-search-lock="true"]{overfl
 .movera-st:not(.movera-st--open) .movera-st__content{transition:opacity 90ms ease-in,transform 180ms var(--st-motion-close)!important}
 .movera-st__panel:has(.movera-st__destination-search input:focus){transition:height 420ms var(--st-motion-ease),border-radius 360ms var(--st-motion-ease),box-shadow 360ms var(--st-motion-ease)!important}
 @media(prefers-reduced-motion:reduce){.movera-st__panel,.movera-st__map-stage,.movera-st__map-veil,.movera-st__content{transition-duration:1ms!important;transition-delay:0ms!important}}
+
+/* Keep copy visually attached to the panel during opening instead of revealing it after the panel settles. */
+.movera-st--open .movera-st__content{opacity:1!important;transform:translate3d(0,0,0) scale(1)!important;transition:opacity 130ms ease-out 70ms,transform 300ms var(--st-motion-ease) 40ms!important}
