@@ -7,13 +7,26 @@ const listFiles = (dir) => fs.existsSync(path.join(root, dir)) ? fs.readdirSync(
 
 const app = read('src/app/App.jsx')
 const searchDir = 'src/features/search'
-const searchFiles = listFiles(searchDir)
+const searchFiles = listFiles(searchDir).sort()
 const workflowFiles = listFiles('.github/workflows').filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
 
+const expectedSearchFiles = [
+  'GuestSelector.jsx',
+  'SearchCalendar.jsx',
+  'SearchTransitionHost.jsx',
+  'searchData.js',
+  'searchState.js',
+  'searchTransition-stability.css',
+  'searchTransition.css',
+].sort()
+
+const unexpectedSearchFiles = searchFiles.filter((file) => !expectedSearchFiles.includes(file))
+const missingSearchFiles = expectedSearchFiles.filter((file) => !searchFiles.includes(file))
 const searchImplementations = searchFiles.filter((f) => /Search.*\.jsx$/.test(f))
 const mountedTransitions = (app.match(/<SearchTransitionHost\b/g) || []).length
 const mountedSearchV2 = (app.match(/<SearchExperience\b/g) || []).length
 
+const cssLayers = searchFiles.filter((file) => /^searchTransition.*\.css$/.test(file))
 const transitionCss = read('src/features/search/searchTransition.css')
 const stabilityCss = read('src/features/search/searchTransition-stability.css')
 const importantCount = [transitionCss, stabilityCss].reduce((sum, css) => sum + (css.match(/!important/g) || []).length, 0)
@@ -31,7 +44,11 @@ const report = {
   mountedTransitions,
   mountedSearchV2,
   searchImplementations,
-  cssLayers: ['searchTransition.css', 'searchTransition-stability.css'],
+  searchFiles,
+  expectedSearchFiles,
+  unexpectedSearchFiles,
+  missingSearchFiles,
+  cssLayers,
   importantCount,
   deployWorkflows,
   findings: [],
@@ -39,9 +56,18 @@ const report = {
 
 if (mountedTransitions !== 1) report.findings.push(`Expected exactly one SearchTransitionHost mount, found ${mountedTransitions}`)
 if (mountedSearchV2 !== 0) report.findings.push(`Unexpected SearchExperience mount on live branch: ${mountedSearchV2}`)
+if (unexpectedSearchFiles.length) report.findings.push(`Unexpected Search files detected: ${unexpectedSearchFiles.join(', ')}`)
+if (missingSearchFiles.length) report.findings.push(`Expected Search files missing: ${missingSearchFiles.join(', ')}`)
+if (cssLayers.length !== 2) report.findings.push(`Expected exactly 2 Search CSS layers, found ${cssLayers.length}: ${cssLayers.join(', ')}`)
 if (importantCount > 35) report.findings.push(`High CSS override debt: ${importantCount} !important declarations across Search CSS layers`)
 if (deployWorkflows.length > 1) report.findings.push(`Multiple deployment workflows detected: ${deployWorkflows.map((x) => x.file).join(', ')}`)
 
 console.log(JSON.stringify(report, null, 2))
 
-if (mountedTransitions !== 1 || mountedSearchV2 !== 0) process.exit(1)
+if (
+  mountedTransitions !== 1 ||
+  mountedSearchV2 !== 0 ||
+  unexpectedSearchFiles.length ||
+  missingSearchFiles.length ||
+  cssLayers.length !== 2
+) process.exit(1)
