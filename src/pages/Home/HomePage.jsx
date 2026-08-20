@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { homeCategories, homeCollections, homeDestinations, homeFeatured, homeServices } from '../../mocks/homeData'
+import { SearchExperience } from '../../features/search/SearchExperience.jsx'
 import '../../styles/home-b225.css'
 import '../../styles/home-b225-block2.css'
 import '../../styles/home-b225-block3.css'
@@ -14,11 +15,12 @@ function ListingCard({item,onOpen,featured=false}){return <article className={`b
 function Collection({title,items,onOpen}){return <section className="b225-section"><div className="b225-section__title"><h2>{title}</h2><button type="button" aria-label={`Voir ${title}`}><ArrowIcon/></button></div><div className="b225-scroll">{items.map(item=><ListingCard key={`${title}-${item.id}`} item={item} onOpen={onOpen}/>)}</div></section>}
 
 export function HomePage({onNavigate}){
- const [category,setCategory]=useState('all'); const [query,setQuery]=useState('');
- const featured=useMemo(()=>{const q=query.trim().toLowerCase();return homeFeatured.filter(item=>(category==='all'||item.category.split(' ').includes(category))&&(!q||`${item.title} ${item.location}`.toLowerCase().includes(q)))},[category,query]);
+ const [category,setCategory]=useState('all');
+ const [searchOpen,setSearchOpen]=useState(false);
+ const featured=useMemo(()=>homeFeatured.filter(item=>category==='all'||item.category.split(' ').includes(category)),[category]);
  const openListing=id=>onNavigate(`/listing/${id}`);
  return <div className="b225-home" data-testid="page-home">
- <header className="b225-home-header"><div className="b225-brand">Movera Host</div><label className="b225-search" aria-label="Rechercher une destination"><SearchIcon/><span className="b225-search__copy"><strong>Où allez-vous ?</strong><span>Destination · Dates · Voyageurs</span></span><input data-testid="home-search" type="search" value={query} onChange={e=>setQuery(e.target.value)} aria-label="Destination"/><button type="button" className="b225-ai" aria-label="Assistant IA" onClick={()=>onNavigate('/messages')}>✦</button></label></header>
+ <header className="b225-home-header"><div className="b225-brand">Movera Host</div><button className="b225-search" data-testid="home-search" type="button" aria-label="Rechercher une destination" onClick={()=>setSearchOpen(true)}><SearchIcon/><span className="b225-search__copy"><strong>Où allez-vous ?</strong><span>Destination · Dates · Voyageurs</span></span><span className="b225-ai" aria-hidden="true">⌕</span></button></header>
  <div className="b225-categories" data-testid="home-categories">{homeCategories.map(item=><button key={item.id} type="button" data-active={category===item.id?'true':'false'} onClick={()=>setCategory(item.id)}>{item.id==='all'?<img src={ALL_CATEGORY_GLOBE} alt="" aria-hidden="true"/>:item.id==='guesthouse'?<img src={GUESTHOUSE_CATEGORY_ICON} alt="" aria-hidden="true" style={{width:22,height:22,objectFit:'contain',display:'block',flex:'0 0 22px',background:'transparent'}}/>:item.id==='beach'?<img src={BEACH_CATEGORY_ICON} alt="" aria-hidden="true" style={{width:24,height:24,objectFit:'contain',display:'block',flex:'0 0 24px',background:'transparent',mixBlendMode:'multiply'}}/>:<span aria-hidden="true">{item.icon}</span>}{item.label}</button>)}</div>
  <section className="b225-welcome" aria-label="Bienvenue chez Movera"><div><span>Bienvenue chez Movera</span><div className="b225-signs"><button type="button" onClick={()=>onNavigate('/map?destination=sidi-bou-said')}>Sidi Bou Saïd</button><button type="button" onClick={()=>onNavigate('/map?destination=sousse')}>Sousse</button><button type="button" onClick={()=>onNavigate('/map?destination=hammamet')}>Hammamet</button></div></div><div className="b225-welcome__visual" aria-hidden="true"><span>MH</span></div></section>
  <section className="b225-section b225-featured-section" data-testid="home-featured"><div className="b225-section__title"><h2>Sélection d'Exception</h2></div><div className="b225-scroll b225-featured-scroll">{featured.length?featured.map(item=><ListingCard key={item.id} item={item} onOpen={openListing} featured/>):<p className="b225-empty">Aucune offre pour cette sélection.</p>}</div></section>
@@ -27,5 +29,6 @@ export function HomePage({onNavigate}){
  {homeCollections.map(collection=><Collection key={collection.id} title={collection.title} items={collection.items} onOpen={openListing}/>)}
  <section className="b225-section b225-experiences"><div className="b225-section__title"><h2>Expériences Exclusives</h2></div><div className="b225-experience-grid"><button type="button"><span>✦</span><strong>Table privée</strong><small>Expérience locale sélectionnée</small></button><button type="button"><span>◌</span><strong>Escapade mer</strong><small>Moments exclusifs en Tunisie</small></button></div></section>
  <button className="b225-map-cta" data-testid="home-map-cta" type="button" onClick={()=>onNavigate('/map')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>Explorer la carte</button>
+ <SearchExperience open={searchOpen} onClose={()=>setSearchOpen(false)} onNavigate={onNavigate}/>
  </div>
 }
