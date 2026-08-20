@@ -1,0 +1,78 @@
+name: Phase 4 Validation
+
+on:
+  push:
+    branches:
+      - refactor/movera-architecture-v1
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-preview.log 2>&1 &
+          echo $! > /tmp/movera-preview.pid
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/movera-preview.log
+          exit 1
+      - name: Route navigation 404 and error-boundary smoke
+        run: |
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          BASE="http://127.0.0.1:4173"
+          dump() {
+            local path="$1"
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --virtual-time-budget=1500 --dump-dom "$BASE$path" 2>/dev/null
+          }
+          check_route() {
+            local path="$1"
+            local testid="$2"
+            dump "$path" | grep -q "data-testid=\"$testid\""
+          }
+          check_route "/" "page-home"
+          check_route "/map" "page-map"
+          check_route "/listing/test-listing" "page-listing"
+          check_route "/booking/test-booking" "page-booking"
+          check_route "/favorites" "page-favorites"
+          check_route "/messages" "page-messages"
+          check_route "/messages/test-thread" "page-messages"
+          check_route "/profile" "page-profile"
+          check_route "/login" "page-login"
+          check_route "/register" "page-register"
+          check_route "/host" "page-host"
+          check_route "/host/listings" "page-host-listings"
+          check_route "/host/listings/new" "page-host-listing-new"
+          check_route "/host/listings/test-listing/edit" "page-host-listing-edit"
+          check_route "/host/reservations" "page-host-reservations"
+          check_route "/host/calendar" "page-host-calendar"
+          check_route "/host/earnings" "page-host-earnings"
+          check_route "/host/settings" "page-host-settings"
+          dump "/" | grep -q 'href="/map"'
+          dump "/host" | grep -q 'href="/host/listings"'
+          check_route "/not-a-real-route" "page-404"
+          check_route "/?__testError=1" "global-error-boundary"
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/movera-preview.pid) || true

@@ -1,0 +1,57 @@
+name: B225 Home Validation
+on:
+  push:
+    branches: [b225-ui-home]
+  pull_request:
+    branches: [phase17-performance-engineering]
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-preview.log 2>&1 &
+          echo $! > /tmp/movera-preview.pid
+          for i in {1..20}; do curl --fail --silent http://127.0.0.1:4173/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/movera-preview.log; exit 1
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: B225 Home gate
+        run: |
+          cat > b225-home-smoke.mjs <<'EOF'
+          import { chromium } from 'playwright'
+          const browser=await chromium.launch({headless:true})
+          const page=await browser.newPage({viewport:{width:390,height:844}})
+          const errors=[]
+          page.on('pageerror',e=>errors.push(e.message))
+          await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'})
+          await page.getByTestId('page-home').waitFor()
+          if(await page.locator('.b225-categories button').count()<7) throw new Error('B225 categories incomplete')
+          if(await page.locator('.b225-city__image img').count()<4) throw new Error('B225 destinations incomplete')
+          if(await page.locator('.b225-card__image img').count()<3) throw new Error('B225 property cards incomplete')
+          if(await page.getByTestId('home-map-cta').count()!==1) throw new Error('map CTA missing')
+          const media=await page.locator('.b225-card__image').first().boundingBox()
+          if(!media||media.height<150) throw new Error('property visual collapsed')
+          const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-window.innerWidth)
+          if(overflow>1) throw new Error(`critical horizontal overflow: ${overflow}`)
+          const blanks=await page.locator('.b225-card__image').evaluateAll(nodes=>nodes.filter(n=>{const img=n.querySelector('img');return !img||!img.getAttribute('src')}).length)
+          if(blanks) throw new Error(`blank property media slots: ${blanks}`)
+          if(errors.length) throw new Error(`runtime errors: ${errors.join('; ')}`)
+          await browser.close()
+          EOF
+          node b225-home-smoke.mjs
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/movera-preview.pid) || true
