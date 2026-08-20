@@ -32,11 +32,14 @@ const stabilityCss = read('src/features/search/searchTransition-stability.css')
 const importantCount = [transitionCss, stabilityCss].reduce((sum, css) => sum + (css.match(/!important/g) || []).length, 0)
 
 const deployWorkflows = []
+const legacyPhaseBranchTargets = []
 for (const file of workflowFiles) {
   const content = read(`.github/workflows/${file}`)
   if (/deploy-pages@|github-pages-deploy-action|deploy\/github-pages/.test(content)) {
     deployWorkflows.push({ file, directPages: /actions\/deploy-pages@/.test(content), branchPublish: /deploy\/github-pages/.test(content) })
   }
+  const matches = [...content.matchAll(/\bphase\d+[\w-]*/g)].map((match) => match[0])
+  if (matches.length) legacyPhaseBranchTargets.push({ file, targets: [...new Set(matches)] })
 }
 
 const expectedDeployWorkflow = 'deploy-pages-direct.yml'
@@ -63,6 +66,7 @@ const report = {
   deployWorkflows,
   expectedDeployWorkflow,
   legacyPhaseWorkflows,
+  legacyPhaseBranchTargets,
   redundantPermanentWorkflows,
   permanentCriticalRegression,
   hasPermanentCriticalRegression,
@@ -80,6 +84,7 @@ if (deployWorkflows.length !== 1) report.findings.push(`Expected exactly one dep
 if (!directDeploy?.directPages) report.findings.push(`Expected ${expectedDeployWorkflow} to use direct GitHub Pages deployment`)
 if (legacyBranchPublish.length) report.findings.push(`Legacy deploy/github-pages publishing detected: ${legacyBranchPublish.map((x) => x.file).join(', ')}`)
 if (legacyPhaseWorkflows.length) report.findings.push(`Legacy phase validation workflows detected: ${legacyPhaseWorkflows.join(', ')}`)
+if (legacyPhaseBranchTargets.length) report.findings.push(`Legacy phase branch targets detected: ${legacyPhaseBranchTargets.map((x) => `${x.file}:${x.targets.join('|')}`).join(', ')}`)
 if (redundantPermanentWorkflows.length) report.findings.push(`Redundant permanent workflows detected: ${redundantPermanentWorkflows.join(', ')}`)
 if (!hasPermanentCriticalRegression) report.findings.push(`Permanent critical regression suite missing: ${permanentCriticalRegression}`)
 if (!qualityHasCleanupAudit) report.findings.push('Movera Quality Gate is missing the permanent cleanup audit')
@@ -96,6 +101,7 @@ if (
   !directDeploy?.directPages ||
   legacyBranchPublish.length ||
   legacyPhaseWorkflows.length ||
+  legacyPhaseBranchTargets.length ||
   redundantPermanentWorkflows.length ||
   !hasPermanentCriticalRegression ||
   !qualityHasCleanupAudit
