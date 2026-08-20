@@ -2,7 +2,7 @@ name: Search V2 Final Validation
 
 on:
   push:
-    branches: [phase-11-search-v2-validation]
+    branches: [phase-11-search-v2-validation, phase-12-generalisation]
   pull_request:
   workflow_dispatch:
 
