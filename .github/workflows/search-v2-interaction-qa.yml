@@ -1,0 +1,32 @@
+name: Search V2 Interaction QA
+
+on:
+  push:
+    branches: [phase-8-interaction-qa]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  interaction-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:interaction
+      - name: Upload Playwright traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-v2-interaction-failures
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
