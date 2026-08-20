@@ -1,58 +1,141 @@
 :root {
+  /* Brand */
+  --color-brand-800: #24563f;
   --color-brand-700: #2d6a4f;
   --color-brand-600: #357a5c;
+  --color-brand-500: #4b8f70;
+  --color-brand-100: #e8f2ed;
+
+  /* Surfaces */
   --color-surface-0: #ffffff;
   --color-surface-50: #fafafa;
   --color-surface-100: #f5f5f5;
+  --color-surface-200: #ececec;
+  --color-surface-inverse: #171717;
+  --color-surface-glass: rgba(255, 255, 255, 0.78);
+  --color-surface-glass-strong: rgba(255, 255, 255, 0.9);
+
+  /* Content */
   --color-text-primary: #171717;
   --color-text-secondary: #666666;
+  --color-text-tertiary: #8a8a8a;
+  --color-text-inverse: #ffffff;
+  --color-text-disabled: #a8a8a8;
+
+  /* Borders and states */
+  --color-border-subtle: rgba(23, 23, 23, 0.07);
   --color-border: #e5e5e5;
+  --color-border-strong: #d0d0d0;
+  --color-focus: #171717;
+  --color-overlay: rgba(12, 12, 12, 0.42);
+  --color-pressed: rgba(23, 23, 23, 0.06);
+  --color-disabled-surface: #f1f1f1;
+
+  /* Semantic */
   --color-danger: #b42318;
+  --color-danger-soft: #fff0ee;
   --color-success: #18794e;
+  --color-success-soft: #eaf7f0;
+  --color-warning: #a15c00;
+  --color-warning-soft: #fff6e5;
+  --color-info: #2667a8;
+  --color-info-soft: #edf5ff;
 
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-pill: 999px;
-
+  /* 4/8 spacing system */
+  --space-0: 0;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --space-7: 28px;
   --space-8: 32px;
   --space-10: 40px;
   --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.12);
+  /* Radii */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-pill: 999px;
 
+  /* Elevation */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.09);
+  --shadow-lg: 0 20px 52px rgba(0, 0, 0, 0.13);
+  --shadow-floating: 0 24px 64px rgba(0, 0, 0, 0.16);
+  --shadow-inset-press: inset 0 1px 2px rgba(0, 0, 0, 0.12);
+
+  /* Glass */
+  --blur-glass-sm: 10px;
   --blur-glass: 18px;
+  --blur-glass-lg: 28px;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.5);
 
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif;
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Segoe UI", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-md: 1rem;
   --font-size-lg: 1.125rem;
   --font-size-xl: 1.5rem;
   --font-size-2xl: 2rem;
+  --font-size-3xl: 2.5rem;
+  --line-height-tight: 1.12;
+  --line-height-heading: 1.2;
+  --line-height-body: 1.5;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --tracking-tight: -0.025em;
+  --tracking-normal: -0.01em;
 
+  /* Control sizing */
+  --control-sm: 36px;
+  --control-md: 44px;
+  --control-lg: 52px;
+  --touch-target-min: 44px;
+
+  /* Layout */
+  --page-max-width: 430px;
+  --content-max-width: 1200px;
+  --page-gutter-mobile: 16px;
+  --page-gutter-tablet: 24px;
+  --page-gutter-desktop: 32px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  /* Layering */
   --z-base: 0;
   --z-sticky: 100;
+  --z-floating: 300;
   --z-overlay: 500;
   --z-modal: 1000;
   --z-toast: 1200;
 
+  /* Motion tokens — behavioral animations are implemented in Phase 3 */
+  --duration-instant: 80ms;
   --duration-fast: 120ms;
   --duration-normal: 220ms;
   --duration-slow: 360ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
 
+  /* Responsive reference tokens */
+  --breakpoint-xs: 320px;
   --breakpoint-sm: 360px;
+  --breakpoint-mobile: 430px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
 }
