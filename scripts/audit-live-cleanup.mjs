@@ -42,6 +42,9 @@ for (const file of workflowFiles) {
 const expectedDeployWorkflow = 'deploy-pages-direct.yml'
 const directDeploy = deployWorkflows.find((item) => item.file === expectedDeployWorkflow)
 const legacyBranchPublish = deployWorkflows.filter((item) => item.branchPublish)
+const legacyPhaseWorkflows = workflowFiles.filter((file) => /^phase-(?:\d+(?:-\d+)?)-validation\.ya?ml$/.test(file))
+const permanentCriticalRegression = 'tests/e2e/critical-regressions.spec.js'
+const hasPermanentCriticalRegression = fs.existsSync(path.join(root, permanentCriticalRegression))
 
 const report = {
   liveSearch: 'SearchTransitionHost',
@@ -56,6 +59,9 @@ const report = {
   importantCount,
   deployWorkflows,
   expectedDeployWorkflow,
+  legacyPhaseWorkflows,
+  permanentCriticalRegression,
+  hasPermanentCriticalRegression,
   findings: [],
 }
 
@@ -68,6 +74,8 @@ if (importantCount > 35) report.findings.push(`High CSS override debt: ${importa
 if (deployWorkflows.length !== 1) report.findings.push(`Expected exactly one deployment workflow, found ${deployWorkflows.length}: ${deployWorkflows.map((x) => x.file).join(', ')}`)
 if (!directDeploy?.directPages) report.findings.push(`Expected ${expectedDeployWorkflow} to use direct GitHub Pages deployment`)
 if (legacyBranchPublish.length) report.findings.push(`Legacy deploy/github-pages publishing detected: ${legacyBranchPublish.map((x) => x.file).join(', ')}`)
+if (legacyPhaseWorkflows.length) report.findings.push(`Legacy phase validation workflows detected: ${legacyPhaseWorkflows.join(', ')}`)
+if (!hasPermanentCriticalRegression) report.findings.push(`Permanent critical regression suite missing: ${permanentCriticalRegression}`)
 
 console.log(JSON.stringify(report, null, 2))
 
@@ -79,5 +87,7 @@ if (
   cssLayers.length !== 2 ||
   deployWorkflows.length !== 1 ||
   !directDeploy?.directPages ||
-  legacyBranchPublish.length
+  legacyBranchPublish.length ||
+  legacyPhaseWorkflows.length ||
+  !hasPermanentCriticalRegression
 ) process.exit(1)
