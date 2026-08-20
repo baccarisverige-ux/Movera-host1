@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test:visual": "playwright test tests/visual",
     "test:visual:update": "playwright test tests/visual --update-snapshots",
-    "test:interaction": "playwright test tests/interaction"
+    "test:interaction": "playwright test tests/interaction",
+    "test:performance": "playwright test tests/performance"
   },
   "dependencies": {
     "motion": "^13.1.0",
