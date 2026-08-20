@@ -1,0 +1,81 @@
+name: Search V2 Final Validation
+
+on:
+  push:
+    branches: [phase-11-search-v2-validation]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Static quality
+        run: |
+          npm run lint
+          npm run build
+      - name: Architecture guard
+        run: |
+          test -f src/features/search/SearchExperience.jsx
+          test -f src/features/search/PremiumCalendar.jsx
+          test -f src/shared/ui/index.jsx
+          test -f src/shared/motion/index.jsx
+          test -f src/styles/design-system.css
+          test -f src/styles/responsive-layout.css
+          grep -q "PremiumCalendar" src/features/search/SearchExperience.jsx
+          grep -q "MotionSurface" src/features/search/SearchExperience.jsx
+          grep -q "SearchExperience" src/pages/Home/HomePage.jsx
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Interaction QA
+        run: npm run test:interaction
+      - name: Accessibility / Axe
+        run: npm run test:a11y
+      - name: Performance UI
+        run: npm run test:performance
+      - name: Generate visual baselines for CI workspace
+        run: npm run test:visual:update
+      - name: Visual regression verification
+        run: npm run test:visual
+      - name: Start production preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4174 > /tmp/search-v2-preview.log 2>&1 &
+          echo $! > /tmp/search-v2-preview.pid
+          for i in {1..30}; do curl --fail --silent http://127.0.0.1:4174/Movera-host1/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/search-v2-preview.log; exit 1
+      - name: Lighthouse Search entry
+        run: |
+          npx --yes lighthouse@12.8.2 http://127.0.0.1:4174/Movera-host1/ \
+            --only-categories=performance,accessibility,best-practices \
+            --chrome-flags="--headless --no-sandbox" \
+            --output=json --output-path=lighthouse-search-v2.json --quiet
+          node - <<'EOF'
+          const fs=require('fs')
+          const report=JSON.parse(fs.readFileSync('lighthouse-search-v2.json','utf8'))
+          const scores=Object.fromEntries(Object.entries(report.categories).map(([k,v])=>[k,Math.round(v.score*100)]))
+          console.log(scores)
+          if(scores.accessibility < 90) throw new Error(`Accessibility score ${scores.accessibility} < 90`)
+          if(scores['best-practices'] < 90) throw new Error(`Best practices score ${scores['best-practices']} < 90`)
+          if(scores.performance < 70) throw new Error(`Performance score ${scores.performance} < 70`)
+          EOF
+      - name: Stop preview
+        if: always()
+        run: kill $(cat /tmp/search-v2-preview.pid) || true
+      - name: Upload validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-v2-final-validation
+          path: |
+            lighthouse-search-v2.json
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
