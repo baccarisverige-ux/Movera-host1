@@ -1,22 +1,27 @@
-/* Search close hand-off: reveal the real Home UI before portal teardown. */
+/* Search close hand-off: keep the slow reverse motion visible, then reveal Home only near the end. */
 .movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__map-veil{
   opacity:0!important;
-  transition:opacity 100ms ease-out!important;
+  transition:opacity 260ms ease-out 1180ms!important;
 }
 
 .movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__map-stage{
   opacity:0!important;
   transition:
-    transform 500ms var(--st-motion-close),
-    filter 360ms ease-out,
-    opacity 140ms ease-out 160ms!important;
+    transform 1450ms var(--st-motion-close),
+    filter 900ms ease-out,
+    opacity 280ms ease-out 1160ms!important;
 }
 
 .movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__panel{
   opacity:0!important;
   transition:
-    transform 500ms var(--st-motion-close),
-    border-radius 430ms var(--st-motion-close),
-    box-shadow 430ms var(--st-motion-close),
-    opacity 120ms ease-in 285ms!important;
+    transform 1450ms var(--st-motion-close),
+    border-radius 1250ms var(--st-motion-close),
+    box-shadow 1250ms var(--st-motion-close),
+    opacity 280ms ease-in 1160ms!important;
+}
+
+/* Content can leave earlier, but the physical panel remains visible through the reverse motion. */
+.movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__content{
+  transition:opacity 260ms ease-in,transform 620ms var(--st-motion-close)!important;
 }
