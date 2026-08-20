@@ -2,7 +2,12 @@ name: Search Motion Targeted E2E
 on:
   push:
     branches: [b225-ui-home]
+    paths-ignore:
+      - docs/ci/search-motion-status.json
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   search-motion:
@@ -27,6 +32,8 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
       - name: E2E UAT open close desktop and iPhone
+        id: motion_test
+        continue-on-error: true
         run: |
           cat > /tmp/search-motion-targeted.mjs <<'EOF'
           import { chromium } from 'playwright'
@@ -47,19 +54,16 @@ jobs:
             const input=page.locator('.movera-st__destination-search input')
             await popup.waitFor({state:'visible'})
 
-            // UAT 1: no automatic destination focus / keyboard request after opening.
             await page.waitForTimeout(250)
             const autoFocused=await input.evaluate(el=>document.activeElement===el)
             if(autoFocused) throw new Error(`${label}: destination input auto-focused on open`)
 
-            // E2E 1: slow opening must still be moving well before the final state.
             const earlyBox=await panel.boundingBox()
             await page.waitForTimeout(500)
             const midBox=await panel.boundingBox()
             if(!earlyBox||!midBox) throw new Error(`${label}: panel missing during opening`)
             if(Math.abs(midBox.height-earlyBox.height)<8) throw new Error(`${label}: opening is not visibly progressive`)
 
-            // Do not assert final geometry at the legacy 900 ms point. Wait for the real slow motion to settle.
             await page.waitForTimeout(1050)
             const finalBox=await panel.boundingBox()
             const cssHeight=Number((await popup.evaluate(el=>getComputedStyle(el).getPropertyValue('--st-panel-height'))).replace('px',''))
@@ -67,13 +71,11 @@ jobs:
             if(Number(await page.locator('.movera-st__content').evaluate(el=>getComputedStyle(el).opacity))<0.99) throw new Error(`${label}: content not visible after open`)
             if(await input.evaluate(el=>document.activeElement===el)) throw new Error(`${label}: input focused without explicit user tap`)
 
-            // Intentional user interaction must still focus normally.
             await input.click()
             if(!await input.evaluate(el=>document.activeElement===el)) throw new Error(`${label}: intentional input focus failed`)
             await input.blur()
             await page.waitForTimeout(500)
 
-            // UAT 2: close must stay visible through most of the 1.5 s reverse motion.
             await page.getByRole('button',{name:'Fermer'}).click()
             await page.waitForTimeout(650)
             if(await popup.count()!==1) throw new Error(`${label}: popup detached too early during close`)
@@ -83,7 +85,6 @@ jobs:
             if(!closeMidBox) throw new Error(`${label}: panel missing mid-close`)
             if(Math.abs(closeMidBox.height-finalBox.height)<8) throw new Error(`${label}: close reverse motion is not visibly progressing`)
 
-            // Handoff is allowed only near the end, then teardown must complete.
             await page.waitForTimeout(650)
             if(await popup.count()!==1) throw new Error(`${label}: popup detached before final handoff window`)
             const lateOpacity=Number(await panel.evaluate(el=>getComputedStyle(el).opacity))
@@ -102,3 +103,24 @@ jobs:
       - name: Stop preview
         if: always()
         run: kill $(cat /tmp/movera-search-motion.pid) || true
+      - name: Publish searchable test status
+        if: always()
+        env:
+          TEST_OUTCOME: ${{ steps.motion_test.outcome }}
+          TEST_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          mkdir -p docs/ci
+          if [ "$TEST_OUTCOME" = "success" ]; then STATUS=PASS; else STATUS=FAIL; fi
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          printf '{"status":"%s","tested_sha":"%s","run_id":"%s","updated_at":"%s"}\n' "$STATUS" "$TEST_SHA" "$RUN_ID" "$NOW" > docs/ci/search-motion-status.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/ci/search-motion-status.json
+          git commit -m "ci: record search motion result [skip ci]" || exit 0
+          git push
+      - name: Enforce targeted result
+        if: always()
+        env:
+          TEST_OUTCOME: ${{ steps.motion_test.outcome }}
+        run: test "$TEST_OUTCOME" = "success"
