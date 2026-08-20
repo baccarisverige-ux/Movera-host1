@@ -106,11 +106,18 @@ jobs:
             const categories = page.getByTestId('home-categories').locator('button')
             if (await categories.count() !== 7) throw new Error(`${viewport.name}: expected 7 categories`)
 
-            const labels = await categories.allTextContents()
-            const normalized = labels.map(v => v.trim())
+            const labels = await categories.evaluateAll(buttons => buttons.map(button => {
+              const wrapper = button.querySelector(':scope > span')
+              if (!wrapper) return ''
+              return Array.from(wrapper.childNodes)
+                .filter(node => node.nodeType === Node.TEXT_NODE)
+                .map(node => node.textContent || '')
+                .join('')
+                .trim()
+            }))
             const wanted = expected.map(v => v.label)
-            if (JSON.stringify(normalized) !== JSON.stringify(wanted)) {
-              throw new Error(`${viewport.name}: category order mismatch: ${JSON.stringify(normalized)}`)
+            if (JSON.stringify(labels) !== JSON.stringify(wanted)) {
+              throw new Error(`${viewport.name}: category order mismatch: ${JSON.stringify(labels)}`)
             }
 
             if (await categories.nth(0).getAttribute('data-active') !== 'true') {
@@ -195,7 +202,14 @@ jobs:
           await browser.close()
           console.log('CATEGORY_E2E_PASS: 7 categories x 2 viewports, Motion isolation, filtering, stress switching, no runtime/console errors')
           EOF
-          node category-e2e.mjs 2>&1 | tee -a category-motion-e2e-result.txt
+          set +e
+          node category-e2e.mjs > category-e2e-output.txt 2>&1
+          code=$?
+          cat category-e2e-output.txt | tee -a category-motion-e2e-result.txt
+          if [ "$code" -ne 0 ]; then
+            echo 'E2E=FAIL' >> category-motion-e2e-result.txt
+            exit "$code"
+          fi
           echo 'E2E=PASS' >> category-motion-e2e-result.txt
 
       - name: Stop preview
