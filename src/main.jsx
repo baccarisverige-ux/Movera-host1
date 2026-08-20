@@ -8,6 +8,7 @@ import './styles/home-scroll-link.css'
 import './styles/search-close-sync.css'
 import './features/home/categoryIdentity.js'
 import './features/home/homeScrollLink.js'
+import './features/search/searchOpenFocusGuard.js'
 import App from './app/App.jsx'
 
 createRoot(document.getElementById('root')).render(
