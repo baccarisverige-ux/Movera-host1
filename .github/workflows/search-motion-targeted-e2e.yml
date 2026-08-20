@@ -35,7 +35,7 @@ jobs:
         id: motion_test
         continue-on-error: true
         run: |
-          cat > /tmp/search-motion-targeted.mjs <<'EOF'
+          cat > search-motion-targeted.mjs <<'EOF'
           import { chromium } from 'playwright'
           const base='http://127.0.0.1:4173/Movera-host1/'
 
@@ -99,7 +99,7 @@ jobs:
           await run('iPhone',{viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'})
           console.log('PASS: Search open/close targeted E2E/UAT desktop + iPhone')
           EOF
-          node /tmp/search-motion-targeted.mjs
+          node search-motion-targeted.mjs
       - name: Stop preview
         if: always()
         run: kill $(cat /tmp/movera-search-motion.pid) || true
