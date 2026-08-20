@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   fast-quality:
-    name: Architecture · Lint · Unit · Build · Bundle
+    name: Architecture · Lint · Unit · Build · Bundle · Cleanup
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -39,6 +39,8 @@ jobs:
       - run: npm run build
       - name: Bundle budget
         run: npm run quality:bundle
+      - name: Legacy cleanup audit
+        run: node scripts/audit-live-cleanup.mjs
 
   browser-quality:
     name: Responsive · Mobile · E2E · A11y · Visual capture
