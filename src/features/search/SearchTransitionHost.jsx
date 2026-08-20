@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { storageAdapter } from '../../services/storage/storageAdapter.js'
 import { MapContainer } from '../map-engine/MapContainer.jsx'
 import { GuestSelector } from './GuestSelector.jsx'
 import { SearchCalendar } from './SearchCalendar.jsx'
@@ -41,12 +42,8 @@ function guestSummary(state) {
 }
 
 function readRecents() {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(RECENT_KEY) || '[]')
-    return Array.isArray(parsed) ? parsed.slice(0, 3) : []
-  } catch {
-    return []
-  }
+  const parsed = storageAdapter.getJson(RECENT_KEY, [])
+  return Array.isArray(parsed) ? parsed.slice(0, 3) : []
 }
 
 function destinationById(id) {
@@ -241,7 +238,7 @@ export function SearchTransitionHost({ onNavigate }) {
     }
     const next = [entry, ...recentSearches.filter((item) => item.destinationId !== entry.destinationId)].slice(0, 3)
     setRecentSearches(next)
-    try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(next)) } catch { /* stockage indisponible */ }
+    try { storageAdapter.setJson(RECENT_KEY, next) } catch { /* stockage indisponible */ }
   }
 
   const submitSearch = () => {
