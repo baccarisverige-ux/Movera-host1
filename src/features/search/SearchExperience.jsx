@@ -70,7 +70,7 @@ export function SearchExperience({open,onClose,onNavigate}){
   const q=new URLSearchParams({destination,arrival,departure,guests:String(adults+children)})
   requestClose(()=>onNavigate(`/map?${q.toString()}`))
  }
- return <div className="search-v2" data-closing={closing?'true':'false'} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
+ return <div className="search-v2" data-step={step} data-closing={closing?'true':'false'} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
    <div className="search-v2__backdrop" aria-hidden="true" onClick={()=>requestClose()}/>
    <div className="search-v2__panel-shell">
     <MotionSurface ref={panelRef} className="search-v2__panel" variant="rise">
