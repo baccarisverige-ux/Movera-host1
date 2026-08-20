@@ -1,0 +1,35 @@
+name: Search V2 Performance UI
+
+on:
+  push:
+    branches: [phase-9-performance-ui]
+  pull_request:
+    branches: [phase-8-interaction-qa, main]
+  workflow_dispatch:
+
+jobs:
+  performance-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run Search V2 performance budgets
+        run: npm run test:performance
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-v2-performance-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
