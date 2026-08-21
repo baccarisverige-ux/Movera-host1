@@ -1,7 +1,6 @@
-@import './styles/tokens.css';
+@import './styles/tokens/index.css';
 @import './styles/reset.css';
 @import './styles/globals.css';
 @import './styles/animations.css';
 @import './styles/utilities.css';
 @import './styles/accessibility.css';
-@import './styles/prestige-category.css';

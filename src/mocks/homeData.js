@@ -31,8 +31,8 @@ export const homeServices = [
 export const homeFeatured = [
   { id:'villa-perle', title:'Villa Saphir — Front de mer', location:'Gammarth', price:580, currency:'TND', category:'beach prestige', image:'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Collection', rating:'4.98' },
   { id:'maison-bleue', title:'Suite Panorama Sidi Bou Saïd', location:'Sidi Bou Saïd', price:480, currency:'TND', category:'prestige guesthouse', image:'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Signature', rating:'4.95' },
-  { id:'res-carthage', title:'Dar Carthage Résidence', location:'Carthage', price:340, currency:'TND', category:'family guesthouse', image:'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Nouveau', rating:'4.88' },
-  { id:'villa-emeraude', title:'Villa Émeraude — Domaine privé', location:'Gammarth', price:1200, currency:'TND', category:'prestige beach', image:'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Prestige', rating:'4.99' },
+  { id:'res-carthage', title:'Dar Carthage Résidence', location:'Carthage', price:340, currency:'TND', category:'family guesthouse experience', image:'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Nouveau', rating:'4.88' },
+  { id:'villa-emeraude', title:'Villa Émeraude — Domaine privé', location:'Gammarth', price:1200, currency:'TND', category:'prestige beach', image:'https://images.unsplash.com/photo-1600607687920-4e2a09cf1590?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Prestige', rating:'4.99' },
   { id:'loft-cote', title:'Loft Côte Bleue Design', location:'La Marsa', price:420, currency:'TND', category:'beach', image:'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Design', rating:'4.82' },
   { id:'villa-jasmin', title:'Villa Jasmin — Jardin secret', location:'Carthage', price:680, currency:'TND', category:'prestige', image:'https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Signature', rating:'4.96' },
   { id:'dar-sidi', title:"Dar Sidi — Maison d’hôtes d’exception", location:'Sidi Bou Saïd', price:380, currency:'TND', category:'guesthouse', image:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=90&fm=webp', badge:"Maison d’hôtes", rating:'4.93' },
@@ -42,9 +42,9 @@ export const homeFeatured = [
 const byCategory = (category) => homeFeatured.filter((item) => item.category.split(' ').includes(category))
 
 export const homeCollections = [
-  { id: 'beach', title: 'Vues Panoramiques & Littoral', items: byCategory('beach') },
-  { id: 'popular', title: 'Adresses Remarquables', items: [homeFeatured[2], homeFeatured[4], homeFeatured[0]] },
-  { id: 'guesthouse', title: 'Hôtes Privilégiés', items: byCategory('guesthouse') },
-  { id: 'prestige', title: 'Villas & Propriétés de Prestige', items: byCategory('prestige') },
-  { id: 'family', title: "Résidences Familiales d'Exception", items: [homeFeatured[2]] },
+  { id: 'guesthouse', title: "Maison d’hôte", items: byCategory('guesthouse') },
+  { id: 'beach', title: 'Plage', items: byCategory('beach') },
+  { id: 'family', title: 'Famille', items: byCategory('family') },
+  { id: 'prestige', title: 'Prestige', items: byCategory('prestige') },
+  { id: 'experience', title: 'Expérience', items: byCategory('experience') },
 ]

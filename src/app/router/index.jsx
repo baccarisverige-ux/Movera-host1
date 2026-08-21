@@ -1,8 +1,8 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { authStore } from '../../features/account/authStore.js'
-import { GuestLayout } from '../../pages/layouts/GuestLayout.jsx'
-import { HostLayout } from '../../pages/layouts/HostLayout.jsx'
-import { routeDefinitions, NotFoundPage } from '../../pages/routes.jsx'
+import { GuestLayout } from '../layouts/GuestLayout.jsx'
+import { HostLayout } from '../layouts/HostLayout.jsx'
+import { routeDefinitions, NotFoundPage } from './routes.jsx'
 
 const BASE_PATH = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
 
@@ -30,7 +30,10 @@ export function navigate(to){
   window.dispatchEvent(new PopStateEvent('popstate'))
 }
 
-function ProtectedRedirect(){useEffect(()=>navigate('/login'),[]);return <section data-testid="protected-redirect"><p>Connexion requise…</p></section>}
+function ProtectedRedirect({ targetPath }){
+  useEffect(()=>navigate(`/login?from=${encodeURIComponent(targetPath)}`),[targetPath])
+  return <section data-testid="protected-redirect"><p>Connexion requise…</p></section>
+}
 function RouteFallback(){return <section className="route-page" data-testid="route-loading" aria-live="polite"><p>Chargement…</p></section>}
 
 export function AppRouter(){
@@ -41,7 +44,7 @@ export function AppRouter(){
  if(new URLSearchParams(window.location.search).get('__testError')==='1')throw new Error('Phase 4 error-boundary verification')
  if(!resolved)return <NotFoundPage onNavigate={navigate}/>
  const {route,params}=resolved
- if(route.protected&&!authStore.isAuthenticated())return <ProtectedRedirect/>
+ if(route.protected&&!authStore.isAuthenticated())return <ProtectedRedirect targetPath={internalPath}/>
  const Page=route.component;const Layout=route.area==='host'?HostLayout:GuestLayout
  return <Layout currentPath={internalPath} onNavigate={navigate}><Suspense fallback={<RouteFallback/>}><Page params={params} onNavigate={navigate}/></Suspense></Layout>
 }

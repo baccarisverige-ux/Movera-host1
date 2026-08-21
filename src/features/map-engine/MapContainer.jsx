@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ClusterLayer } from './ClusterLayer.jsx'
-import { MapControls } from './MapControls.jsx'
-import { MarkerLayer } from './MarkerLayer.jsx'
-import { ResizeManager } from './ResizeManager.jsx'
-import { TileLayer } from './TileLayer.jsx'
-import { ViewportController } from './ViewportController.jsx'
-import { panViewport, zoomViewport } from './geometry.js'
+import { ClusterLayer } from './layers/ClusterLayer.jsx'
+import { MapControls } from './controls/MapControls.jsx'
+import { MarkerLayer } from './layers/MarkerLayer.jsx'
+import { ResizeManager } from './lifecycle/ResizeManager.jsx'
+import { TileLayer } from './layers/TileLayer.jsx'
+import { ViewportController } from './lifecycle/ViewportController.jsx'
+import { panViewport, zoomViewport } from './geometry/geometry.js'
 import '../../styles/map-engine.css'
 
 export const INITIAL_VIEWPORT = Object.freeze({ lat: 36.8065, lng: 10.1815, zoom: 11 })
@@ -49,7 +49,6 @@ export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: con
   }, [])
 
   const zoomBy = useCallback((delta) => commitViewport((current) => zoomViewport(current, delta)), [commitViewport])
-  const reset = useCallback(() => { setSelected(null); commitViewport(() => ({ ...INITIAL_VIEWPORT })) }, [commitViewport, setSelected])
   const focusPoint = useCallback((point, targetZoom) => commitViewport((current) => ({ ...current, lat: point.lat, lng: point.lng, zoom: targetZoom })), [commitViewport])
   const selectMarker = useCallback((marker) => { setSelected(marker.id); focusPoint(marker, MARKER_FOCUS_ZOOM) }, [focusPoint, setSelected])
 
@@ -105,7 +104,7 @@ export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: con
       <TileLayer viewport={viewport} size={size} />
       <ClusterLayer markers={markers} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
       {viewport.zoom > 10 ? <MarkerLayer markers={markers} viewport={viewport} size={size} selectedListingId={selectedListingId} onSelect={selectMarker} /> : null}
-      <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} onReset={reset} />
+      <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} />
       <div className="map-attribution">© OpenStreetMap contributors</div>
       <ResizeManager targetRef={surfaceRef} onSize={setSize} />
       <ViewportController onLifecycle={() => setLifecycleEvents((count) => count + 1)} />

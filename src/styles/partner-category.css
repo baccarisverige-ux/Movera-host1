@@ -1,0 +1,54 @@
+.b225-categories button[data-category-id="prestige"] > img{
+  width:24px!important;
+  height:24px!important;
+  flex:0 0 24px!important;
+  display:block!important;
+  object-fit:contain!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  filter:none!important;
+  opacity:1!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
+
+.b225-categories button[data-category-id="experience"] > span[aria-hidden="true"],
+.b225-categories button[data-category-id="partner"] > span[aria-hidden="true"]{
+  display:block!important;
+  height:24px!important;
+  flex:0 0 24px!important;
+  font-size:0!important;
+  line-height:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background-color:transparent!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  background-size:contain!important;
+  box-shadow:none!important;
+  filter:none!important;
+  opacity:1!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
+
+.b225-categories button[data-category-id="experience"] > span[aria-hidden="true"]{
+  width:24px!important;
+  background-image:url('/Movera-host1/assets/prestige-category.webp')!important;
+}
+
+.b225-categories button[data-category-id="partner"] > span[aria-hidden="true"]{
+  width:28px!important;
+  flex-basis:28px!important;
+  background-image:url('/Movera-host1/assets/partner-category.png')!important;
+}
+
+.b225-categories button[data-category-id="experience"]::before,
+.b225-categories button[data-category-id="prestige"]::before,
+.b225-categories button[data-category-id="partner"]::before{
+  content:none!important;
+  display:none!important;
+  background-image:none!important;
+}

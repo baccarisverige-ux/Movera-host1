@@ -108,6 +108,10 @@ export function CarouselShell({
     setListingIndex(clamped)
     onSelectedListingChange?.(listings[clamped].id)
   }
+  const openCarousel = () => {
+    if (!selectedListingId && listing) onSelectedListingChange?.(listing.id)
+    setPhase('opening')
+  }
   const moveListing = (delta) => chooseListing(listingIndex + delta)
   const movePhoto = (delta) => setImageIndexes((current) => {
     const next = [...current]
@@ -119,7 +123,7 @@ export function CarouselShell({
 
   return <section className={`carousel-shell is-${phase}`} data-testid="carousel-shell" data-carousel-state={phase}
     data-selected-listing-id={listing.id} data-gesture-lock={gestureLock} data-state-label={stateLabel}>
-    <Controls open={open} onOpen={() => setPhase('opening')} onClose={() => setPhase('closing')}
+    <Controls open={open} onOpen={openCarousel} onClose={() => setPhase('closing')}
       onPrevious={() => moveListing(-1)} onNext={() => moveListing(1)} onDetail={() => onDetail?.(listing.id, phase)} />
     {open ? <GestureController onListingSwipe={moveListing} onPhotoSwipe={movePhoto} onGestureState={setPhase} onGestureLock={updateGestureLock}>
       <CarouselTrack listing={listing} imageIndex={imageIndex} listingIndex={listingIndex} />
