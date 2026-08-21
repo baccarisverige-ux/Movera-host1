@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { storageAdapter } from '../../services/storage/storageAdapter.js'
 import { MapContainer } from '../map-engine/MapContainer.jsx'
+import { beginMapHandoff, endMapHandoff, MAP_READY_EVENT } from './mapHandoff.js'
 import { GuestSelector } from './GuestSelector.jsx'
 import { SearchCalendar } from './SearchCalendar.jsx'
 import { SearchStepMotion } from './SearchStepMotion.jsx'
@@ -74,6 +75,9 @@ export function SearchTransitionHost({ onNavigate }) {
   const completeTimerRef = useRef(0)
   const stepTimerRef = useRef(0)
   const readyTimerRef = useRef(0)
+  const handoffFallbackTimerRef = useRef(0)
+  const mapHandoffRef = useRef(false)
+  const skipScrollRestoreRef = useRef(false)
   const lockedScrollYRef = useRef(0)
 
   const selectedViewport = state.destination?.viewport || SEARCH_OVERVIEW_VIEWPORT
@@ -108,7 +112,21 @@ export function SearchTransitionHost({ onNavigate }) {
     window.clearTimeout(completeTimerRef.current)
     window.clearTimeout(stepTimerRef.current)
     window.clearTimeout(readyTimerRef.current)
+    window.clearTimeout(handoffFallbackTimerRef.current)
   }
+
+  const finalizeMapHandoff = useCallback(() => {
+    if (!mapHandoffRef.current) return
+    window.clearTimeout(handoffFallbackTimerRef.current)
+    mapHandoffRef.current = false
+    endMapHandoff()
+    window.requestAnimationFrame(() => {
+      setActive(false)
+      setComplete(false)
+      setDestinationQuery('')
+      setAddressMode(false)
+    })
+  }, [])
 
   const closeTransition = () => {
     if (!active || complete) return
@@ -130,6 +148,9 @@ export function SearchTransitionHost({ onNavigate }) {
       event.preventDefault()
       event.stopPropagation()
       clearTimers()
+      endMapHandoff()
+      mapHandoffRef.current = false
+      skipScrollRestoreRef.current = false
       const rect = trigger.getBoundingClientRect()
       const viewportHeight = Math.round(window.visualViewport?.height || window.innerHeight || 760)
       setOrigin({ top: rect.top, left: rect.left, width: rect.width, height: rect.height })
@@ -209,7 +230,8 @@ export function SearchTransitionHost({ onNavigate }) {
       html.style.height = previous.htmlHeight
       html.style.overflow = previous.htmlOverflow
       html.style.overscrollBehavior = previous.htmlOverscroll
-      window.scrollTo(0, lockedScrollYRef.current)
+      if (!skipScrollRestoreRef.current) window.scrollTo(0, lockedScrollYRef.current)
+      skipScrollRestoreRef.current = false
     }
   }, [active, lockedViewportHeight])
 
@@ -222,7 +244,22 @@ export function SearchTransitionHost({ onNavigate }) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [active, complete])
 
-  useEffect(() => () => clearTimers(), [])
+  useEffect(() => {
+    const onMapReady = () => {
+      if (!mapHandoffRef.current) return
+      window.requestAnimationFrame(finalizeMapHandoff)
+    }
+    window.addEventListener(MAP_READY_EVENT, onMapReady)
+    return () => window.removeEventListener(MAP_READY_EVENT, onMapReady)
+  }, [finalizeMapHandoff])
+
+  useEffect(() => () => {
+    clearTimers()
+    if (mapHandoffRef.current) {
+      mapHandoffRef.current = false
+      endMapHandoff()
+    }
+  }, [])
 
   const chooseDestination = (destination) => {
     clearTimers()
@@ -281,16 +318,16 @@ export function SearchTransitionHost({ onNavigate }) {
     if (!state.destination || !datesValid || state.adults < 1) return
     clearTimers()
     saveRecent()
+    beginMapHandoff()
+    mapHandoffRef.current = true
+    skipScrollRestoreRef.current = true
     setReady(false)
     setComplete(true)
     setOpen(false)
     const path = buildMapSearchPath(state)
     completeTimerRef.current = window.setTimeout(() => {
       onNavigate(path)
-      setActive(false)
-      setComplete(false)
-      setDestinationQuery('')
-      setAddressMode(false)
+      handoffFallbackTimerRef.current = window.setTimeout(finalizeMapHandoff, 2500)
     }, COMPLETE_MS)
   }
 
