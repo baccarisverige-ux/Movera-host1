@@ -1,0 +1,68 @@
+name: Remove Home floating map CTA
+
+on:
+  push:
+    branches: [b225-ui-home]
+    paths:
+      - .github/workflows/remove-home-map-cta.yml
+
+permissions:
+  contents: write
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Remove CTA markup and dedicated CSS
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          home = Path('src/features/home/HomePage.jsx')
+          s = home.read_text()
+          s, n = re.subn(
+              r'\n\s*<button className="b225-map-cta" data-testid="home-map-cta" type="button" onClick=\{\(\)=>onNavigate\(\'/map\'\)\}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>Explorer la carte</button>',
+              '',
+              s,
+              count=1,
+          )
+          if n != 1:
+              raise SystemExit(f'Home CTA markup removal count={n}')
+          home.write_text(s)
+
+          css = Path('src/styles/home-b225.css')
+          s = css.read_text()
+          s, n = re.subn(r'\.b225-map-cta\{[^}]*\}\.b225-map-cta svg\{[^}]*\}', '', s, count=1)
+          if n != 1:
+              raise SystemExit(f'CTA CSS removal count={n}')
+          s, n = re.subn(r'(\.b225-home\{[^}]*?padding:)0 0 118px', r'\g<1>0 0 84px', s, count=1)
+          if n != 1:
+              raise SystemExit(f'Home bottom padding adjustment count={n}')
+          css.write_text(s)
+          PY
+
+          ! grep -R "b225-map-cta\|home-map-cta" src
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+      - name: Commit validated removal
+        run: |
+          rm .github/workflows/remove-home-map-cta.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/features/home/HomePage.jsx src/styles/home-b225.css .github/workflows/remove-home-map-cta.yml
+          git commit -m "fix(home): remove floating map CTA"
+          git pull --rebase origin b225-ui-home
+          git push origin HEAD:b225-ui-home
