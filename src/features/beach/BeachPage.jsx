@@ -90,6 +90,7 @@ export function BeachPage({ onNavigate }) {
   return (
     <div className="beach-page" data-testid="page-beach">
       <section className="beach-hero" aria-label="Collection Plage">
+        <img className="beach-hero__image" src="/Movera-host1/assets/plage-page-hero.jpeg" alt="Collection Plage Movera" decoding="async" fetchPriority="high" />
         <div className="beach-hero__veil" />
         <div className="beach-hero__top">
           <button className="beach-glass-button" type="button" aria-label="Retour à l’accueil" onClick={() => onNavigate('/')}>
