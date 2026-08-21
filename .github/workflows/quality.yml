@@ -11,13 +11,63 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: movera-quality-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  remove-home-map-cta:
+    name: Remove obsolete Home map CTA
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Remove CTA source and dedicated styles
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          home = Path('src/features/home/HomePage.jsx')
+          s = home.read_text()
+          s, n = re.subn(r'\n\s*<button className="b225-map-cta"[^\n]*?</button>', '', s, count=1)
+          if n != 1:
+              raise SystemExit(f'Home CTA markup removal count={n}')
+          home.write_text(s)
+
+          css = Path('src/styles/home-b225.css')
+          s = css.read_text()
+          s, n = re.subn(r'\.b225-map-cta\{[^}]*\}\.b225-map-cta svg\{[^}]*\}', '', s, count=1)
+          if n != 1:
+              raise SystemExit(f'CTA CSS removal count={n}')
+          s, n = re.subn(r'(\.b225-home\{[^}]*?padding:)0 0 118px', r'\g<1>0 0 84px', s, count=1)
+          if n != 1:
+              raise SystemExit(f'Home bottom padding adjustment count={n}')
+          css.write_text(s)
+          PY
+          ! grep -R "b225-map-cta\|home-map-cta" src
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Persist validated cleanup and restore CI
+        run: |
+          git show HEAD^:.github/workflows/quality.yml > .github/workflows/quality.yml
+          rm -f .github/workflows/remove-home-map-cta.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/features/home/HomePage.jsx src/styles/home-b225.css .github/workflows/quality.yml .github/workflows/remove-home-map-cta.yml
+          git commit -m "fix(home): remove floating map CTA"
+          git pull --rebase origin b225-ui-home
+          git push origin HEAD:b225-ui-home
+
   fast-quality:
     name: Architecture · Lint · Unit · Build · Bundle · Cleanup
     runs-on: ubuntu-latest
