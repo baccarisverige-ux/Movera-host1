@@ -1,0 +1,60 @@
+name: Remove stale malformed Prestige data URI
+
+on:
+  push:
+    branches: [b225-ui-home]
+    paths: [.github/workflows/temp-remove-stale-prestige-datauri.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: b225-ui-home
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Remove dead malformed inline PNG rule
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          p = Path('src/styles/home-b225-block3.css')
+          s = p.read_text()
+          pattern = r"\.b225-categories button:nth-child\(5\)>span\{[^}]*data:image/png;base64,[^}]*\}"
+          replacement = ".b225-categories button:nth-child(5)>span{background:transparent}"
+          new, n = re.subn(pattern, replacement, s, count=1)
+          if n != 1:
+              raise SystemExit(f'Expected one stale Prestige data URI rule, found {n}')
+          p.write_text(new)
+          Path('.github/workflows/temp-remove-stale-prestige-datauri.yml').unlink()
+          PY
+
+      - name: Verify quality gates
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+          test -f dist/index.html
+          ! grep -q "data:image/png;base64" src/styles/home-b225-block3.css
+          ! grep -q "styles/map-b225.css" src/features/home/HomePage.jsx
+          grep -q "styles/map-b225.css" src/features/map/MapPage.jsx
+          grep -q "b225-home-map-search" src/features/home/HomePage.jsx
+
+      - name: Commit verified repair
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/styles/home-b225-block3.css .github/workflows/temp-remove-stale-prestige-datauri.yml
+          git commit -m "fix(home): remove stale malformed Prestige data URI"
+          git pull --rebase origin b225-ui-home
+          git push origin HEAD:b225-ui-home
