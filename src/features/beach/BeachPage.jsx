@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { homeFeatured } from '../../mocks/homeData.js'
 import './beach-page.css'
+import './beach-page-scale.css'
 
 const HERO_IMAGE = '/Movera-host1/assets/plage-collection-hero.jpg'
 
