@@ -2,12 +2,12 @@ name: Movera Quality Gate
 
 on:
   push:
-    branches: [b225-ui-home]
+    branches: [main]
     paths-ignore:
       - 'docs/**'
       - '**/*.md'
   pull_request:
-    branches: [b225-ui-home]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
