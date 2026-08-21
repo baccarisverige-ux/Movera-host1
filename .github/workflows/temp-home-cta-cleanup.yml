@@ -1,3 +1,4 @@
+# Second push executes the already-registered one-shot workflow.
 name: One-shot Home CTA cleanup
 
 on:
