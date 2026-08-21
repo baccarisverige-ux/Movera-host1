@@ -41,6 +41,12 @@
   margin-bottom:0!important;
 }
 
+/* The legacy CTA uses margin-top:auto. On the final step that creates artificial
+   flex space below the content; exact-fit uses a physical 10px rhythm instead. */
+.movera-st[data-exact-fit="true"] .movera-st__screen--guests .movera-st__action--search{
+  margin-top:10px!important;
+}
+
 .movera-st__address-loading{
   margin:0 0 7px 3px;
   color:#7e8781;
