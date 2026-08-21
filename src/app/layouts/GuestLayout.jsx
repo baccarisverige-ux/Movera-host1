@@ -11,6 +11,7 @@ const guestNav = [
 const mapShellStyle = { maxWidth: 430, margin: '0 auto', background: '#eef0ee' }
 const mapContentStyle = { padding: 0, overflow: 'hidden' }
 const mapNavStyle = { position: 'fixed', left: '50%', right: 'auto', bottom: 0, width: 'min(100%, 430px)', transform: 'translateX(-50%)', zIndex: 50 }
+const beachContentStyle = { padding: 0, overflow: 'auto', background: '#f6f5f2' }
 
 function AppLink({ children, className, href, onNavigate, active }) {
   return (
@@ -35,16 +36,36 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
     : null
   const activePath = requestedPath === '/messages' || requestedPath === '/profile'
     ? requestedPath
-    : currentPath
+    : currentPath === '/plage' ? '/' : currentPath
   const isMapRoute = currentPath === '/map'
+  const isBeachRoute = currentPath === '/plage'
+
+  const handleGuestCapture = (event) => {
+    if (currentPath !== '/') return
+    const button = event.target.closest?.('[data-testid="home-categories"] button')
+    if (!button) return
+    const beachIcon = button.querySelector('img[src*="plage-category"]')
+    if (!beachIcon) return
+    event.preventDefault()
+    event.stopPropagation()
+    onNavigate('/plage')
+  }
 
   return (
-    <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
-      <header className="app-shell__header" style={isMapRoute ? { display: 'none' } : undefined}>
+    <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isBeachRoute ? ' app-shell--beach' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
+      <header className="app-shell__header" style={isMapRoute || isBeachRoute ? { display: 'none' } : undefined}>
         <strong>Movera Host</strong>
         <AppLink className="shell-switch" href="/host" onNavigate={onNavigate}>Mode hôte</AppLink>
       </header>
-      <main className="app-shell__content" id="main-content" tabIndex={-1} style={isMapRoute ? mapContentStyle : undefined}>{children}</main>
+      <main
+        className="app-shell__content"
+        id="main-content"
+        tabIndex={-1}
+        style={isMapRoute ? mapContentStyle : isBeachRoute ? beachContentStyle : undefined}
+        onClickCapture={handleGuestCapture}
+      >
+        {children}
+      </main>
       <nav className="app-shell__nav" aria-label="Navigation principale" style={isMapRoute ? mapNavStyle : undefined}>
         {guestNav.map(({ label, path, icon }) => (
           <AppLink
