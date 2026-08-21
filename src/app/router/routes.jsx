@@ -1,12 +1,12 @@
 import { lazy } from 'react'
 import { HomePage } from '../../features/home/HomePage.jsx'
+import { MapPage } from '../../features/map/MapPage.jsx'
 
 const lazyNamed = (loader, name) => lazy(() => loader().then(module => ({ default: module[name] })))
 const BookingPage = lazyNamed(() => import('../../features/booking/BookingPage.jsx'), 'BookingPage')
 const CarouselLab = lazyNamed(() => import('../../features/carousel/CarouselShell.jsx'), 'CarouselLab')
 const GestureLab = lazyNamed(() => import('../../features/carousel/GestureLab.jsx'), 'GestureLab')
 const ListingDetailPage = lazyNamed(() => import('../../features/listing-detail/ListingDetailPage.jsx'), 'ListingDetailPage')
-const MapPage = lazyNamed(() => import('../../features/map/MapPage.jsx'), 'MapPage')
 const FavoritesPage = lazyNamed(() => import('../../features/account/pages/FavoritesPage.jsx'), 'FavoritesPage')
 const ForgotPasswordPage = lazyNamed(() => import('../../features/account/pages/ForgotPasswordPage.jsx'), 'ForgotPasswordPage')
 const LoginPage = lazyNamed(() => import('../../features/account/pages/LoginPage.jsx'), 'LoginPage')
