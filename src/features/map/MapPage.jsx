@@ -29,20 +29,22 @@ export function MapPage({ onNavigate }) {
 
   useEffect(() => {
     let frame = 0
-    let readyFrame = 0
+    let paintFrame = 0
+    let finalFrame = 0
     const startedAt = performance.now()
-    const deadlineMs = 2200
+    const maxWaitMs = 260
 
     const announceAfterPaint = () => {
-      readyFrame = window.requestAnimationFrame(() => {
-        readyFrame = window.requestAnimationFrame(() => announceMapReady())
+      paintFrame = window.requestAnimationFrame(() => {
+        finalFrame = window.requestAnimationFrame(() => announceMapReady())
       })
     }
 
-    const checkReady = () => {
+    const checkSurface = () => {
       const surface = document.querySelector('.b225-map-page [data-testid="map-surface"]')
       if (!surface) {
-        frame = window.requestAnimationFrame(checkReady)
+        if (performance.now() - startedAt >= maxWaitMs) announceAfterPaint()
+        else frame = window.requestAnimationFrame(checkSurface)
         return
       }
 
@@ -54,25 +56,19 @@ export function MapPage({ onNavigate }) {
         && Math.abs(measuredWidth - Math.round(rect.width)) <= 1
         && Math.abs(measuredHeight - Math.round(rect.height)) <= 1
 
-      const tileImages = [...surface.querySelectorAll('.map-tile img')]
-      const loadedTiles = tileImages.filter((image) => {
-        const style = window.getComputedStyle(image)
-        return image.complete && image.naturalWidth > 0 && style.visibility !== 'hidden'
-      }).length
-      const enoughTiles = loadedTiles >= Math.min(4, tileImages.length)
-
-      if ((sizeStable && tileImages.length > 0 && enoughTiles) || performance.now() - startedAt >= deadlineMs) {
+      if (sizeStable || performance.now() - startedAt >= maxWaitMs) {
         announceAfterPaint()
         return
       }
 
-      frame = window.requestAnimationFrame(checkReady)
+      frame = window.requestAnimationFrame(checkSurface)
     }
 
-    frame = window.requestAnimationFrame(checkReady)
+    frame = window.requestAnimationFrame(checkSurface)
     return () => {
       window.cancelAnimationFrame(frame)
-      window.cancelAnimationFrame(readyFrame)
+      window.cancelAnimationFrame(paintFrame)
+      window.cancelAnimationFrame(finalFrame)
     }
   }, [])
 
