@@ -1,5 +1,5 @@
-.beach-hero{padding-top:12px;background:#fff}
-.beach-hero__image{width:66%;height:auto;max-height:none;margin:0 auto;object-fit:contain;object-position:center;transform:none;filter:none;border-radius:16px;background:transparent}
+.beach-hero{padding-top:14px;background:#fff;perspective:1000px}
+.beach-hero__image{width:50%;height:auto;max-height:none;margin:0 10px 0 auto;object-fit:contain;object-position:center;filter:none;border-radius:18px;background:#fff;border:1px solid rgba(255,255,255,.94);box-shadow:-18px 20px 34px rgba(24,28,24,.16),-7px 9px 18px rgba(24,28,24,.10),-3px 4px 0 rgba(255,255,255,.96),-5px 6px 0 rgba(224,225,220,.88);transform:perspective(900px) rotateY(-8deg) rotateX(2deg) translateZ(0);transform-origin:right center}
 .beach-hero__copy{padding:8px 16px 10px}
 .beach-hero__copy>span{margin-bottom:4px;font-size:7px;letter-spacing:.11em}
 .beach-hero__copy h1{font-size:clamp(18px,5vw,22px);line-height:1.02;letter-spacing:-.03em}
