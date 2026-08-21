@@ -1,5 +1,5 @@
 .beach-hero{padding-top:14px;background:#fff;perspective:none}
-.beach-hero__image{width:50%;height:auto;max-height:none;margin:0 28px 0 auto;object-fit:contain;object-position:center;filter:none;border-radius:0;background:transparent;border:0;box-shadow:none;transform:none;transform-origin:center}
+.beach-hero__image{width:100%;height:auto;aspect-ratio:1536/1093;max-height:none;margin:0;display:block;object-fit:contain;object-position:center;background:#fff;filter:none;border:0;border-radius:0;box-shadow:none;transform:none;transform-origin:center}
 .beach-hero__copy{padding:8px 16px 10px}
 .beach-hero__copy>span{margin-bottom:4px;font-size:7px;letter-spacing:.11em}
 .beach-hero__copy h1{font-size:clamp(18px,5vw,22px);line-height:1.02;letter-spacing:-.03em}

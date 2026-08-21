@@ -3,6 +3,8 @@ import { homeFeatured } from '../../mocks/homeData.js'
 import './beach-page.css'
 import './beach-page-scale.css'
 
+const HERO_IMAGE = '/Movera-host1/assets/plage-family-hero.jpeg'
+
 const QUICK_CITIES = ['Toutes', 'Gammarth', 'La Marsa', 'Hammamet', 'Sousse', 'Djerba', 'Bizerte', 'Nabeul']
 
 const TUNISIA_CITIES = [
@@ -90,6 +92,7 @@ export function BeachPage({ onNavigate }) {
   return (
     <div className="beach-page" data-testid="page-beach">
       <section className="beach-hero" aria-label="Collection Plage">
+        <img className="beach-hero__image" src={HERO_IMAGE} alt="Famille et amis prêts pour une journée à la plage" decoding="async" fetchPriority="high" />
         <div className="beach-hero__veil" />
         <div className="beach-hero__top">
           <button className="beach-glass-button" type="button" aria-label="Retour à l’accueil" onClick={() => onNavigate('/')}>
