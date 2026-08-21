@@ -1,12 +1,18 @@
+import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 
 const STEP_ORDER = Object.freeze({ destination: 0, dates: 1, guests: 2 })
 
-export function SearchStepMotion({ step, previousStep, children }) {
+export function SearchStepMotion({ step, children }) {
   const reduceMotion = useReducedMotion()
+  const previousStepRef = useRef(step)
   const currentIndex = STEP_ORDER[step] ?? 0
-  const previousIndex = STEP_ORDER[previousStep] ?? currentIndex
+  const previousIndex = STEP_ORDER[previousStepRef.current] ?? currentIndex
   const direction = currentIndex >= previousIndex ? 1 : -1
+
+  useEffect(() => {
+    previousStepRef.current = step
+  }, [step])
 
   const initial = reduceMotion
     ? { opacity: 1 }
