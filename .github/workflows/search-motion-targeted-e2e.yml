@@ -115,21 +115,25 @@ jobs:
             const guestsGap=(guestsPanel.y+guestsPanel.height)-(finalBox.y+finalBox.height)
             if(guestsGap>34) throw new Error(`${label}: guests excess bottom gap ${guestsGap}`)
 
-            await page.getByRole('button',{name:'Fermer'}).click()
-            await page.waitForTimeout(650)
-            if(await popup.count()!==1) throw new Error(`${label}: popup detached too early during close`)
-            await page.waitForTimeout(180)
-            if(await popup.count()!==1) throw new Error(`${label}: popup detached before 950ms close duration`)
-            await page.waitForTimeout(260)
-            await popup.waitFor({state:'detached',timeout:900})
-            await page.getByTestId('page-home').waitFor()
+            const homeSearch=page.getByTestId('page-home').locator('.b225-search').first()
+            await finalButton.click()
+            await page.waitForTimeout(80)
+            if(await popup.getAttribute('class').then(value=>!String(value).includes('movera-st--complete'))) throw new Error(`${label}: complete handoff state missing`)
+            const earlyHomeStyle=await homeSearch.evaluate(el=>({visibility:getComputedStyle(el).visibility,opacity:Number(getComputedStyle(el).opacity)}))
+            if(earlyHomeStyle.visibility!=='hidden' || earlyHomeStyle.opacity>0.01) throw new Error(`${label}: Home search flashed at handoff start`)
+            await page.waitForTimeout(300)
+            const lateHomeStyle=await homeSearch.evaluate(el=>({visibility:getComputedStyle(el).visibility,opacity:Number(getComputedStyle(el).opacity)}))
+            if(lateHomeStyle.visibility!=='hidden' || lateHomeStyle.opacity>0.01) throw new Error(`${label}: Home search flashed before map navigation`)
+            await page.waitForURL(/\/map(?:\?|$)/,{timeout:1800})
+            await popup.waitFor({state:'detached',timeout:1200})
+            if(await page.getByTestId('page-home').count()!==0) throw new Error(`${label}: Home remained mounted after map navigation`)
             if(runtimeErrors.length) throw new Error(`${label}: runtime errors: ${runtimeErrors.join('; ')}`)
             await browser.close()
           }
 
           await run('Desktop',{viewport:{width:390,height:844}})
           await run('iPhone',{viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'})
-          console.log('PASS: Search exact fit desktop + iPhone')
+          console.log('PASS: Search exact fit + no Home search flash desktop + iPhone')
           EOF
           node search-motion-targeted.mjs
       - name: Stop preview
