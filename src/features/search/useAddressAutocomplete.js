@@ -9,7 +9,7 @@ function normalize(value) {
 
 function localMatches(query) {
   const normalized = normalize(query)
-  if (!normalized) return SEARCH_ADDRESS_SUGGESTIONS.slice(0, 4)
+  if (!normalized) return SEARCH_ADDRESS_SUGGESTIONS.slice(0, 2)
   return SEARCH_ADDRESS_SUGGESTIONS.filter((address) => normalize(`${address.label} ${address.subtitle}`).includes(normalized)).slice(0, 5)
 }
 
