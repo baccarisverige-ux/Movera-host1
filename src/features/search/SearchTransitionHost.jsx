@@ -5,11 +5,13 @@ import { MapContainer } from '../map-engine/MapContainer.jsx'
 import { GuestSelector } from './GuestSelector.jsx'
 import { SearchCalendar } from './SearchCalendar.jsx'
 import { SearchStepMotion } from './SearchStepMotion.jsx'
-import { SEARCH_DESTINATIONS } from './searchData.js'
+import { SEARCH_ADDRESS_SUGGESTIONS, SEARCH_DESTINATIONS } from './searchData.js'
 import { buildMapSearchPath, createSearchState, isDateRangeValid, totalTravellers } from './searchState.js'
+import { useSearchPanelFit } from './useSearchPanelFit.js'
 import './searchTransition.css'
 import './searchTransition-stability.css'
 import './searchStepFit.css'
+import './searchAddressMode.css'
 
 const OPEN_MS = 980
 const CLOSE_MS = 950
@@ -63,6 +65,7 @@ export function SearchTransitionHost({ onNavigate }) {
   const [origin, setOrigin] = useState({ top: 72, left: 14, width: 362, height: 52 })
   const [lockedViewportHeight, setLockedViewportHeight] = useState(760)
   const [destinationQuery, setDestinationQuery] = useState('')
+  const [addressMode, setAddressMode] = useState(false)
   const [recentSearches, setRecentSearches] = useState(readRecents)
   const closeTimerRef = useRef(0)
   const completeTimerRef = useRef(0)
@@ -86,6 +89,14 @@ export function SearchTransitionHost({ onNavigate }) {
       : SEARCH_DESTINATIONS
     return matches.slice(0, 4)
   }, [destinationQuery])
+  const filteredAddressSuggestions = useMemo(() => {
+    const query = destinationQuery.trim().toLocaleLowerCase('fr')
+    const matches = query
+      ? SEARCH_ADDRESS_SUGGESTIONS.filter((address) => `${address.label} ${address.subtitle}`.toLocaleLowerCase('fr').includes(query))
+      : SEARCH_ADDRESS_SUGGESTIONS
+    return matches.slice(0, 4)
+  }, [destinationQuery])
+  const { contentRef, panelHeight: fittedPanelHeight } = useSearchPanelFit({ active, step, addressMode, lockedViewportHeight })
 
   const clearTimers = () => {
     window.clearTimeout(closeTimerRef.current)
@@ -102,6 +113,7 @@ export function SearchTransitionHost({ onNavigate }) {
     closeTimerRef.current = window.setTimeout(() => {
       setActive(false)
       setDestinationQuery('')
+      setAddressMode(false)
     }, CLOSE_MS)
   }
 
@@ -120,6 +132,7 @@ export function SearchTransitionHost({ onNavigate }) {
       setState(createSearchState())
       setRecentSearches(readRecents())
       setDestinationQuery('')
+      setAddressMode(false)
       setStep('destination')
       setComplete(false)
       setReady(false)
@@ -208,8 +221,22 @@ export function SearchTransitionHost({ onNavigate }) {
 
   const chooseDestination = (destination) => {
     clearTimers()
+    setAddressMode(false)
     setState((current) => ({ ...current, destination }))
     stepTimerRef.current = window.setTimeout(() => setStep('dates'), 220)
+  }
+
+  const chooseAddressSuggestion = (address) => {
+    const destination = destinationById(address.destinationId)
+    if (!destination) return
+    clearTimers()
+    setState((current) => ({
+      ...current,
+      destination: { ...destination, label: address.label, subtitle: address.subtitle, viewport: address.viewport },
+    }))
+    setDestinationQuery(`${address.label}, ${address.subtitle}`)
+    setAddressMode(false)
+    stepTimerRef.current = window.setTimeout(() => setStep('dates'), 180)
   }
 
   const applyRecent = (recent) => {
@@ -224,6 +251,7 @@ export function SearchTransitionHost({ onNavigate }) {
       infants: Math.max(0, Number(recent.infants) || 0),
       pets: Math.max(0, Number(recent.pets) || 0),
     })
+    setAddressMode(false)
     setStep(recent.checkin && recent.checkout ? 'guests' : 'dates')
   }
 
@@ -257,12 +285,14 @@ export function SearchTransitionHost({ onNavigate }) {
       setActive(false)
       setComplete(false)
       setDestinationQuery('')
+      setAddressMode(false)
     }, COMPLETE_MS)
   }
 
   if (!active) return null
 
-  const panelHeight = Math.min(570, Math.max(455, Math.round(lockedViewportHeight * 0.64)))
+  const fallbackPanelHeight = Math.min(570, Math.max(455, Math.round(lockedViewportHeight * 0.64)))
+  const panelHeight = fittedPanelHeight || fallbackPanelHeight
   const rootStyle = {
     '--st-origin-top': `${origin.top}px`,
     '--st-origin-left': `${origin.left}px`,
@@ -275,7 +305,7 @@ export function SearchTransitionHost({ onNavigate }) {
   const stepIndex = step === 'destination' ? 1 : step === 'dates' ? 2 : 3
 
   return createPortal(
-    <div className={rootClass} style={rootStyle} data-testid="search-transition" data-step={step} data-ready={ready ? 'true' : 'false'}>
+    <div className={rootClass} style={rootStyle} data-testid="search-transition" data-step={step} data-ready={ready ? 'true' : 'false'} data-address-mode={addressMode ? 'true' : 'false'}>
       <div className="movera-st__map-stage" aria-hidden="true">
         <MapContainer key={state.destination?.id || 'search-overview'} initialViewport={selectedViewport} />
       </div>
@@ -286,13 +316,19 @@ export function SearchTransitionHost({ onNavigate }) {
         <div className="movera-st__persistent-copy">
           <input
             value={destinationQuery}
-            onFocus={() => setStep('destination')}
+            onFocus={() => {
+              setAddressMode(true)
+              setStep('destination')
+            }}
             onChange={(event) => {
               setDestinationQuery(event.target.value)
+              setAddressMode(true)
               setStep('destination')
             }}
             placeholder="Explorez autrement"
             aria-label="Destination ou adresse"
+            aria-expanded={addressMode}
+            aria-controls="movera-address-suggestions"
             autoComplete="off"
           />
           <span className="movera-st__persistent-meta">Destination · Dates · Voyageurs</span>
@@ -305,7 +341,7 @@ export function SearchTransitionHost({ onNavigate }) {
 
       <section className="movera-st__panel" role="dialog" aria-modal="true" aria-label="Recherche Movera">
         <div className="movera-st__shine" aria-hidden="true" />
-        <div className="movera-st__content">
+        <div className="movera-st__content" ref={contentRef}>
           <div className="movera-st__topline">
             <span className="movera-st__brandmark" aria-hidden="true"><span /></span>
             <div className="movera-st__brandcopy"><strong>Movera</strong><span>Votre séjour, simplement</span></div>
@@ -313,50 +349,75 @@ export function SearchTransitionHost({ onNavigate }) {
             <button type="button" className="movera-st__close" onClick={closeTransition} aria-label="Fermer">×</button>
           </div>
 
-          <div className="movera-st__steps" aria-label="Étapes de recherche">
-            <button type="button" className="movera-st__step" data-active={step === 'destination'} data-complete={Boolean(state.destination)} onClick={() => setStep('destination')}><span>1</span>Destination</button>
-            <button type="button" className="movera-st__step" data-active={step === 'dates'} data-complete={datesValid} disabled={!state.destination} onClick={() => state.destination && setStep('dates')}><span>2</span>Dates</button>
-            <button type="button" className="movera-st__step" data-active={step === 'guests'} disabled={!datesValid} onClick={() => datesValid && setStep('guests')}><span>3</span>Voyageurs</button>
-          </div>
+          {addressMode ? (
+            <div className="movera-st__address-mode" id="movera-address-suggestions">
+              <span className="movera-st__address-label">{destinationQuery.trim() ? 'Adresses suggérées' : 'Adresses populaires'}</span>
+              {filteredAddressSuggestions.length ? (
+                <div className="movera-st__address-suggestions">
+                  {filteredAddressSuggestions.map((address) => (
+                    <button
+                      key={address.id}
+                      type="button"
+                      className="movera-st__address-suggestion"
+                      onPointerDown={(event) => event.preventDefault()}
+                      onClick={() => chooseAddressSuggestion(address)}
+                    >
+                      <span className="movera-st__address-pin"><PinIcon /></span>
+                      <span className="movera-st__address-copy"><strong>{address.label}</strong><small>{address.subtitle}</small></span>
+                      <span className="movera-st__address-arrow" aria-hidden="true">›</span>
+                    </button>
+                  ))}
+                </div>
+              ) : <div className="movera-st__address-empty">Aucune adresse correspondante</div>}
+            </div>
+          ) : (
+            <>
+              <div className="movera-st__steps" aria-label="Étapes de recherche">
+                <button type="button" className="movera-st__step" data-active={step === 'destination'} data-complete={Boolean(state.destination)} onClick={() => setStep('destination')}><span>1</span>Destination</button>
+                <button type="button" className="movera-st__step" data-active={step === 'dates'} data-complete={datesValid} disabled={!state.destination} onClick={() => state.destination && setStep('dates')}><span>2</span>Dates</button>
+                <button type="button" className="movera-st__step" data-active={step === 'guests'} disabled={!datesValid} onClick={() => datesValid && setStep('guests')}><span>3</span>Voyageurs</button>
+              </div>
 
-          <div className="movera-st__body">
-            <SearchStepMotion step={step}>
-            {step === 'destination' ? (
-              <div className="movera-st__screen movera-st__screen--destination" data-testid="search-step-destination">
-                <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Où allez-vous ?</h2><p className="movera-st__sub">Trouvez votre prochaine adresse Movera.</p></div><PinIcon /></div>
-                {!destinationQuery ? (
-                  <div className="movera-st__recent-block">
-                    <span className="movera-st__section-label">Recherches récentes</span>
-                    {recentSearches.length ? <div className="movera-st__recents">{recentSearches.slice(0, 1).map((recent) => <button type="button" key={`${recent.destinationId}-${recent.checkin}`} className="movera-st__recent" onClick={() => applyRecent(recent)}><span className="movera-st__recent-pin"><PinIcon /></span><span><strong>{recent.label}</strong><small>{recent.checkin && recent.checkout ? `${formatDate(recent.checkin)} – ${formatDate(recent.checkout)} · ${Math.max(1, Number(recent.adults) || 1) + Math.max(0, Number(recent.children) || 0)} voyageur(s)` : 'Recherche précédente'}</small></span><b>›</b></button>)}</div> : <div className="movera-st__recent-empty">Aucune recherche récente pour le moment</div>}
+              <div className="movera-st__body">
+                <SearchStepMotion step={step}>
+                {step === 'destination' ? (
+                  <div className="movera-st__screen movera-st__screen--destination" data-testid="search-step-destination">
+                    <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Où allez-vous ?</h2><p className="movera-st__sub">Trouvez votre prochaine adresse Movera.</p></div><PinIcon /></div>
+                    {!destinationQuery ? (
+                      <div className="movera-st__recent-block">
+                        <span className="movera-st__section-label">Recherches récentes</span>
+                        {recentSearches.length ? <div className="movera-st__recents">{recentSearches.slice(0, 1).map((recent) => <button type="button" key={`${recent.destinationId}-${recent.checkin}`} className="movera-st__recent" onClick={() => applyRecent(recent)}><span className="movera-st__recent-pin"><PinIcon /></span><span><strong>{recent.label}</strong><small>{recent.checkin && recent.checkout ? `${formatDate(recent.checkin)} – ${formatDate(recent.checkout)} · ${Math.max(1, Number(recent.adults) || 1) + Math.max(0, Number(recent.children) || 0)} voyageur(s)` : 'Recherche précédente'}</small></span><b>›</b></button>)}</div> : <div className="movera-st__recent-empty">Aucune recherche récente pour le moment</div>}
+                      </div>
+                    ) : null}
+                    <span className="movera-st__section-label movera-st__section-label--suggestions">Destinations suggérées</span>
+                    <div className="movera-st__destinations">
+                      {filteredDestinations.map((destination) => <button key={destination.id} type="button" className="movera-st__destination" data-destination={destination.id} onClick={() => chooseDestination(destination)}><span className="movera-st__destination-pin"><PinIcon /></span><span className="movera-st__destination-copy"><strong>{destination.label}</strong><small>{destination.subtitle}</small></span><span className="movera-st__chevron" aria-hidden="true">›</span></button>)}
+                      {filteredDestinations.length === 0 ? <div className="movera-st__empty">Aucune destination trouvée</div> : null}
+                    </div>
                   </div>
                 ) : null}
-                <span className="movera-st__section-label movera-st__section-label--suggestions">Destinations suggérées</span>
-                <div className="movera-st__destinations">
-                  {filteredDestinations.map((destination) => <button key={destination.id} type="button" className="movera-st__destination" data-destination={destination.id} onClick={() => chooseDestination(destination)}><span className="movera-st__destination-pin"><PinIcon /></span><span className="movera-st__destination-copy"><strong>{destination.label}</strong><small>{destination.subtitle}</small></span><span className="movera-st__chevron" aria-hidden="true">›</span></button>)}
-                  {filteredDestinations.length === 0 ? <div className="movera-st__empty">Aucune destination trouvée</div> : null}
-                </div>
-              </div>
-            ) : null}
 
-            {step === 'dates' ? (
-              <div className="movera-st__screen movera-st__screen--dates" data-testid="search-step-dates">
-                <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Choisissez vos dates</h2><p className="movera-st__sub">{state.destination?.label} · sélectionnez l’arrivée puis le départ.</p></div><CalendarIcon /></div>
-                <SearchCalendar checkin={state.checkin} checkout={state.checkout} minDate={minDate} onChange={({ checkin, checkout }) => setState((current) => ({ ...current, checkin, checkout }))} />
-                <div className="movera-st__tripline"><span>{state.destination?.label}</span><i /><strong>{formatDate(state.checkin)} → {formatDate(state.checkout)}</strong></div>
-                <button type="button" className="movera-st__action" disabled={!datesValid} onClick={() => setStep('guests')}>Continuer vers les voyageurs <span>›</span></button>
-              </div>
-            ) : null}
+                {step === 'dates' ? (
+                  <div className="movera-st__screen movera-st__screen--dates" data-testid="search-step-dates">
+                    <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Choisissez vos dates</h2><p className="movera-st__sub">{state.destination?.label} · sélectionnez l’arrivée puis le départ.</p></div><CalendarIcon /></div>
+                    <SearchCalendar checkin={state.checkin} checkout={state.checkout} minDate={minDate} onChange={({ checkin, checkout }) => setState((current) => ({ ...current, checkin, checkout }))} />
+                    <div className="movera-st__tripline"><span>{state.destination?.label}</span><i /><strong>{formatDate(state.checkin)} → {formatDate(state.checkout)}</strong></div>
+                    <button type="button" className="movera-st__action" disabled={!datesValid} onClick={() => setStep('guests')}>Continuer vers les voyageurs <span>›</span></button>
+                  </div>
+                ) : null}
 
-            {step === 'guests' ? (
-              <div className="movera-st__screen movera-st__screen--guests" data-testid="search-step-guests">
-                <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Qui voyage ?</h2><p className="movera-st__sub">Ajoutez les voyageurs et vos animaux.</p></div><span className="movera-st__people" aria-hidden="true">••</span></div>
-                <GuestSelector state={state} onChange={setState} />
-                <div className="movera-st__tripline"><span>{state.destination?.label}</span><i /><strong>{formatDate(state.checkin)} → {formatDate(state.checkout)}</strong><i /><span>{guestSummary(state)}</span></div>
-                <button type="button" className="movera-st__action movera-st__action--search" onClick={submitSearch}><SearchIcon /><span>Rechercher sur la carte</span></button>
+                {step === 'guests' ? (
+                  <div className="movera-st__screen movera-st__screen--guests" data-testid="search-step-guests">
+                    <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Qui voyage ?</h2><p className="movera-st__sub">Ajoutez les voyageurs et vos animaux.</p></div><span className="movera-st__people" aria-hidden="true">••</span></div>
+                    <GuestSelector state={state} onChange={setState} />
+                    <div className="movera-st__tripline"><span>{state.destination?.label}</span><i /><strong>{formatDate(state.checkin)} → {formatDate(state.checkout)}</strong><i /><span>{guestSummary(state)}</span></div>
+                    <button type="button" className="movera-st__action movera-st__action--search" onClick={submitSearch}><SearchIcon /><span>Rechercher sur la carte</span></button>
+                  </div>
+                ) : null}
+                </SearchStepMotion>
               </div>
-            ) : null}
-            </SearchStepMotion>
-          </div>
+            </>
+          )}
         </div>
       </section>
     </div>,
