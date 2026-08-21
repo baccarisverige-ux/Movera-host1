@@ -47,10 +47,18 @@
   margin-top:10px!important;
 }
 
-/* Final handoff to /map: the Home page is still mounted for COMPLETE_MS (560 ms).
-   Hide only its search trigger during that short handoff so it cannot flash above
-   the transition map. This does not target the Map page search UI. */
-body:has(> .movera-st--complete) [data-testid="page-home"] .b225-search{
+/* Explicit Home -> Map handoff guard. The attribute lives independently from
+   the Search portal, so Safari cannot reveal the Home bar between route frames. */
+body[data-movera-map-handoff="true"] [data-testid="page-home"] .b225-search{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transition:none!important;
+}
+
+/* The popup owns a visually identical persistent bar. Hide it as soon as the
+   final handoff begins so neither Home-style bar can flash before MapPage paints. */
+.movera-st--complete .movera-st__persistent-search{
   opacity:0!important;
   visibility:hidden!important;
   pointer-events:none!important;
