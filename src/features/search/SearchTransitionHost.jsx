@@ -5,13 +5,16 @@ import { MapContainer } from '../map-engine/MapContainer.jsx'
 import { GuestSelector } from './GuestSelector.jsx'
 import { SearchCalendar } from './SearchCalendar.jsx'
 import { SearchStepMotion } from './SearchStepMotion.jsx'
-import { SEARCH_ADDRESS_SUGGESTIONS, SEARCH_DESTINATIONS } from './searchData.js'
+import { SEARCH_DESTINATIONS } from './searchData.js'
 import { buildMapSearchPath, createSearchState, isDateRangeValid, totalTravellers } from './searchState.js'
+import { useAddressAutocomplete } from './useAddressAutocomplete.js'
 import { useSearchPanelFit } from './useSearchPanelFit.js'
+import { useSearchPanelHeightMotion } from './useSearchPanelHeightMotion.js'
 import './searchTransition.css'
 import './searchTransition-stability.css'
 import './searchStepFit.css'
 import './searchAddressMode.css'
+import './searchExactFit.css'
 
 const OPEN_MS = 980
 const CLOSE_MS = 950
@@ -89,14 +92,16 @@ export function SearchTransitionHost({ onNavigate }) {
       : SEARCH_DESTINATIONS
     return matches.slice(0, 4)
   }, [destinationQuery])
-  const filteredAddressSuggestions = useMemo(() => {
-    const query = destinationQuery.trim().toLocaleLowerCase('fr')
-    const matches = query
-      ? SEARCH_ADDRESS_SUGGESTIONS.filter((address) => `${address.label} ${address.subtitle}`.toLocaleLowerCase('fr').includes(query))
-      : SEARCH_ADDRESS_SUGGESTIONS
-    return matches.slice(0, 4)
-  }, [destinationQuery])
+  const { suggestions: addressSuggestions, loading: addressLoading } = useAddressAutocomplete(destinationQuery, addressMode)
   const { contentRef, panelHeight: fittedPanelHeight } = useSearchPanelFit({ active, step, addressMode, lockedViewportHeight })
+  const fallbackPanelHeight = Math.min(570, Math.max(455, Math.round(lockedViewportHeight * 0.64)))
+  const animatedPanelHeight = useSearchPanelHeightMotion({
+    active,
+    open,
+    ready,
+    targetHeight: fittedPanelHeight,
+    fallbackHeight: fallbackPanelHeight,
+  })
 
   const clearTimers = () => {
     window.clearTimeout(closeTimerRef.current)
@@ -291,21 +296,21 @@ export function SearchTransitionHost({ onNavigate }) {
 
   if (!active) return null
 
-  const fallbackPanelHeight = Math.min(570, Math.max(455, Math.round(lockedViewportHeight * 0.64)))
-  const panelHeight = fittedPanelHeight || fallbackPanelHeight
+  const panelHeight = animatedPanelHeight
   const rootStyle = {
     '--st-origin-top': `${origin.top}px`,
     '--st-origin-left': `${origin.left}px`,
     '--st-origin-width': `${origin.width}px`,
     '--st-origin-height': `${origin.height}px`,
     '--st-locked-vh': `${lockedViewportHeight}px`,
+    '--st-runtime-panel-height': `${panelHeight}px`,
     '--st-panel-height': `${panelHeight}px`,
   }
   const rootClass = ['movera-st', open ? 'movera-st--open' : '', ready ? 'movera-st--ready' : '', complete ? 'movera-st--complete' : ''].filter(Boolean).join(' ')
   const stepIndex = step === 'destination' ? 1 : step === 'dates' ? 2 : 3
 
   return createPortal(
-    <div className={rootClass} style={rootStyle} data-testid="search-transition" data-step={step} data-ready={ready ? 'true' : 'false'} data-address-mode={addressMode ? 'true' : 'false'}>
+    <div className={rootClass} style={rootStyle} data-testid="search-transition" data-step={step} data-ready={ready ? 'true' : 'false'} data-address-mode={addressMode ? 'true' : 'false'} data-exact-fit="true">
       <div className="movera-st__map-stage" aria-hidden="true">
         <MapContainer key={state.destination?.id || 'search-overview'} initialViewport={selectedViewport} />
       </div>
@@ -350,11 +355,12 @@ export function SearchTransitionHost({ onNavigate }) {
           </div>
 
           {addressMode ? (
-            <div className="movera-st__address-mode" id="movera-address-suggestions">
+            <div className="movera-st__address-mode" id="movera-address-suggestions" aria-busy={addressLoading ? 'true' : 'false'}>
               <span className="movera-st__address-label">{destinationQuery.trim() ? 'Adresses suggérées' : 'Adresses populaires'}</span>
-              {filteredAddressSuggestions.length ? (
+              {addressLoading ? <div className="movera-st__address-loading" role="status">Recherche d’adresses…</div> : null}
+              {addressSuggestions.length ? (
                 <div className="movera-st__address-suggestions">
-                  {filteredAddressSuggestions.map((address) => (
+                  {addressSuggestions.map((address) => (
                     <button
                       key={address.id}
                       type="button"
