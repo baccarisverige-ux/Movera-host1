@@ -1,5 +1,3 @@
-# Trigger file for the already-installed cleanup workflow. Removed by the cleanup itself.
-# Existing workflow retriggered after creation so GitHub Actions executes it.
 name: Remove Home floating map CTA
 
 on:
@@ -32,12 +30,7 @@ jobs:
 
           home = Path('src/features/home/HomePage.jsx')
           s = home.read_text()
-          s, n = re.subn(
-              r'\n\s*<button className="b225-map-cta" data-testid="home-map-cta" type="button" onClick=\{\(\)=>onNavigate\(\'/map\'\)\}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>Explorer la carte</button>',
-              '',
-              s,
-              count=1,
-          )
+          s, n = re.subn(r'\n\s*<button className="b225-map-cta"[^\n]*?</button>', '', s, count=1)
           if n != 1:
               raise SystemExit(f'Home CTA markup removal count={n}')
           home.write_text(s)
@@ -52,19 +45,17 @@ jobs:
               raise SystemExit(f'Home bottom padding adjustment count={n}')
           css.write_text(s)
           PY
-
           ! grep -R "b225-map-cta\|home-map-cta" src
 
       - run: npm ci
       - run: npm run lint
       - run: npm run build
 
-      - name: Commit validated removal
+      - name: Commit validated source removal
         run: |
-          rm .github/workflows/remove-home-map-cta.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/features/home/HomePage.jsx src/styles/home-b225.css .github/workflows/remove-home-map-cta.yml
+          git add src/features/home/HomePage.jsx src/styles/home-b225.css
           git commit -m "fix(home): remove floating map CTA"
           git pull --rebase origin b225-ui-home
           git push origin HEAD:b225-ui-home
