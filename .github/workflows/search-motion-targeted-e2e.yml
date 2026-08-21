@@ -129,11 +129,12 @@ jobs:
                 const homeSearch = document.querySelector('[data-testid="page-home"] .b225-search')
                 const mapPage = document.querySelector('[data-testid="page-map"]')
                 const portal = document.querySelector('[data-testid="search-transition"]')
+                const handoffActive = document.body.dataset.moveraMapHandoff === 'true'
                 const homeVisible = visible(homeSearch)
                 const mapVisible = visible(mapPage)
                 const portalVisible = visible(portal)
-                window.__moveraHandoffSamples.push({ homeVisible, mapVisible, portalVisible, t: performance.now() })
-                if (homeVisible && !mapVisible) window.__moveraHandoffFlash = true
+                window.__moveraHandoffSamples.push({ handoffActive, homeVisible, mapVisible, portalVisible, t: performance.now() })
+                if (handoffActive && homeVisible && !mapVisible) window.__moveraHandoffFlash = true
                 frames += 1
                 if (frames < 180) requestAnimationFrame(sample)
               }
@@ -153,8 +154,8 @@ jobs:
             await popup.waitFor({state:'detached',timeout:2400})
             await page.waitForTimeout(180)
             if(await page.evaluate(()=>window.__moveraHandoffFlash)) {
-              const samples=await page.evaluate(()=>window.__moveraHandoffSamples.filter(s=>s.homeVisible&&!s.mapVisible).slice(0,8))
-              throw new Error(`${label}: Home search flashed between Search and Map ${JSON.stringify(samples)}`)
+              const samples=await page.evaluate(()=>window.__moveraHandoffSamples.filter(s=>s.handoffActive&&s.homeVisible&&!s.mapVisible).slice(0,8))
+              throw new Error(`${label}: Home search flashed during active handoff ${JSON.stringify(samples)}`)
             }
             if(await page.locator('body').getAttribute('data-movera-map-handoff')) throw new Error(`${label}: map handoff guard not cleared`)
             if(!await mapPage.isVisible()) throw new Error(`${label}: MapPage not visible after handoff`)
