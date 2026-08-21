@@ -37,9 +37,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Add SPA route fallback
+        run: cp dist/index.html dist/404.html
+
       - name: Verify compiled output
         run: |
           test -f dist/index.html
+          test -f dist/404.html
           test -d dist/assets
           grep -q '/Movera-host1/assets/' dist/index.html
 
