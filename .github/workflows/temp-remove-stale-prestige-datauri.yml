@@ -26,7 +26,6 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
           p = Path('src/styles/home-b225-block3.css')
           s = p.read_text()
           marker = '.b225-categories button:nth-child(5)>span{'
@@ -39,27 +38,50 @@ jobs:
           block = s[start:end + 1]
           if 'data:image/png;base64' not in block:
               raise SystemExit('Prestige legacy span rule does not contain expected inline PNG')
-          replacement = '.b225-categories button:nth-child(5)>span{background:transparent}'
-          p.write_text(s[:start] + replacement + s[end + 1:])
-          Path('.github/workflows/temp-remove-stale-prestige-datauri.yml').unlink()
+          p.write_text(s[:start] + '.b225-categories button:nth-child(5)>span{background:transparent}' + s[end + 1:])
           PY
 
-      - name: Verify quality gates
+      - name: Run quality gates and capture result
+        id: quality
+        shell: bash
         run: |
-          npm ci
-          npm run lint
-          npm run build
-          test -f dist/index.html
+          set +e
+          npm ci > /tmp/quality.log 2>&1
+          CI_RC=$?
+          if [ $CI_RC -eq 0 ]; then npm run lint >> /tmp/quality.log 2>&1; LINT_RC=$?; else LINT_RC=1; fi
+          if [ $CI_RC -eq 0 ] && [ $LINT_RC -eq 0 ]; then npm run build >> /tmp/quality.log 2>&1; BUILD_RC=$?; else BUILD_RC=1; fi
+          if [ $CI_RC -eq 0 ] && [ $LINT_RC -eq 0 ] && [ $BUILD_RC -eq 0 ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            tail -n 120 /tmp/quality.log > /tmp/quality-tail.txt
+          fi
+          exit 0
+
+      - name: Commit verified repair
+        if: steps.quality.outputs.ok == 'true'
+        run: |
           ! grep -q "data:image/png;base64" src/styles/home-b225-block3.css
           ! grep -q "styles/map-b225.css" src/features/home/HomePage.jsx
           grep -q "styles/map-b225.css" src/features/map/MapPage.jsx
           grep -q "b225-home-map-search" src/features/home/HomePage.jsx
-
-      - name: Commit verified repair
-        run: |
+          rm .github/workflows/temp-remove-stale-prestige-datauri.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/styles/home-b225-block3.css .github/workflows/temp-remove-stale-prestige-datauri.yml
           git commit -m "fix(home): remove stale malformed Prestige data URI"
+          git pull --rebase origin b225-ui-home
+          git push origin HEAD:b225-ui-home
+
+      - name: Publish diagnostic only on failure
+        if: steps.quality.outputs.ok != 'true'
+        run: |
+          git checkout -- src/styles/home-b225-block3.css
+          mkdir -p docs/ci
+          cp /tmp/quality-tail.txt docs/ci/css-repair-diagnostic.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/ci/css-repair-diagnostic.txt
+          git commit -m "ci: capture CSS repair build diagnostic [skip ci]" || exit 0
           git pull --rebase origin b225-ui-home
           git push origin HEAD:b225-ui-home
