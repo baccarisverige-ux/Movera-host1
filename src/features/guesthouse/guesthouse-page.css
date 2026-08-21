@@ -1,0 +1,18 @@
+.guesthouse-page .beach-hero{padding-top:12px;background:#fff}
+.guesthouse-page .guesthouse-hero__image{
+  width:min(76%,320px);
+  height:auto;
+  max-height:360px;
+  margin:0 auto;
+  display:block;
+  object-fit:contain;
+  object-position:center top;
+  background:#fff;
+  image-rendering:auto;
+}
+.guesthouse-page .beach-hero__copy{padding-top:9px}
+.guesthouse-page .beach-city-chips button[data-active=true]{border-color:#495663;background:#495663}
+.guesthouse-page .beach-offer__badge{color:#3f4c58}
+@media(max-width:380px){
+  .guesthouse-page .guesthouse-hero__image{width:72%;max-height:315px}
+}
