@@ -13,12 +13,9 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: movera-quality-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   remove-home-map-cta:
+    if: github.event_name == 'push' && github.event.head_commit.message == 'ci(home): execute floating CTA cleanup v2'
     name: Remove obsolete Home map CTA
     runs-on: ubuntu-latest
     timeout-minutes: 10
