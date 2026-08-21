@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import '../../styles/map-b225.css'
 import { INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
+import { announceMapReady } from '../search/mapHandoff.js'
 import { DESTINATION_VIEWPORTS } from './constants/map.constants.js'
 
 function SearchIcon() {
@@ -11,6 +13,18 @@ export function MapPage({ onNavigate }) {
   const requestedDestination = searchParams.get('destination')
   const destinationViewport = requestedDestination ? DESTINATION_VIEWPORTS[requestedDestination] || null : null
   const initialViewport = destinationViewport || INITIAL_VIEWPORT
+
+  useEffect(() => {
+    let firstFrame = 0
+    let paintedFrame = 0
+    firstFrame = window.requestAnimationFrame(() => {
+      paintedFrame = window.requestAnimationFrame(() => announceMapReady())
+    })
+    return () => {
+      window.cancelAnimationFrame(firstFrame)
+      window.cancelAnimationFrame(paintedFrame)
+    }
+  }, [])
 
   return (
     <section className="b225-map-page" data-testid="page-map" data-destination={requestedDestination || ''}>
