@@ -47,6 +47,16 @@
   margin-top:10px!important;
 }
 
+/* Final handoff to /map: the Home page is still mounted for COMPLETE_MS (560 ms).
+   Hide only its search trigger during that short handoff so it cannot flash above
+   the transition map. This does not target the Map page search UI. */
+body:has(> .movera-st--complete) [data-testid="page-home"] .b225-search{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transition:none!important;
+}
+
 .movera-st__address-loading{
   margin:0 0 7px 3px;
   color:#7e8781;
