@@ -1,60 +1,98 @@
-name: Home CTA Source Cleanup Runner
+name: Movera Quality Gate
 
 on:
   push:
     branches: [b225-ui-home]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  pull_request:
+    branches: [b225-ui-home]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: movera-quality-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  cleanup:
-    if: github.event.head_commit.message == 'ci(home): quality source cleanup'
+  fast-quality:
+    name: Architecture · Lint · Unit · Build · Bundle · Cleanup
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Remove floating Home map CTA source
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          home = Path('src/features/home/HomePage.jsx')
-          s = home.read_text()
-          s, n = re.subn(r'\n\s*<button className="b225-map-cta"[^\n]*?</button>', '', s, count=1)
-          if n != 1:
-              raise SystemExit(f'Home CTA markup removal count={n}')
-          home.write_text(s)
-
-          css = Path('src/styles/home-b225.css')
-          s = css.read_text()
-          s, n = re.subn(r'\.b225-map-cta\{[^}]*\}\.b225-map-cta svg\{[^}]*\}', '', s, count=1)
-          if n != 1:
-              raise SystemExit(f'CTA CSS removal count={n}')
-          s, n = re.subn(r'(\.b225-home\{[^}]*?padding:)0 0 118px', r'\g<1>0 0 84px', s, count=1)
-          if n != 1:
-              raise SystemExit(f'Home bottom padding adjustment count={n}')
-          css.write_text(s)
-          PY
-          ! grep -R "b225-map-cta\|home-map-cta" src
-
       - run: npm ci
+      - name: Install unit test runner
+        run: npm install --no-save --package-lock=false vitest@3.2.4
+      - name: Architecture contract
+        run: npm run quality:architecture
       - run: npm run lint
+      - name: Unit tests
+        run: npx vitest run tests/unit
       - run: npm run build
+      - name: Bundle budget
+        run: npm run quality:bundle
+      - name: Legacy cleanup audit
+        run: node scripts/audit-live-cleanup.mjs
 
-      - name: Commit validated source cleanup
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/features/home/HomePage.jsx src/styles/home-b225.css
-          git commit -m "fix(home): remove floating map CTA"
-          git pull --rebase origin b225-ui-home
-          git push origin HEAD:b225-ui-home
+  browser-quality:
+    name: Responsive · Mobile · E2E · A11y · Visual capture
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install browser quality tools
+        run: npm install --no-save --package-lock=false @playwright/test@1.55.0 @axe-core/playwright@4.10.2
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: E2E, responsive baseline and accessibility
+        run: npx playwright test tests/e2e tests/accessibility --project=mobile-chromium --project=desktop-chromium
+      - name: Capture visual references
+        run: npx playwright test tests/visual --project=mobile-chromium
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 14
+
+  lighthouse:
+    name: Lighthouse budgets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install Lighthouse CI
+        run: npm install --no-save --package-lock=false @lhci/cli@0.15.1
+      - name: Run performance budgets
+        run: npx lhci autorun --config=./lighthouserc.cjs
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: lhci-report
+          if-no-files-found: ignore
+          retention-days: 14
