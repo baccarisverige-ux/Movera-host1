@@ -1,0 +1,63 @@
+name: One-shot Home CTA cleanup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/temp-home-cta-cleanup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-live-branch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: b225-ui-home
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Remove obsolete Home floating map CTA
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          home = Path('src/features/home/HomePage.jsx')
+          source = home.read_text()
+          source, count = re.subn(r'\n\s*<button className="b225-map-cta"[^\n]*?</button>', '', source, count=1)
+          if count != 1:
+              raise SystemExit(f'Expected one Home CTA, removed {count}')
+          home.write_text(source)
+
+          css = Path('src/styles/home-b225.css')
+          styles = css.read_text()
+          styles, count = re.subn(r'\.b225-map-cta\{[^}]*\}\.b225-map-cta svg\{[^}]*\}', '', styles, count=1)
+          if count != 1:
+              raise SystemExit(f'Expected one CTA CSS block, removed {count}')
+          styles, count = re.subn(r'(\.b225-home\{[^}]*?padding:)0 0 118px', r'\g<1>0 0 84px', styles, count=1)
+          if count != 1:
+              raise SystemExit(f'Expected CTA bottom-space rule, changed {count}')
+          css.write_text(styles)
+          PY
+
+          ! grep -R "b225-map-cta\|home-map-cta" src
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+      - name: Commit validated source cleanup to live branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/features/home/HomePage.jsx src/styles/home-b225.css
+          git commit -m "fix(home): remove floating map CTA and dedicated code"
+          git pull --rebase origin b225-ui-home
+          git push origin HEAD:b225-ui-home
