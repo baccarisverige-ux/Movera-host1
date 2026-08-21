@@ -115,25 +115,58 @@ jobs:
             const guestsGap=(guestsPanel.y+guestsPanel.height)-(finalBox.y+finalBox.height)
             if(guestsGap>34) throw new Error(`${label}: guests excess bottom gap ${guestsGap}`)
 
+            await page.evaluate(() => {
+              window.__moveraHandoffFlash = false
+              window.__moveraHandoffSamples = []
+              let frames = 0
+              const visible = (element) => {
+                if (!element) return false
+                const style = getComputedStyle(element)
+                const rect = element.getBoundingClientRect()
+                return style.visibility !== 'hidden' && Number(style.opacity) > 0.01 && style.display !== 'none' && rect.width > 0 && rect.height > 0
+              }
+              const sample = () => {
+                const homeSearch = document.querySelector('[data-testid="page-home"] .b225-search')
+                const mapPage = document.querySelector('[data-testid="page-map"]')
+                const portal = document.querySelector('[data-testid="search-transition"]')
+                const homeVisible = visible(homeSearch)
+                const mapVisible = visible(mapPage)
+                const portalVisible = visible(portal)
+                window.__moveraHandoffSamples.push({ homeVisible, mapVisible, portalVisible, t: performance.now() })
+                if (homeVisible && !mapVisible) window.__moveraHandoffFlash = true
+                frames += 1
+                if (frames < 180) requestAnimationFrame(sample)
+              }
+              requestAnimationFrame(sample)
+            })
+
             const homeSearch=page.getByTestId('page-home').locator('.b225-search').first()
             await finalButton.click()
             await page.waitForTimeout(80)
-            if(await popup.getAttribute('class').then(value=>!String(value).includes('movera-st--complete'))) throw new Error(`${label}: complete handoff state missing`)
-            const earlyHomeStyle=await homeSearch.evaluate(el=>({visibility:getComputedStyle(el).visibility,opacity:Number(getComputedStyle(el).opacity)}))
-            if(earlyHomeStyle.visibility!=='hidden' || earlyHomeStyle.opacity>0.01) throw new Error(`${label}: Home search flashed at handoff start`)
-            await page.waitForTimeout(300)
-            const lateHomeStyle=await homeSearch.evaluate(el=>({visibility:getComputedStyle(el).visibility,opacity:Number(getComputedStyle(el).opacity)}))
-            if(lateHomeStyle.visibility!=='hidden' || lateHomeStyle.opacity>0.01) throw new Error(`${label}: Home search flashed before map navigation`)
+            if(await page.locator('body').getAttribute('data-movera-map-handoff')!=='true') throw new Error(`${label}: explicit map handoff did not start`)
+            if(await homeSearch.isVisible()) throw new Error(`${label}: Home search visible at handoff start`)
+            if(await page.locator('.movera-st__persistent-search').isVisible()) throw new Error(`${label}: popup persistent search visible during complete state`)
+
             await page.waitForURL(/\/map(?:\?|$)/,{timeout:1800})
-            await popup.waitFor({state:'detached',timeout:1200})
-            if(await homeSearch.isVisible()) throw new Error(`${label}: Home search visible after map navigation`)
+            const mapPage=page.getByTestId('page-map')
+            await mapPage.waitFor({state:'visible',timeout:2400})
+            await popup.waitFor({state:'detached',timeout:2400})
+            await page.waitForTimeout(180)
+            if(await page.evaluate(()=>window.__moveraHandoffFlash)) {
+              const samples=await page.evaluate(()=>window.__moveraHandoffSamples.filter(s=>s.homeVisible&&!s.mapVisible).slice(0,8))
+              throw new Error(`${label}: Home search flashed between Search and Map ${JSON.stringify(samples)}`)
+            }
+            if(await page.locator('body').getAttribute('data-movera-map-handoff')) throw new Error(`${label}: map handoff guard not cleared`)
+            if(!await mapPage.isVisible()) throw new Error(`${label}: MapPage not visible after handoff`)
+            if(!await page.locator('.b225-map-search').isVisible()) throw new Error(`${label}: Map search missing after handoff`)
+            if(await homeSearch.isVisible()) throw new Error(`${label}: Home search visible after map handoff`)
             if(runtimeErrors.length) throw new Error(`${label}: runtime errors: ${runtimeErrors.join('; ')}`)
             await browser.close()
           }
 
           await run('Desktop',{viewport:{width:390,height:844}})
           await run('iPhone',{viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'})
-          console.log('PASS: Search exact fit + no Home search flash desktop + iPhone')
+          console.log('PASS: frame-by-frame Home -> Map handoff desktop + iPhone')
           EOF
           node search-motion-targeted.mjs
       - name: Stop preview
