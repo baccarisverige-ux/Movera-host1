@@ -279,6 +279,28 @@ export function SearchTransitionHost({ onNavigate }) {
       </div>
       <div className="movera-st__map-veil" aria-hidden="true" />
 
+      <div className="movera-st__persistent-search movera-st__destination-search" role="search" aria-label="Rechercher une destination">
+        <SearchIcon />
+        <div className="movera-st__persistent-copy">
+          <input
+            value={destinationQuery}
+            onFocus={() => setStep('destination')}
+            onChange={(event) => {
+              setDestinationQuery(event.target.value)
+              setStep('destination')
+            }}
+            placeholder="Explorez autrement"
+            aria-label="Destination ou adresse"
+            autoComplete="off"
+          />
+          <span className="movera-st__persistent-meta">Destination · Dates · Voyageurs</span>
+        </div>
+        <button type="button" className="movera-st__persistent-toggle" onClick={closeTransition} aria-label="Fermer">
+          <span className="movera-st__persistent-menu" aria-hidden="true">≡</span>
+          <span className="movera-st__persistent-x" aria-hidden="true">×</span>
+        </button>
+      </div>
+
       <section className="movera-st__panel" role="dialog" aria-modal="true" aria-label="Recherche Movera">
         <div className="movera-st__shine" aria-hidden="true" />
         <div className="movera-st__content">
@@ -299,7 +321,6 @@ export function SearchTransitionHost({ onNavigate }) {
             {step === 'destination' ? (
               <div className="movera-st__screen movera-st__screen--destination" data-testid="search-step-destination">
                 <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Où allez-vous ?</h2><p className="movera-st__sub">Trouvez votre prochaine adresse Movera.</p></div><PinIcon /></div>
-                <label className="movera-st__destination-search"><SearchIcon /><input value={destinationQuery} onChange={(event) => setDestinationQuery(event.target.value)} placeholder="Rechercher une destination" autoComplete="off" /></label>
                 {!destinationQuery ? (
                   <div className="movera-st__recent-block">
                     <span className="movera-st__section-label">Recherches récentes</span>
