@@ -25,17 +25,22 @@ jobs:
       - name: Remove dead malformed inline PNG rule
         run: |
           python - <<'PY'
-          import re
           from pathlib import Path
 
           p = Path('src/styles/home-b225-block3.css')
           s = p.read_text()
-          pattern = r"\.b225-categories button:nth-child\(5\)>span\{[^}]*data:image/png;base64,[^}]*\}"
-          replacement = ".b225-categories button:nth-child(5)>span{background:transparent}"
-          new, n = re.subn(pattern, replacement, s, count=1)
-          if n != 1:
-              raise SystemExit(f'Expected one stale Prestige data URI rule, found {n}')
-          p.write_text(new)
+          marker = '.b225-categories button:nth-child(5)>span{'
+          start = s.find(marker)
+          if start < 0:
+              raise SystemExit('Prestige legacy span selector not found')
+          end = s.find('}', start)
+          if end < 0:
+              raise SystemExit('Prestige legacy span rule has no closing brace')
+          block = s[start:end + 1]
+          if 'data:image/png;base64' not in block:
+              raise SystemExit('Prestige legacy span rule does not contain expected inline PNG')
+          replacement = '.b225-categories button:nth-child(5)>span{background:transparent}'
+          p.write_text(s[:start] + replacement + s[end + 1:])
           Path('.github/workflows/temp-remove-stale-prestige-datauri.yml').unlink()
           PY
 
