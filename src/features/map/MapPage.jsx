@@ -27,6 +27,7 @@ export function MapPage({ onNavigate }) {
   const destinationViewport = requestedDestination ? DESTINATION_VIEWPORTS[requestedDestination] || null : null
   const initialViewport = handoffViewport || destinationViewport || INITIAL_VIEWPORT
 
+  // Handoff readiness is layout-based only; tile-network timing never blocks route release.
   useEffect(() => {
     let frame = 0
     let paintFrame = 0
