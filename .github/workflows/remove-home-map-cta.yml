@@ -1,3 +1,4 @@
+# Trigger file for the already-installed cleanup workflow. Removed by the cleanup itself.
 # Existing workflow retriggered after creation so GitHub Actions executes it.
 name: Remove Home floating map CTA
 
