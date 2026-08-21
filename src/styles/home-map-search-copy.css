@@ -7,3 +7,4 @@
 .b225-home .b225-home-map-search__copy span{font-size:10.5px;color:#747875;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:normal}
 .b225-home .b225-home-map-filter-button{width:38px;height:38px;flex:0 0 38px;border:1px solid #eceeed;border-radius:50%;background:#fff;display:grid;place-items:center;color:#232523;font-size:17px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.04);pointer-events:none}
 @media(max-width:350px){.b225-home .b225-search.b225-home-map-search{height:49px}}
+/* deploy: isolated Home search; Map CSS remains route-owned */
