@@ -23,9 +23,23 @@ export function totalTravellers(state) {
   return Math.max(1, Number(state.adults) || 1) + Math.max(0, Number(state.children) || 0)
 }
 
+function appendViewport(params, viewport) {
+  const lat = Number(viewport?.lat)
+  const lng = Number(viewport?.lng)
+  const zoom = Number(viewport?.zoom)
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90) return
+  if (!Number.isFinite(lng) || lng < -180 || lng > 180) return
+  if (!Number.isFinite(zoom) || zoom < 1 || zoom > 20) return
+
+  params.set('lat', lat.toFixed(6))
+  params.set('lng', lng.toFixed(6))
+  params.set('zoom', String(zoom))
+}
+
 export function buildMapSearchPath(state) {
   const params = new URLSearchParams()
   if (state.destination?.id) params.set('destination', state.destination.id)
+  appendViewport(params, state.destination?.viewport)
   if (state.checkin) params.set('checkin', state.checkin)
   if (state.checkout) params.set('checkout', state.checkout)
   params.set('guests', String(totalTravellers(state)))
