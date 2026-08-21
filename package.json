@@ -20,6 +20,7 @@
     "quality:full": "npm run lint && npm run quality:architecture && npm run test:unit && npm run build && npm run quality:bundle && npm run test:e2e && npm run test:a11y"
   },
   "dependencies": {
+    "motion": "^13.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

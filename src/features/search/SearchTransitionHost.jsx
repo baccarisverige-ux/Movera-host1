@@ -4,10 +4,12 @@ import { storageAdapter } from '../../services/storage/storageAdapter.js'
 import { MapContainer } from '../map-engine/MapContainer.jsx'
 import { GuestSelector } from './GuestSelector.jsx'
 import { SearchCalendar } from './SearchCalendar.jsx'
+import { SearchStepMotion } from './SearchStepMotion.jsx'
 import { SEARCH_DESTINATIONS } from './searchData.js'
 import { buildMapSearchPath, createSearchState, isDateRangeValid, totalTravellers } from './searchState.js'
 import './searchTransition.css'
 import './searchTransition-stability.css'
+import './searchStepFit.css'
 
 const OPEN_MS = 980
 const CLOSE_MS = 950
@@ -318,6 +320,7 @@ export function SearchTransitionHost({ onNavigate }) {
           </div>
 
           <div className="movera-st__body">
+            <SearchStepMotion step={step}>
             {step === 'destination' ? (
               <div className="movera-st__screen movera-st__screen--destination" data-testid="search-step-destination">
                 <div className="movera-st__screen-head"><div><h2 className="movera-st__title">Où allez-vous ?</h2><p className="movera-st__sub">Trouvez votre prochaine adresse Movera.</p></div><PinIcon /></div>
@@ -352,6 +355,7 @@ export function SearchTransitionHost({ onNavigate }) {
                 <button type="button" className="movera-st__action movera-st__action--search" onClick={submitSearch}><SearchIcon /><span>Rechercher sur la carte</span></button>
               </div>
             ) : null}
+            </SearchStepMotion>
           </div>
         </div>
       </section>
