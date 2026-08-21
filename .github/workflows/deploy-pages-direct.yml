@@ -1,4 +1,4 @@
-name: Finalize Home CTA removal
+name: Deploy Movera Host to GitHub Pages
 
 on:
   push:
@@ -8,55 +8,25 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  cleanup:
-    if: github.event_name == 'push' && github.event.head_commit.message == 'ci(home): finalize floating CTA removal'
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Remove obsolete floating CTA completely
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          home = Path('src/features/home/HomePage.jsx')
-          s = home.read_text()
-          s, n = re.subn(r'\n\s*<button className="b225-map-cta"[^\n]*?</button>', '', s, count=1)
-          if n != 1:
-              raise SystemExit(f'Home CTA markup removal count={n}')
-          home.write_text(s)
-
-          css = Path('src/styles/home-b225.css')
-          s = css.read_text()
-          s, n = re.subn(r'\.b225-map-cta\{[^}]*\}\.b225-map-cta svg\{[^}]*\}', '', s, count=1)
-          if n != 1:
-              raise SystemExit(f'CTA CSS removal count={n}')
-          s, n = re.subn(r'(\.b225-home\{[^}]*?padding:)0 0 118px', r'\g<1>0 0 84px', s, count=1)
-          if n != 1:
-              raise SystemExit(f'Home bottom padding adjustment count={n}')
-          css.write_text(s)
-          PY
-
-          ! grep -R "b225-map-cta\|home-map-cta" src
-
-      - name: Restore normal CI files
-        run: |
-          git show 09a4fc69807fc5aac391920c37019200d87747db:.github/workflows/deploy-pages-direct.yml > .github/workflows/deploy-pages-direct.yml
-          git show 09a4fc69807fc5aac391920c37019200d87747db:.github/workflows/quality.yml > .github/workflows/quality.yml
-          rm -f .github/workflows/remove-home-map-cta.yml
 
       - name: Install dependencies
         run: npm ci
@@ -67,11 +37,47 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Persist validated cleanup
+      - name: Verify compiled output
         run: |
+          test -f dist/index.html
+          test -d dist/assets
+          grep -q '/Movera-host1/assets/' dist/index.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout deployment source
+        uses: actions/checkout@v6
+        with:
+          ref: b225-ui-home
+          fetch-depth: 0
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Record successful Pages deployment
+        env:
+          DEPLOYED_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p docs/ci
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          printf '{"status":"PASS","deployed_sha":"%s","updated_at":"%s"}\n' "$DEPLOYED_SHA" "$NOW" > docs/ci/pages-deploy-status.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/features/home/HomePage.jsx src/styles/home-b225.css .github/workflows/deploy-pages-direct.yml .github/workflows/quality.yml .github/workflows/remove-home-map-cta.yml
-          git commit -m "fix(home): remove floating map CTA"
+          git add docs/ci/pages-deploy-status.json
+          git commit -m "ci: record Pages deployment [skip ci]" || exit 0
           git pull --rebase origin b225-ui-home
           git push origin HEAD:b225-ui-home
