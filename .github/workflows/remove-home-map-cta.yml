@@ -1,17 +1,15 @@
-# Source-only cleanup trigger; this file will be removed after source commit is confirmed.
 name: Remove Home floating map CTA
 
 on:
   push:
     branches: [b225-ui-home]
-    paths:
-      - .github/workflows/remove-home-map-cta.yml
 
 permissions:
   contents: write
 
 jobs:
   remove:
+    if: github.event.head_commit.message == 'ci(home): trigger source cleanup'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
