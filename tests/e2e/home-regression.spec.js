@@ -9,7 +9,7 @@ test('home keeps B225 structure, media and guest navigation stable', async ({ pa
   await expect(page.locator('.b225-city')).toHaveCount(10)
   await expect(page.getByTestId('home-services').locator('.b225-service-card')).toHaveCount(4)
   expect(await page.getByTestId('home-featured').locator('.b225-featured-card').count()).toBeGreaterThanOrEqual(3)
-  await expect(page.getByTestId('home-map-cta')).toHaveCount(1)
+  await expect(page.getByTestId('home-tunisia-map')).toHaveCount(1)
 
   for (const id of ['prestige', 'experience', 'partner']) {
     const button = page.locator(`.b225-categories button[data-category-id="${id}"]`)
@@ -35,4 +35,25 @@ test('home keeps B225 structure, media and guest navigation stable', async ({ pa
     await expect(page.locator('.app-shell--guest > .app-shell__nav .app-shell__nav-item[data-active="true"] span')).toHaveText(label)
   }
   expect(errors).toEqual([])
+})
+
+test('critical collection pages contain no broken project images', async ({ page }) => {
+  for (const route of ['/', '/plage', '/maison-d-hote']) {
+    await page.goto(route === '/' ? '/' : `/Movera-host1${route}`)
+    await expect(page.locator('img')).not.toHaveCount(0)
+    await page.waitForTimeout(1_000)
+
+    const brokenImages = await page.locator('img').evaluateAll(images => images
+      .filter(image => new URL(image.currentSrc || image.src).origin === window.location.origin)
+      .filter(image => !image.complete || image.naturalWidth === 0)
+      .map(image => image.currentSrc || image.src))
+
+    expect(brokenImages, `${route}: broken image sources`).toEqual([])
+  }
+
+  await page.goto('/')
+  const villaImage = page.getByTestId('home-card-villa-emeraude').locator('img').first()
+  await expect(villaImage).toHaveAttribute('src', '/Movera-host1/assets/listing-villa-emeraude.webp')
+  await villaImage.scrollIntoViewIfNeeded()
+  await expect.poll(() => villaImage.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
 })
