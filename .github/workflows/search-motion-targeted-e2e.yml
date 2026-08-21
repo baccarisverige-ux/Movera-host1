@@ -19,28 +19,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Repair stale Prestige CSS source
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('src/styles/home-b225-block3.css')
-          s = p.read_text()
-          marker = '.b225-categories button:nth-child(5)>span{'
-          start = s.find(marker)
-          if start < 0:
-              raise SystemExit('Prestige legacy span selector not found')
-          tail = s[start:]
-          replacement = '.b225-categories button:nth-child(5)>span{background:transparent}'
-          if 'data:image/png;base64' not in tail:
-              print('Prestige legacy CSS already clean')
-          else:
-              end = s.find('}', start)
-              if end < 0:
-                  s = s[:start] + replacement + '\n'
-              else:
-                  s = s[:start] + replacement + s[end + 1:]
-              p.write_text(s)
-          PY
       - run: npm ci
       - run: npm run build
       - name: Start preview
@@ -125,7 +103,7 @@ jobs:
       - name: Stop preview
         if: always()
         run: kill $(cat /tmp/movera-search-motion.pid) || true
-      - name: Publish searchable test status and CSS repair
+      - name: Publish searchable test status
         if: always()
         env:
           TEST_OUTCOME: ${{ steps.motion_test.outcome }}
@@ -138,9 +116,8 @@ jobs:
           printf '{"status":"%s","tested_sha":"%s","run_id":"%s","updated_at":"%s"}\n' "$STATUS" "$TEST_SHA" "$RUN_ID" "$NOW" > docs/ci/search-motion-status.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/ci/search-motion-status.json src/styles/home-b225-block3.css
-          git commit -m "fix(home): persist repaired legacy CSS tail [skip ci]" || exit 0
-          git pull --rebase origin b225-ui-home
+          git add docs/ci/search-motion-status.json
+          git commit -m "ci: record search motion result [skip ci]" || exit 0
           git push
       - name: Enforce targeted result
         if: always()
