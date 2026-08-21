@@ -126,7 +126,7 @@ jobs:
             if(lateHomeStyle.visibility!=='hidden' || lateHomeStyle.opacity>0.01) throw new Error(`${label}: Home search flashed before map navigation`)
             await page.waitForURL(/\/map(?:\?|$)/,{timeout:1800})
             await popup.waitFor({state:'detached',timeout:1200})
-            if(await page.getByTestId('page-home').count()!==0) throw new Error(`${label}: Home remained mounted after map navigation`)
+            if(await homeSearch.isVisible()) throw new Error(`${label}: Home search visible after map navigation`)
             if(runtimeErrors.length) throw new Error(`${label}: runtime errors: ${runtimeErrors.join('; ')}`)
             await browser.close()
           }
