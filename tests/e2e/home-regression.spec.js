@@ -95,3 +95,18 @@ test('category scroll animation reattaches after returning to Home', async ({ pa
   ))).toBeGreaterThan(10)
   await expect(page.getByTestId('home-categories')).toHaveClass(/movera-categories-moving-under-header/)
 })
+
+test('Plage and Maison selections remain active after returning Home', async ({ page }) => {
+  for (const category of [
+    { id: 'beach', pageTestId: 'page-beach' },
+    { id: 'guesthouse', pageTestId: 'page-guesthouse' },
+  ]) {
+    await page.goto('/')
+    const button = page.locator(`.b225-categories button[data-category-id="${category.id}"]`)
+    await button.click()
+    await expect(page.getByTestId(category.pageTestId)).toBeVisible()
+    await page.goBack()
+    await expect(page.getByTestId('page-home')).toBeVisible()
+    await expect(button).toHaveAttribute('data-active', 'true')
+  }
+})
