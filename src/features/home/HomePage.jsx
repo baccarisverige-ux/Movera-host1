@@ -8,9 +8,9 @@ import '../../styles/home-map-search-copy.css'
 import '../../styles/home-section-alignment.css'
 import ALL_CATEGORY_GLOBE from './assets/all-category-globe.png'
 import BEACH_CATEGORY_ICON from './assets/plage-category.jpg'
-import APPARTEMENT_CATEGORY_ICON from './assets/appartement-category-data.js'
+import APPARTEMENT_CATEGORY_ICON from './assets/appartement-category.png'
 import GUESTHOUSE_CATEGORY_ICON from './assets/maison-hote-category.png'
-import VILLA_CATEGORY_ICON from './assets/villa-category-data.js'
+import VILLA_CATEGORY_ICON from './assets/villa-category.png'
 import { getSelectedHomeCategory, setSelectedHomeCategory } from './homeCategorySelection.js'
 
 function SearchIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>}
