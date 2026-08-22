@@ -4,8 +4,8 @@ export const homeCategories = [
   { id: 'all', label: 'Tout', icon: '◉' },
   { id: 'guesthouse', label: "Maison d’hôte", icon: '⌂' },
   { id: 'beach', label: 'Plage', icon: '◒' },
-  { id: 'family', label: 'Famille', icon: '♡' },
-  { id: 'prestige', label: 'Prestige', icon: '◇' },
+  { id: 'family', label: 'Appartement', icon: '♡' },
+  { id: 'prestige', label: 'Villa', icon: '◇' },
   { id: 'experience', label: 'Expérience', icon: '✦' },
   { id: 'partner', label: 'Partenaire', icon: '○' },
 ]
@@ -37,7 +37,7 @@ const byCategory = (category) => homeFeatured.filter((item) => item.category.spl
 export const homeCollections = [
   { id: 'guesthouse', title: "Maison d’hôte", items: byCategory('guesthouse') },
   { id: 'beach', title: 'Plage', items: byCategory('beach') },
-  { id: 'family', title: 'Famille', items: byCategory('family') },
-  { id: 'prestige', title: 'Prestige', items: byCategory('prestige') },
+  { id: 'family', title: 'Appartement', items: byCategory('family') },
+  { id: 'prestige', title: 'Villa', items: byCategory('prestige') },
   { id: 'experience', title: 'Expérience', items: byCategory('experience') },
 ]
