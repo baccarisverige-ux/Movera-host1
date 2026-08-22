@@ -10,7 +10,7 @@ export function BeachPage() {
       offers={BEACH_OFFERS}
       pageClassName="portrait-collection-page"
       hero={{
-        src: '/Movera-host1/assets/plage-page-hero.jpeg?v=pure-white',
+        src: '/Movera-host1/assets/plage-page-hero.webp',
         alt: 'Collection Plage Movera',
         className: 'portrait-collection-hero__image',
         testId: 'page-beach',
