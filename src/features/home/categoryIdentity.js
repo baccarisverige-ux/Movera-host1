@@ -8,7 +8,6 @@ const CATEGORY_IDS_BY_LABEL = new Map([
   ['Partenaire', 'partner'],
 ])
 
-import PRESTIGE_ICON_SRC from './assets/prestige-star.png'
 let scheduled = false
 
 function getCategoryLabel(button) {
@@ -30,13 +29,6 @@ function applyCategoryIdentity() {
 
     matched += 1
     button.dataset.categoryId = id
-
-    if (id === 'prestige') {
-      const image = button.querySelector(':scope > img')
-      if (image && image.getAttribute('src') !== PRESTIGE_ICON_SRC) {
-        image.setAttribute('src', PRESTIGE_ICON_SRC)
-      }
-    }
   })
 
   return matched === CATEGORY_IDS_BY_LABEL.size
