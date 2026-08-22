@@ -4,6 +4,4 @@
 .beach-hero__copy>span{margin-bottom:4px;font-size:7px;letter-spacing:.11em}
 .beach-hero__copy h1{font-size:clamp(18px,5vw,22px);line-height:1.02;letter-spacing:-.03em}
 .beach-hero__copy p{max-width:245px;margin-top:5px;font-size:9px;line-height:1.35}
-.beach-hero__brand{font-size:9px}
-.beach-hero__counter{font-size:8px;padding:5px 8px}
 .beach-results__head h2{font-size:18px}

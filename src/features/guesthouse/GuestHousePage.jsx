@@ -4,10 +4,9 @@ import '../../shared/collection/portrait-collection.css'
 
 const GUESTHOUSE_OFFERS = listingCatalog.filter((item) => item.category.split(' ').includes('guesthouse'))
 
-export function GuestHousePage({ onNavigate }) {
+export function GuestHousePage() {
   return (
     <CollectionPage
-      onNavigate={onNavigate}
       offers={GUESTHOUSE_OFFERS}
       pageClassName="portrait-collection-page"
       hero={{
