@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { preloadMapRenderer } from '../../features/map-engine/mapRendererLoader.js'
 import '../../styles/guest-bottom-nav.css'
 
 const guestNav = [
@@ -36,6 +38,17 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
   const activePath = currentPath === '/plage' ? '/' : currentPath
   const isMapRoute = currentPath === '/map'
   const isBeachRoute = currentPath === '/plage'
+
+  useEffect(() => {
+    if (currentPath !== '/') return undefined
+    const preload = () => preloadMapRenderer()
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(preload, { timeout: 1200 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const id = window.setTimeout(preload, 250)
+    return () => window.clearTimeout(id)
+  }, [currentPath])
 
   return (
     <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isBeachRoute ? ' app-shell--beach' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
