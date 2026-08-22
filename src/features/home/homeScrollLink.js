@@ -5,22 +5,28 @@ let moveraLastFrameTime = 0
 let moveraWelcomeExitScrollY = 0
 let moveraCategoriesHeight = 0
 let moveraHeaderHeight = 0
+let moveraObservedHeader = null
+let moveraObservedCategories = null
+let moveraObservedWelcome = null
 const MOVERA_CATEGORY_FOLLOW_MS = 220
 
-function measureMoveraCategoryScroll() {
-  const header = document.querySelector('.b225-home-header')
-  const categories = document.querySelector('.b225-categories')
-  const welcome = document.querySelector('.b225-welcome')
-  if (!header || !categories || !welcome) return false
+function observeMoveraHome(header, categories, welcome) {
+  if (
+    moveraObservedHeader === header
+    && moveraObservedCategories === categories
+    && moveraObservedWelcome === welcome
+  ) return
 
-  moveraHeaderHeight = header.getBoundingClientRect().height
-  moveraCategoriesHeight = categories.getBoundingClientRect().height
-  moveraWelcomeExitScrollY = window.scrollY + welcome.getBoundingClientRect().bottom
+  moveraResizeObserver?.disconnect()
+  moveraResizeObserver = null
+  moveraObservedHeader = header
+  moveraObservedCategories = categories
+  moveraObservedWelcome = welcome
+  moveraCategoryTravel = 0
+  moveraLastFrameTime = 0
+  document.documentElement.style.setProperty('--movera-category-upward-travel', '0px')
 
-  document.documentElement.style.setProperty('--movera-home-header-height', `${moveraHeaderHeight}px`)
-  categories.classList.add('movera-categories-linked')
-
-  if (!moveraResizeObserver && 'ResizeObserver' in window) {
+  if ('ResizeObserver' in window) {
     moveraResizeObserver = new ResizeObserver(() => {
       measureMoveraCategoryScroll()
       requestMoveraCategorySync()
@@ -29,6 +35,22 @@ function measureMoveraCategoryScroll() {
     moveraResizeObserver.observe(categories)
     moveraResizeObserver.observe(welcome)
   }
+}
+
+function measureMoveraCategoryScroll() {
+  const header = document.querySelector('.b225-home-header')
+  const categories = document.querySelector('.b225-categories')
+  const welcome = document.querySelector('.b225-welcome')
+  if (!header || !categories || !welcome) return false
+
+  observeMoveraHome(header, categories, welcome)
+
+  moveraHeaderHeight = header.getBoundingClientRect().height
+  moveraCategoriesHeight = categories.getBoundingClientRect().height
+  moveraWelcomeExitScrollY = window.scrollY + welcome.getBoundingClientRect().bottom
+
+  document.documentElement.style.setProperty('--movera-home-header-height', `${moveraHeaderHeight}px`)
+  categories.classList.add('movera-categories-linked')
 
   return true
 }
@@ -69,14 +91,12 @@ window.addEventListener('scroll', requestMoveraCategorySync, { passive: true })
 window.addEventListener('resize', refreshMoveraCategoryScroll, { passive: true })
 window.addEventListener('popstate', refreshMoveraCategoryScroll)
 
-if (!measureMoveraCategoryScroll()) {
-  const bootObserver = new MutationObserver(() => {
-    if (measureMoveraCategoryScroll()) {
-      bootObserver.disconnect()
-      requestMoveraCategorySync()
-    }
-  })
-  bootObserver.observe(document.documentElement, { childList: true, subtree: true })
-} else {
-  requestMoveraCategorySync()
-}
+const homeMountObserver = new MutationObserver(() => {
+  if (measureMoveraCategoryScroll()) requestMoveraCategorySync()
+})
+homeMountObserver.observe(document.getElementById('root') || document.documentElement, {
+  childList: true,
+  subtree: true,
+})
+
+if (measureMoveraCategoryScroll()) requestMoveraCategorySync()
