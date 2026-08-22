@@ -3,7 +3,7 @@ import { ClusterLayer } from './layers/ClusterLayer.jsx'
 import { MapControls } from './controls/MapControls.jsx'
 import { MarkerLayer } from './layers/MarkerLayer.jsx'
 import { ResizeManager } from './lifecycle/ResizeManager.jsx'
-import { TileLayer } from './layers/TileLayer.jsx'
+import { VectorBaseLayer } from './layers/VectorBaseLayer.jsx'
 import { ViewportController } from './lifecycle/ViewportController.jsx'
 import { panViewport, zoomViewport } from './geometry/geometry.js'
 import '../../styles/map-engine.css'
@@ -101,11 +101,11 @@ export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: con
       data-width={size.width} data-height={size.height} data-update-count={updateCountRef.current} data-render-count={renderCountRef.current} data-listener-count="7" data-lifecycle-events={lifecycleEvents}
       onDoubleClick={(event) => { if (!event.target.closest('button')) zoomBy(1) }} onPointerCancel={releasePointer} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
       onPointerUp={releasePointer} onWheel={(event) => { event.preventDefault(); zoomBy(event.deltaY < 0 ? 1 : -1) }}>
-      <TileLayer viewport={viewport} size={size} />
+      <VectorBaseLayer viewport={viewport} size={size} />
       <ClusterLayer markers={markers} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
       {viewport.zoom > 10 ? <MarkerLayer markers={markers} viewport={viewport} size={size} selectedListingId={selectedListingId} onSelect={selectMarker} /> : null}
       <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} />
-      <div className="map-attribution">© OpenStreetMap contributors</div>
+      <div className="map-attribution">OpenFreeMap © OpenMapTiles · OpenStreetMap</div>
       <ResizeManager targetRef={surfaceRef} onSize={setSize} />
       <ViewportController onLifecycle={() => setLifecycleEvents((count) => count + 1)} />
     </div>
