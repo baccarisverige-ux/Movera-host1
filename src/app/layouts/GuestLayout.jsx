@@ -1,4 +1,5 @@
 import '../../styles/guest-bottom-nav.css'
+import { getGuestNavigationPath, isGuestCollectionRoute } from '../../shared/navigation/guestCollectionRoutes.js'
 
 const guestNav = [
   { label: 'Accueil', path: '/', icon: <><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></> },
@@ -11,7 +12,7 @@ const guestNav = [
 const mapShellStyle = { maxWidth: 430, margin: '0 auto', background: '#eef0ee' }
 const mapContentStyle = { padding: 0, overflow: 'hidden' }
 const mapNavStyle = { position: 'fixed', left: '50%', right: 'auto', bottom: 0, width: 'min(100%, 430px)', transform: 'translateX(-50%)', zIndex: 50 }
-const beachContentStyle = { padding: 0, overflow: 'auto', background: '#f6f5f2' }
+const collectionContentStyle = { padding: 0, overflow: 'auto', background: '#f6f5f2' }
 
 function AppLink({ children, className, href, onNavigate, active, disabled = false }) {
   return (
@@ -33,12 +34,12 @@ function AppLink({ children, className, href, onNavigate, active, disabled = fal
 }
 
 export function GuestLayout({ children, currentPath, onNavigate }) {
-  const activePath = currentPath === '/plage' ? '/' : currentPath
+  const activePath = getGuestNavigationPath(currentPath)
   const isMapRoute = currentPath === '/map'
-  const isBeachRoute = currentPath === '/plage'
+  const isCollectionRoute = isGuestCollectionRoute(currentPath)
 
   return (
-    <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isBeachRoute ? ' app-shell--beach' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
+    <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isCollectionRoute ? ' app-shell--collection' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
       <header className="app-shell__header" style={isMapRoute ? { display: 'none' } : undefined}>
         <strong>Movera Host</strong>
       </header>
@@ -46,7 +47,7 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
         className="app-shell__content"
         id="main-content"
         tabIndex={-1}
-        style={isMapRoute ? mapContentStyle : isBeachRoute ? beachContentStyle : undefined}
+        style={isMapRoute ? mapContentStyle : isCollectionRoute ? collectionContentStyle : undefined}
       >
         {children}
       </main>
