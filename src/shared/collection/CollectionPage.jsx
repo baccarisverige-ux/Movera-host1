@@ -30,16 +30,11 @@ function PinIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.3"/></svg>
 }
 
-function BackIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-}
-
 function HeartIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.8a5.3 5.3 0 0 0-7.5 0L12 6.1l-1.3-1.3a5.3 5.3 0 0 0-7.5 7.5L12 21l8.8-8.7a5.3 5.3 0 0 0 0-7.5Z"/></svg>
 }
 
 export function CollectionPage({
-  onNavigate,
   offers,
   pageClassName = '',
   hero,
@@ -96,14 +91,6 @@ export function CollectionPage({
     <div className={`beach-page${pageClassName ? ` ${pageClassName}` : ''}`} data-testid={hero.testId}>
       <section className="beach-hero" aria-label={collectionLabel}>
         <img className={`beach-hero__image${hero.className ? ` ${hero.className}` : ''}`} src={hero.src} alt={hero.alt} decoding="async" fetchPriority="high" />
-        <div className="beach-hero__veil" />
-        <div className="beach-hero__top">
-          <button className="beach-glass-button" type="button" aria-label="Retour à l’accueil" onClick={() => onNavigate('/')}>
-            <BackIcon />
-          </button>
-          <span className="beach-hero__brand">Movera Host</span>
-          <span className="beach-hero__counter">{offers.length} séjours</span>
-        </div>
         <div className="beach-hero__copy">
           <span>{collectionLabel}</span>
           <h1>{title}</h1>
