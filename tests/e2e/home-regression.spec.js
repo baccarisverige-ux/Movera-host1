@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('home keeps B225 structure, media and guest navigation stable', async ({ page }) => {
+test('home keeps its structure, media and approved navigation stable', async ({ page }) => {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   await page.goto('/')
@@ -30,9 +30,12 @@ test('home keeps B225 structure, media and guest navigation stable', async ({ pa
   const nav = page.locator('.app-shell--guest > .app-shell__nav')
   await expect(nav).toBeVisible()
   await expect(nav.locator('.app-shell__nav-item')).toHaveCount(5)
-  for (const label of ['Accueil', 'Carte', 'Favoris']) {
+  for (const label of ['Accueil', 'Carte']) {
     if (label !== 'Accueil') await nav.locator('.app-shell__nav-item', { hasText: label }).click()
     await expect(page.locator('.app-shell--guest > .app-shell__nav .app-shell__nav-item[data-active="true"] span')).toHaveText(label)
+  }
+  for (const label of ['Favoris', 'Messages', 'Profil']) {
+    await expect(nav.locator('.app-shell__nav-item', { hasText: label })).toHaveAttribute('aria-disabled', 'true')
   }
   expect(errors).toEqual([])
 })
