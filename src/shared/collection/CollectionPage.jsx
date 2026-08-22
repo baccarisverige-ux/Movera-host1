@@ -170,7 +170,7 @@ export function CollectionPage({
 
         <div className="beach-offer-list">
           {visibleOffers.map((item) => (
-            <article className="beach-offer" key={item.id} onClick={() => onNavigate(`/listing/${item.id}`)}>
+            <article className="beach-offer" key={item.id}>
               <div className="beach-offer__media">
                 <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
                 <span className="beach-offer__badge">{item.badge || badgeLabel}</span>

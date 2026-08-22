@@ -1,74 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-const appPath = (path) => `/Movera-host1${path === '/' ? '/' : path}`
-
 test.describe('Movera critical permanent regressions', () => {
-  test('host management flow stays functional', async ({ page }) => {
-    const errors = []
-    page.on('pageerror', (error) => errors.push(error.message))
-    await page.addInitScript(() => {
-      let activeStorageListeners = 0
-      const add = window.addEventListener.bind(window)
-      const remove = window.removeEventListener.bind(window)
-      window.addEventListener = (type, listener, options) => {
-        if (type === 'storage') activeStorageListeners += 1
-        return add(type, listener, options)
-      }
-      window.removeEventListener = (type, listener, options) => {
-        if (type === 'storage') activeStorageListeners -= 1
-        return remove(type, listener, options)
-      }
-      window.__activeHostStorageListeners = () => activeStorageListeners
-    })
-
-    const expectOwnedListenerCount = (count) => expect.poll(
-      () => page.evaluate(() => window.__activeHostStorageListeners()),
-    ).toBe(count)
-
-    await page.goto(appPath('/host'))
-    await expect(page.getByTestId('host-kpi-listings')).toBeVisible()
-    await expect(page.getByTestId('host-upcoming')).toBeVisible()
-    await expect(page.getByTestId('host-alerts')).toBeVisible()
-    await expectOwnedListenerCount(1)
-
-    await page.goto(appPath('/host/listings'))
-    await page.evaluate(() => localStorage.removeItem('movera-host-listings-v1'))
-    await page.reload()
-    await expectOwnedListenerCount(1)
-    await page.getByTestId('host-create-link').click()
-    await expect(page).toHaveURL(/\/host\/listings\/new$/)
-    await expectOwnedListenerCount(1)
-    await page.getByRole('button', { name: 'Enregistrer' }).click()
-    await expect(page.getByRole('alert')).toBeVisible()
-    await page.getByLabel('Titre').fill('Villa Test')
-    await page.getByLabel('Prix par nuit').fill('300')
-    await page.getByRole('button', { name: 'Enregistrer' }).click()
-    await expect(page).toHaveURL(/\/host\/listings$/)
-    await expect(page.getByText('Villa Test')).toBeVisible()
-
-    const row = page.getByText('Villa Test').locator('..').locator('..')
-    await row.getByRole('button', { name: 'Modifier' }).click()
-    await expectOwnedListenerCount(1)
-    await page.getByLabel('Prix par nuit').fill('350')
-    await page.getByRole('button', { name: 'Enregistrer' }).click()
-    await expect(page.getByText('350 TND/nuit')).toBeVisible()
-
-    await page.goto(appPath('/host/reservations'))
-    await expectOwnedListenerCount(0)
-    for (const state of ['pending', 'confirmed', 'completed', 'cancelled']) {
-      await expect(page.getByTestId(`reservation-${state}`)).toBeVisible()
-    }
-
-    await page.goto(appPath('/host/calendar'))
-    await expect(page.getByTestId('page-host-calendar')).toBeVisible()
-    await page.goto(appPath('/host/earnings'))
-    await expect(page.getByTestId('earning-row')).toHaveCount(2)
-    await page.goto(appPath('/host/settings'))
-    await expect(page.getByTestId('page-host-settings')).toBeVisible()
-    await expectOwnedListenerCount(0)
-    expect(errors).toEqual([])
-  })
-
   test('resilience, offline and recoverable failures stay functional', async ({ page }) => {
     for (const state of ['loading', 'empty', 'success']) {
       await page.goto(`/resilience-lab?state=${state}`)
@@ -95,8 +27,6 @@ test.describe('Movera critical permanent regressions', () => {
     })
     await expect(page.getByTestId('offline-fallback')).toBeHidden()
 
-    await page.goto('/listing/missing')
-    await expect(page.getByTestId('page-listing-missing')).toBeVisible()
     await page.goto('/?__testError=1')
     await expect(page.getByTestId('global-error-boundary')).toBeVisible()
     await page.getByRole('button', { name: 'Réessayer' }).click()
@@ -105,7 +35,7 @@ test.describe('Movera critical permanent regressions', () => {
 
   test('responsive, accessibility and reduced motion guard stays active', async ({ page }) => {
     const sizes = [[320, 568], [375, 812], [390, 844], [430, 932], [768, 1024], [1024, 768]]
-    const routes = ['/', '/map', '/listing/marsa-sea', '/booking/marsa-sea', '/host']
+    const routes = ['/', '/map', '/plage', '/maison-d-hote']
 
     for (const [width, height] of sizes) {
       await page.setViewportSize({ width, height })

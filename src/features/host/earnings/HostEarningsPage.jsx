@@ -1,2 +1,0 @@
-import { HostShell } from '../components/HostShell.jsx'
-export function HostEarningsPage() { const rows = [['Août 2026', '1 420 TND', 'Prévu'], ['Juillet 2026', '3 880 TND', 'Payé']]; return <HostShell title="Revenus" testId="page-host-earnings"><section className="host-panel"><h2>Payouts</h2>{rows.map(([period, amount, status]) => <p key={period} data-testid="earning-row"><strong>{period}</strong> · {amount} · {status}</p>)}</section></HostShell> }
