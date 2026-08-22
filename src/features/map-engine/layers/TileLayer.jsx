@@ -4,10 +4,10 @@ export function TileLayer({ viewport, size }) {
   const zoom = Math.round(viewport.zoom)
   const tilesPerAxis = 2 ** zoom
   const center = project(viewport.lat, viewport.lng, zoom)
-  const minTileX = Math.floor((center.x - size.width / 2) / TILE_SIZE) - 1
-  const maxTileX = Math.floor((center.x + size.width / 2) / TILE_SIZE) + 1
-  const minTileY = Math.max(0, Math.floor((center.y - size.height / 2) / TILE_SIZE) - 1)
-  const maxTileY = Math.min(tilesPerAxis - 1, Math.floor((center.y + size.height / 2) / TILE_SIZE) + 1)
+  const minTileX = Math.floor((center.x - size.width / 2) / TILE_SIZE)
+  const maxTileX = Math.floor((center.x + size.width / 2) / TILE_SIZE)
+  const minTileY = Math.max(0, Math.floor((center.y - size.height / 2) / TILE_SIZE))
+  const maxTileY = Math.min(tilesPerAxis - 1, Math.floor((center.y + size.height / 2) / TILE_SIZE))
   const tiles = []
 
   for (let y = minTileY; y <= maxTileY; y += 1) {
@@ -31,7 +31,9 @@ export function TileLayer({ viewport, size }) {
           >
             <img
               alt=""
+              decoding="async"
               draggable="false"
+              fetchPriority="high"
               loading="eager"
               data-base-src={src}
               src={src}
