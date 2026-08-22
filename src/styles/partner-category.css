@@ -1,59 +1,54 @@
-.b225-categories button > img{
+.b225-categories .b225-category-icon{
+  position:relative!important;
+  z-index:2!important;
   display:block!important;
   visibility:visible!important;
+  width:24px!important;
+  height:24px!important;
+  min-width:24px!important;
+  flex:0 0 24px!important;
   object-fit:contain!important;
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
   box-shadow:none!important;
-  opacity:1!important;
-  pointer-events:none!important;
-}
-
-.b225-categories button[data-category-id="family"] > img,
-.b225-categories button[data-category-id="prestige"] > img,
-.b225-categories button[data-category-id="beach"] > img{
-  width:24px!important;
-  height:24px!important;
-  flex:0 0 24px!important;
-}
-
-.b225-categories button[data-category-id="experience"] > span[aria-hidden="true"],
-.b225-categories button[data-category-id="partner"] > span[aria-hidden="true"]{
-  display:block!important;
-  visibility:visible!important;
-  height:24px!important;
-  flex:0 0 24px!important;
-  font-size:0!important;
-  line-height:0!important;
-  border:0!important;
-  border-radius:0!important;
-  background-color:transparent!important;
-  background-position:center!important;
-  background-repeat:no-repeat!important;
-  background-size:contain!important;
-  box-shadow:none!important;
   filter:none!important;
+  mix-blend-mode:normal!important;
   opacity:1!important;
   transform:none!important;
   pointer-events:none!important;
 }
 
-.b225-categories button[data-category-id="experience"] > span[aria-hidden="true"]{
-  width:24px!important;
-  background-image:url('../features/home/assets/experience-category.webp')!important;
+.b225-categories .b225-category-icon[data-category-icon="all"]{
+  width:18px!important;
+  height:18px!important;
+  min-width:18px!important;
+  flex-basis:18px!important;
 }
 
-.b225-categories button[data-category-id="partner"] > span[aria-hidden="true"]{
+.b225-categories .b225-category-icon[data-category-icon="guesthouse"]{
+  width:22px!important;
+  height:22px!important;
+  min-width:22px!important;
+  flex-basis:22px!important;
+  transform:scale(1.15)!important;
+}
+
+.b225-categories .b225-category-icon[data-category-icon="beach"]{
+  transform:scale(1.15)!important;
+}
+
+.b225-categories .b225-category-icon[data-category-icon="family"],
+.b225-categories .b225-category-icon[data-category-icon="prestige"]{
+  width:26px!important;
+  height:26px!important;
+  min-width:26px!important;
+  flex-basis:26px!important;
+}
+
+.b225-categories .b225-category-icon[data-category-icon="partner"]{
   width:28px!important;
+  height:24px!important;
+  min-width:28px!important;
   flex-basis:28px!important;
-  background-image:url('../features/home/assets/partner-category.png')!important;
-}
-
-.b225-categories button[data-category-id="experience"]::before,
-.b225-categories button[data-category-id="prestige"]::before,
-.b225-categories button[data-category-id="partner"]::before{
-  content:none!important;
-  display:none!important;
-  background-image:none!important;
 }
