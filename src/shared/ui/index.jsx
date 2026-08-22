@@ -1,11 +1,12 @@
 import './ui.css'
 
-export function Button({ children, loading = false, disabled = false, ...props }) {
-  return <button className="ui-button" disabled={disabled || loading} aria-busy={loading || undefined} {...props}>{loading ? 'Chargement…' : children}</button>
+export function Button({ children, loading = false, disabled = false, className = '', variant = 'primary', ...props }) {
+  const classes = ['ui-button', `ui-button--${variant}`, className].filter(Boolean).join(' ')
+  return <button className={classes} disabled={disabled || loading} aria-busy={loading || undefined} {...props}>{loading ? 'Chargement…' : children}</button>
 }
 
-export function IconButton({ label, children, ...props }) {
-  return <button className="ui-icon-button" aria-label={label} {...props}>{children}</button>
+export function IconButton({ label, children, className = '', ...props }) {
+  return <button className={['ui-icon-button', className].filter(Boolean).join(' ')} aria-label={label} {...props}>{children}</button>
 }
 
 export function Card({ children, className = '', ...props }) {
@@ -44,3 +45,5 @@ export function Skeleton({ width = '100%', height = 16, ...props }) { return <di
 export function EmptyState({ children = 'Aucun résultat.' }) { return <div className="ui-state" role="status">{children}</div> }
 export function ErrorState({ children = 'Une erreur est survenue.' }) { return <div className="ui-state" role="alert">{children}</div> }
 export function SearchInput(props) { return <input className="ui-search-input" type="search" {...props} /> }
+
+export { Surface, SectionHeader, Stepper, Counter, SearchField, StickyActionBar, InlineMeta } from './premium.jsx'

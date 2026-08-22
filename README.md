@@ -1,16 +1,33 @@
-# React + Vite
+# Movera Host
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Frontend mobile-first de Movera Host, construit avec React et Vite.
 
-Currently, two official plugins are available:
+## Développement
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm ci
+npm run dev
+```
 
-## React Compiler
+## Validation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm run lint
+npm run quality:architecture
+npm run test:unit
+npm run build
+npm run quality:bundle
+npm run test:e2e
+npm run test:a11y
+```
 
-## Expanding the Oxlint configuration
+Le gate CI principal est `.github/workflows/quality.yml`. Les contrôles Search dédiés et CodeQL restent séparés.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Structure principale
+
+- `src/` — application et fonctionnalités
+- `public/` — assets publics utilisés par l'application
+- `tests/` — tests unitaires, E2E, responsive et accessibilité
+- `scripts/` — contrôles d'architecture, budget bundle et audit de nettoyage
+
+Branche de travail actuelle : `b225-ui-home`.

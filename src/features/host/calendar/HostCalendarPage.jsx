@@ -1,0 +1,3 @@
+import { useState } from 'react'
+import { HostShell } from '../components/HostShell.jsx'
+export function HostCalendarPage() { const [blocked, setBlocked] = useState(['2026-08-30']); return <HostShell title="Calendrier" testId="page-host-calendar"><section className="host-panel"><h2>Disponibilités</h2><p>Août 2026 · dates ouvertes par défaut</p><label>Bloquer une date<input aria-label="Bloquer une date" type="date" onChange={e => e.target.value && setBlocked([...new Set([...blocked, e.target.value])])} /></label><div data-testid="calendar-blocked">{blocked.map(date => <span className="host-chip" key={date}>{date}</span>)}</div></section></HostShell> }
