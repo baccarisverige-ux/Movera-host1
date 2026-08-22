@@ -11,6 +11,7 @@ import '../../styles/map-engine.css'
 export const INITIAL_VIEWPORT = Object.freeze({ lat: 36.8065, lng: 10.1815, zoom: 11 })
 const MARKER_FOCUS_ZOOM = 10.5
 const CLUSTER_FOCUS_ZOOM = 11
+const PINCH_ZOOM_SENSITIVITY = 0.65
 export const DEFAULT_MARKERS = Object.freeze([
   { id: 'marsa-sea', label: 'La Marsa', lat: 36.8782, lng: 10.3247 },
   { id: 'carthage-suite', label: 'Carthage', lat: 36.8528, lng: 10.3233 },
@@ -82,8 +83,9 @@ export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: con
       const distance = Math.hypot(a.x - b.x, a.y - b.y)
       const previousDistance = pinchDistanceRef.current || distance
       const ratio = distance / previousDistance
-      if (ratio > 1.08) { zoomBy(1); pinchDistanceRef.current = distance }
-      else if (ratio < 0.92) { zoomBy(-1); pinchDistanceRef.current = distance }
+      const zoomDelta = Math.log2(ratio) * PINCH_ZOOM_SENSITIVITY
+      pinchDistanceRef.current = distance
+      if (Number.isFinite(zoomDelta) && Math.abs(zoomDelta) >= 0.005) zoomBy(zoomDelta)
       return
     }
     const dx = next.x - previous.x

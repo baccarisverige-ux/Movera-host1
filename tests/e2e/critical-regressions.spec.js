@@ -115,4 +115,29 @@ test.describe('Movera critical permanent regressions', () => {
     await expect(base).toHaveAttribute('data-vector-status', 'fallback', { timeout: 9000 })
     await expect(page.getByTestId('map-engine')).toBeVisible()
   })
+
+  test('finger pinch zoom is gradual instead of jumping a full level', async ({ page }) => {
+    await page.goto('/map')
+    const surface = page.getByTestId('map-surface')
+    const before = Number(await surface.getAttribute('data-zoom'))
+
+    await surface.evaluate((element) => {
+      const pointer = (type, pointerId, clientX) => element.dispatchEvent(new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId,
+        pointerType: 'touch',
+        clientX,
+        clientY: 220,
+      }))
+      pointer('pointerdown', 1, 100)
+      pointer('pointerdown', 2, 200)
+      pointer('pointermove', 2, 210)
+    })
+
+    await page.waitForTimeout(80)
+    const after = Number(await surface.getAttribute('data-zoom'))
+    expect(after).toBeGreaterThan(before)
+    expect(after - before).toBeLessThan(0.2)
+  })
 })
