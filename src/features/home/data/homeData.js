@@ -1,4 +1,4 @@
-import { listingCatalog } from '../entities/listing/listingCatalog.js'
+import { listingCatalog } from '../../../entities/listing/listingCatalog.js'
 
 export const homeCategories = [
   { id: 'all', label: 'Tout', icon: '◉' },
