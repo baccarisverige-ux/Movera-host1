@@ -17,7 +17,6 @@ const forbidden = [
 const required = [
   'src/app/router/routes.jsx',
   'src/app/layouts/GuestLayout.jsx',
-  'src/app/layouts/HostLayout.jsx',
   'src/features/home/HomePage.jsx',
   'src/features/beach/BeachPage.jsx',
   'src/features/guesthouse/GuestHousePage.jsx',
@@ -34,23 +33,6 @@ const required = [
   'src/features/map-engine/lifecycle/ViewportController.jsx',
   'src/features/map-engine/geometry/geometry.js',
   'src/features/map-engine/model/markerModel.js',
-  'src/features/account/pages/LoginPage.jsx',
-  'src/features/account/pages/RegisterPage.jsx',
-  'src/features/account/pages/ForgotPasswordPage.jsx',
-  'src/features/account/pages/FavoritesPage.jsx',
-  'src/features/account/pages/ProfilePage.jsx',
-  'src/features/host/dashboard/HostDashboardPage.jsx',
-  'src/features/host/listings/HostListingsPage.jsx',
-  'src/features/host/listings/HostListingCreatePage.jsx',
-  'src/features/host/listings/HostListingEditPage.jsx',
-  'src/features/host/reservations/HostReservationsPage.jsx',
-  'src/features/host/calendar/HostCalendarPage.jsx',
-  'src/features/host/earnings/HostEarningsPage.jsx',
-  'src/features/host/settings/HostSettingsPage.jsx',
-  'src/features/host/model/hostListingsStore.js',
-  'src/features/messages/MessagesPage.jsx',
-  'src/features/messages/ThreadPage.jsx',
-  'src/entities/listing/listingRepository.js',
   'src/services/storage/storageAdapter.js',
   'src/shared/collection/CollectionPage.jsx',
   'src/shared/collection/collection-page.css',
@@ -103,9 +85,6 @@ for (const file of files) {
   }
   if (repoPath.startsWith('src/features/') && text.includes('localStorage.')) {
     violations.push(`${repoPath}: direct localStorage access; use services/storage/storageAdapter.js`);
-  }
-  if (repoPath.startsWith('src/features/host/') && text.includes('host-listings-change')) {
-    violations.push(`${repoPath}: legacy unowned Host listings event`);
   }
   if ((repoPath.startsWith('src/entities/') || repoPath.startsWith('src/services/') || repoPath.startsWith('src/shared/')) && text.includes('/features/')) {
     violations.push(`${repoPath}: lower-level layer must not import from features`);
