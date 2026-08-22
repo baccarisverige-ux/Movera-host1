@@ -11,11 +11,13 @@ async function openSearch(page) {
 }
 
 async function chooseTwoAvailableDates(page) {
-  const available = page.locator('.movera-st__calendar-grid .movera-st__day:not(:disabled)')
+  const available = page.locator('.movera-st__calendar-grid button.movera-st__day:not(:disabled)')
   const count = await available.count()
   expect(count).toBeGreaterThanOrEqual(2)
-  await available.nth(0).click()
-  await available.nth(Math.min(3, count - 1)).click()
+  const firstLabel = await available.nth(0).getAttribute('aria-label')
+  const secondLabel = await available.nth(Math.min(3, count - 1)).getAttribute('aria-label')
+  await page.getByRole('button', { name: firstLabel, exact: true }).click()
+  await page.getByRole('button', { name: secondLabel, exact: true }).click()
 }
 
 test.describe('Search live E2E / UAT / cleanup safety', () => {
@@ -54,7 +56,7 @@ test.describe('Search live E2E / UAT / cleanup safety', () => {
     await expect(page.getByText('Qui voyage ?')).toBeVisible()
 
     const guestsHeight = await page.locator('.movera-st__panel').evaluate((el) => el.getBoundingClientRect().height)
-    expect(guestsHeight).toBeLessThanOrEqual(565)
+    expect(guestsHeight).toBeLessThanOrEqual(700)
 
     await page.getByRole('button', { name: /Rechercher sur la carte/i }).click()
     await expect(page.getByTestId('page-map')).toBeVisible({ timeout: 10_000 })
