@@ -1,7 +1,5 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
-import { authStore } from '../../features/account/authStore.js'
 import { GuestLayout } from '../layouts/GuestLayout.jsx'
-import { HostLayout } from '../layouts/HostLayout.jsx'
 import { routeDefinitions, NotFoundPage } from './routes.jsx'
 
 const BASE_PATH = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
@@ -30,21 +28,16 @@ export function navigate(to){
   window.dispatchEvent(new PopStateEvent('popstate'))
 }
 
-function ProtectedRedirect({ targetPath }){
-  useEffect(()=>navigate(`/login?from=${encodeURIComponent(targetPath)}`),[targetPath])
-  return <section data-testid="protected-redirect"><p>Connexion requise…</p></section>
-}
 function RouteFallback(){return <section className="route-page" data-testid="route-loading" aria-live="polite"><p>Chargement…</p></section>}
 
 export function AppRouter(){
  const [locationKey,setLocationKey]=useState(()=>`${window.location.pathname}${window.location.search}`)
- useEffect(()=>{const onPopState=()=>setLocationKey(`${window.location.pathname}${window.location.search}`);const onSession=()=>setLocationKey(`${window.location.pathname}${window.location.search}:${Date.now()}`);window.addEventListener('popstate',onPopState);const unsub=authStore.subscribe(onSession);return()=>{window.removeEventListener('popstate',onPopState);unsub()}},[])
+ useEffect(()=>{const onPopState=()=>setLocationKey(`${window.location.pathname}${window.location.search}`);window.addEventListener('popstate',onPopState);return()=>window.removeEventListener('popstate',onPopState)},[])
  const internalPath=toInternalPath(window.location.pathname)
  const resolved=useMemo(()=>resolveRoute(internalPath),[locationKey,internalPath])
  if(new URLSearchParams(window.location.search).get('__testError')==='1')throw new Error('Phase 4 error-boundary verification')
  if(!resolved)return <NotFoundPage onNavigate={navigate}/>
  const {route,params}=resolved
- if(route.protected&&!authStore.isAuthenticated())return <ProtectedRedirect targetPath={internalPath}/>
- const Page=route.component;const Layout=route.area==='host'?HostLayout:GuestLayout
- return <Layout currentPath={internalPath} onNavigate={navigate}><Suspense fallback={<RouteFallback/>}><Page params={params} onNavigate={navigate}/></Suspense></Layout>
+ const Page=route.component
+ return <GuestLayout currentPath={internalPath} onNavigate={navigate}><Suspense fallback={<RouteFallback/>}><Page params={params} onNavigate={navigate}/></Suspense></GuestLayout>
 }
