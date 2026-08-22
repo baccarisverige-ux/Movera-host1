@@ -74,3 +74,17 @@ test('separate collection routes keep their own identity and shared filtering', 
     expect(await page.locator('.beach-offer').count()).toBeGreaterThan(0)
   }
 })
+
+test('category scroll animation reattaches after returning to Home', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('.b225-categories button[data-category-id="beach"]').click()
+  await expect(page.getByTestId('page-beach')).toBeVisible()
+  await page.getByRole('button', { name: 'Retour à l’accueil' }).click()
+  await expect(page.getByTestId('page-home')).toBeVisible()
+
+  await page.evaluate(() => window.scrollTo(0, 900))
+  await expect.poll(() => page.evaluate(() => Number.parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel'),
+  ))).toBeGreaterThan(10)
+  await expect(page.getByTestId('home-categories')).toHaveClass(/movera-categories-moving-under-header/)
+})
