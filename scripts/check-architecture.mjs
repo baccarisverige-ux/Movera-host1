@@ -47,6 +47,10 @@ const required = [
   'src/features/messages/ThreadPage.jsx',
   'src/entities/listing/listingRepository.js',
   'src/services/storage/storageAdapter.js',
+  'src/shared/ui/index.jsx',
+  'src/shared/ui/premium.jsx',
+  'src/shared/ui/ui.css',
+  'src/shared/motion/index.jsx',
   'src/styles/tokens/index.css',
   'src/styles/tokens/colors.css',
   'src/styles/tokens/typography.css',
@@ -106,4 +110,4 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log(`Architecture guard passed: ${required.length} required boundaries present, retired paths absent, storage centralized, and lower-level layers independent from features.`);
+console.log(`Architecture guard passed: ${required.length} required boundaries present, retired paths absent, storage centralized, shared UI/motion boundaries present, and lower-level layers independent from features.`);
