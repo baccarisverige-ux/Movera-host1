@@ -104,4 +104,15 @@ test.describe('Movera critical permanent regressions', () => {
     expect(after - before).toBeLessThanOrEqual(30)
     expect(errors).toEqual([])
   })
+
+  test('map keeps a visible raster base when the vector provider fails', async ({ page }) => {
+    await page.route('https://tiles.openfreemap.org/**', (route) => route.abort())
+    await page.goto('/map')
+
+    const base = page.locator('.map-base-stack')
+    await expect(base).toBeVisible()
+    await expect(page.locator('.map-tiles img').first()).toBeVisible()
+    await expect(base).toHaveAttribute('data-vector-status', 'fallback', { timeout: 9000 })
+    await expect(page.getByTestId('map-engine')).toBeVisible()
+  })
 })

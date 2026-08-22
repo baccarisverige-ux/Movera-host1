@@ -28,6 +28,7 @@ export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: con
   const [size, setSize] = useState({ width: 390, height: 560 })
   const [lifecycleEvents, setLifecycleEvents] = useState(0)
   const [internalSelectedId, setInternalSelectedId] = useState(null)
+  const [baseMapStatus, setBaseMapStatus] = useState('loading')
   const selectedListingId = controlledSelectedId === undefined ? internalSelectedId : controlledSelectedId
   const previousSelectedRef = useRef(selectedListingId)
   renderCountRef.current += 1
@@ -101,11 +102,11 @@ export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: con
       data-width={size.width} data-height={size.height} data-update-count={updateCountRef.current} data-render-count={renderCountRef.current} data-listener-count="7" data-lifecycle-events={lifecycleEvents}
       onDoubleClick={(event) => { if (!event.target.closest('button')) zoomBy(1) }} onPointerCancel={releasePointer} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
       onPointerUp={releasePointer} onWheel={(event) => { event.preventDefault(); zoomBy(event.deltaY < 0 ? 1 : -1) }}>
-      <VectorBaseLayer viewport={viewport} size={size} />
+      <VectorBaseLayer viewport={viewport} size={size} onStatusChange={setBaseMapStatus} />
       <ClusterLayer markers={markers} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
       {viewport.zoom > 10 ? <MarkerLayer markers={markers} viewport={viewport} size={size} selectedListingId={selectedListingId} onSelect={selectMarker} /> : null}
       <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} />
-      <div className="map-attribution">OpenFreeMap © OpenMapTiles · OpenStreetMap</div>
+      <div className="map-attribution">{baseMapStatus === 'ready' ? 'OpenFreeMap © OpenMapTiles · OpenStreetMap' : '© OpenStreetMap contributors'}</div>
       <ResizeManager targetRef={surfaceRef} onSize={setSize} />
       <ViewportController onLifecycle={() => setLifecycleEvents((count) => count + 1)} />
     </div>
