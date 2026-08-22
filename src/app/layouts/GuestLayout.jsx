@@ -50,7 +50,7 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
 
   return (
     <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isBeachRoute ? ' app-shell--beach' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
-      <header className="app-shell__header" style={isMapRoute || isBeachRoute ? { display: 'none' } : undefined}>
+      <header className="app-shell__header" style={isMapRoute ? { display: 'none' } : undefined}>
         <strong>Movera Host</strong>
       </header>
       <main
