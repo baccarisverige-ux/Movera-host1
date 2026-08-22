@@ -37,17 +37,6 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
   const isMapRoute = currentPath === '/map'
   const isBeachRoute = currentPath === '/plage'
 
-  const handleGuestCapture = (event) => {
-    if (currentPath !== '/') return
-    const button = event.target.closest?.('[data-testid="home-categories"] button')
-    if (!button) return
-    const beachIcon = button.querySelector('img[src*="plage-category"]')
-    if (!beachIcon) return
-    event.preventDefault()
-    event.stopPropagation()
-    onNavigate('/plage')
-  }
-
   return (
     <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isBeachRoute ? ' app-shell--beach' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
       <header className="app-shell__header" style={isMapRoute ? { display: 'none' } : undefined}>
@@ -58,7 +47,6 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
         id="main-content"
         tabIndex={-1}
         style={isMapRoute ? mapContentStyle : isBeachRoute ? beachContentStyle : undefined}
-        onClickCapture={handleGuestCapture}
       >
         {children}
       </main>
