@@ -57,3 +57,17 @@ test('critical collection pages contain no broken project images', async ({ page
   await villaImage.scrollIntoViewIfNeeded()
   await expect.poll(() => villaImage.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
 })
+
+test('separate collection routes keep their own identity and shared filtering', async ({ page }) => {
+  for (const collection of [
+    { route: '/plage', testId: 'page-beach', title: /La Tunisie\s*côté mer\./, city: 'Gammarth' },
+    { route: '/maison-d-hote', testId: 'page-guesthouse', title: /L’accueil tunisien,\s*autrement\./, city: 'La Marsa' },
+  ]) {
+    await page.goto(`/Movera-host1${collection.route}`)
+    await expect(page.getByTestId(collection.testId)).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(collection.title)
+    await page.getByLabel('Ville en Tunisie').fill(collection.city)
+    await expect(page.locator('.beach-results__head > div > span')).toHaveText(`Séjours à ${collection.city}`)
+    expect(await page.locator('.beach-offer').count()).toBeGreaterThan(0)
+  }
+})
