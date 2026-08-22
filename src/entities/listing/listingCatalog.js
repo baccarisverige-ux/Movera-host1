@@ -1,3 +1,5 @@
+import VILLA_EMERAUDE_IMAGE from './assets/villa-emeraude.webp'
+
 /**
  * Canonical listing catalogue.
  *
@@ -143,7 +145,7 @@ const PUBLIC_LISTING_META = Object.freeze({
   'villa-perle': { locationLabel:'Gammarth', category:'beach prestige', image:'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Collection' },
   'maison-bleue': { locationLabel:'Sidi Bou Saïd', category:'prestige guesthouse', image:'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Signature' },
   'res-carthage': { locationLabel:'Carthage', category:'family guesthouse experience', image:'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Nouveau' },
-  'villa-emeraude': { locationLabel:'Gammarth', category:'prestige beach', image:'/Movera-host1/assets/listing-villa-emeraude.webp', badge:'Prestige' },
+  'villa-emeraude': { locationLabel:'Gammarth', category:'prestige beach', image:VILLA_EMERAUDE_IMAGE, badge:'Prestige' },
   'loft-cote': { locationLabel:'La Marsa', category:'beach', image:'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Design' },
   'villa-jasmin': { locationLabel:'Carthage', category:'prestige', image:'https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Signature' },
   'dar-sidi': { locationLabel:'Sidi Bou Saïd', category:'guesthouse', image:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=90&fm=webp', badge:'Maison d’hôtes' },

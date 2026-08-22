@@ -56,7 +56,7 @@ test('critical collection pages contain no broken project images', async ({ page
 
   await page.goto('/')
   const villaImage = page.getByTestId('home-card-villa-emeraude').locator('img').first()
-  await expect(villaImage).toHaveAttribute('src', '/Movera-host1/assets/listing-villa-emeraude.webp')
+  await expect(villaImage).toHaveAttribute('src', /villa-emeraude-.*\.webp$/)
   await villaImage.scrollIntoViewIfNeeded()
   await expect.poll(() => villaImage.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
 })

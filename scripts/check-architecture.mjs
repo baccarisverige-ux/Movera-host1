@@ -18,8 +18,19 @@ const required = [
   'src/app/router/routes.jsx',
   'src/app/layouts/GuestLayout.jsx',
   'src/features/home/HomePage.jsx',
+  'src/features/home/data/homeData.js',
+  'src/features/home/assets/all-category-globe.png',
+  'src/features/home/assets/family-category.jpg',
+  'src/features/home/assets/maison-hote-category.png',
+  'src/features/home/assets/partner-category.png',
+  'src/features/home/assets/plage-category.jpg',
+  'src/features/home/assets/prestige-category.webp',
+  'src/features/home/assets/prestige-star.png',
+  'src/features/home/assets/tunisia-regions-3d.webp',
   'src/features/beach/BeachPage.jsx',
+  'src/features/beach/assets/hero.webp',
   'src/features/guesthouse/GuestHousePage.jsx',
+  'src/features/guesthouse/assets/hero.webp',
   'src/features/search/SearchTransitionHost.jsx',
   'src/features/search/searchState.js',
   'src/features/map/MapPage.jsx',
@@ -34,6 +45,7 @@ const required = [
   'src/features/map-engine/geometry/geometry.js',
   'src/features/map-engine/model/markerModel.js',
   'src/services/storage/storageAdapter.js',
+  'src/entities/listing/assets/villa-emeraude.webp',
   'src/shared/collection/CollectionPage.jsx',
   'src/shared/collection/collection-page.css',
   'src/shared/collection/collection-page-scale.css',
@@ -75,6 +87,10 @@ for (const file of files) {
   if (!/\.(js|jsx|mjs|css)$/.test(file)) continue;
   const text = await readFile(file, 'utf8');
 
+  if (/data:image\//i.test(text)) {
+    violations.push(`${repoPath}: embedded image data; store page media in its owning assets folder`);
+  }
+
   for (const legacy of forbidden.filter(item => item.endsWith('/') && item !== 'src/pages/')) {
     const fragment = legacy.replace(/^src\//, '');
     if (text.includes(fragment)) violations.push(`${repoPath}: references ${fragment}`);
@@ -91,9 +107,14 @@ for (const file of files) {
   }
 }
 
+const indexHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+if (/data:image\//i.test(indexHtml)) {
+  violations.push('index.html: embedded image data; use a separate bootstrap asset');
+}
+
 if (violations.length) {
   console.error('Architecture guard failed:\n' + violations.map(v => `- ${v}`).join('\n'));
   process.exit(1);
 }
 
-console.log(`Architecture guard passed: ${required.length} required boundaries present, retired paths absent, storage centralized, and lower-level layers independent from features.`);
+console.log(`Architecture guard passed: ${required.length} required boundaries present, page media externalized, retired paths absent, storage centralized, and lower-level layers independent from features.`);

@@ -36,13 +36,13 @@
 
 .b225-categories button[data-category-id="experience"] > span[aria-hidden="true"]{
   width:24px!important;
-  background-image:url('/Movera-host1/assets/prestige-category.webp')!important;
+  background-image:url('../features/home/assets/prestige-category.webp')!important;
 }
 
 .b225-categories button[data-category-id="partner"] > span[aria-hidden="true"]{
   width:28px!important;
   flex-basis:28px!important;
-  background-image:url('/Movera-host1/assets/partner-category.png')!important;
+  background-image:url('../features/home/assets/partner-category.png')!important;
 }
 
 .b225-categories button[data-category-id="experience"]::before,

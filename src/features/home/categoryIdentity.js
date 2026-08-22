@@ -8,7 +8,7 @@ const CATEGORY_IDS_BY_LABEL = new Map([
   ['Partenaire', 'partner'],
 ])
 
-const PRESTIGE_ICON_SRC = '/Movera-host1/assets/prestige-star.png'
+import PRESTIGE_ICON_SRC from './assets/prestige-star.png'
 let scheduled = false
 
 function getCategoryLabel(button) {

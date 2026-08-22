@@ -1,6 +1,7 @@
 import { listingCatalog } from '../../entities/listing/listingCatalog.js'
 import { CollectionPage } from '../../shared/collection/CollectionPage.jsx'
 import '../../shared/collection/portrait-collection.css'
+import HERO_IMAGE from './assets/hero.webp'
 
 const BEACH_OFFERS = listingCatalog.filter((item) => item.category.split(' ').includes('beach'))
 
@@ -10,7 +11,7 @@ export function BeachPage() {
       offers={BEACH_OFFERS}
       pageClassName="portrait-collection-page"
       hero={{
-        src: '/Movera-host1/assets/plage-page-hero.webp',
+        src: HERO_IMAGE,
         alt: 'Collection Plage Movera',
         className: 'portrait-collection-hero__image',
         testId: 'page-beach',
