@@ -47,6 +47,7 @@ const required = [
   'src/features/host/calendar/HostCalendarPage.jsx',
   'src/features/host/earnings/HostEarningsPage.jsx',
   'src/features/host/settings/HostSettingsPage.jsx',
+  'src/features/host/model/hostListingsStore.js',
   'src/features/messages/MessagesPage.jsx',
   'src/features/messages/ThreadPage.jsx',
   'src/entities/listing/listingRepository.js',
@@ -102,6 +103,9 @@ for (const file of files) {
   }
   if (repoPath.startsWith('src/features/') && text.includes('localStorage.')) {
     violations.push(`${repoPath}: direct localStorage access; use services/storage/storageAdapter.js`);
+  }
+  if (repoPath.startsWith('src/features/host/') && text.includes('host-listings-change')) {
+    violations.push(`${repoPath}: legacy unowned Host listings event`);
   }
   if ((repoPath.startsWith('src/entities/') || repoPath.startsWith('src/services/') || repoPath.startsWith('src/shared/')) && text.includes('/features/')) {
     violations.push(`${repoPath}: lower-level layer must not import from features`);
