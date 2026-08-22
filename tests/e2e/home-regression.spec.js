@@ -68,6 +68,8 @@ test('separate collection routes keep their own identity and shared filtering', 
   ]) {
     await page.goto(`/Movera-host1${collection.route}`)
     await expect(page.getByTestId(collection.testId)).toBeVisible()
+    await expect(page.locator('.app-shell__header')).toBeVisible()
+    await expect(page.locator('.app-shell__header')).toContainText('Movera Host')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(collection.title)
     await page.getByLabel('Ville en Tunisie').fill(collection.city)
     await expect(page.locator('.beach-results__head > div > span')).toHaveText(`Séjours à ${collection.city}`)
