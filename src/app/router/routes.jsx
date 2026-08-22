@@ -1,9 +1,9 @@
 import { lazy } from 'react'
 import { HomePage } from '../../features/home/HomePage.jsx'
+import { BeachPage } from '../../features/beach/BeachPage.jsx'
+import { GuestHousePage } from '../../features/guesthouse/GuestHousePage.jsx'
 
 const lazyNamed = (loader, name) => lazy(() => loader().then(module => ({ default: module[name] })))
-const BeachPage = lazyNamed(() => import('../../features/beach/BeachPage.jsx'), 'BeachPage')
-const GuestHousePage = lazyNamed(() => import('../../features/guesthouse/GuestHousePage.jsx'), 'GuestHousePage')
 const CarouselLab = lazyNamed(() => import('../../features/carousel/CarouselShell.jsx'), 'CarouselLab')
 const GestureLab = lazyNamed(() => import('../../features/carousel/GestureLab.jsx'), 'GestureLab')
 const MapPage = lazyNamed(() => import('../../features/map/MapPage.jsx'), 'MapPage')
