@@ -4,10 +4,9 @@ import '../../shared/collection/portrait-collection.css'
 
 const BEACH_OFFERS = listingCatalog.filter((item) => item.category.split(' ').includes('beach'))
 
-export function BeachPage({ onNavigate }) {
+export function BeachPage() {
   return (
     <CollectionPage
-      onNavigate={onNavigate}
       offers={BEACH_OFFERS}
       pageClassName="portrait-collection-page"
       hero={{
