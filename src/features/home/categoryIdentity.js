@@ -2,8 +2,8 @@ const CATEGORY_IDS_BY_LABEL = new Map([
   ['Tout', 'all'],
   ['Maison d’hôte', 'guesthouse'],
   ['Plage', 'beach'],
-  ['Famille', 'family'],
-  ['Prestige', 'prestige'],
+  ['Appartement', 'family'],
+  ['Villa', 'prestige'],
   ['Expérience', 'experience'],
   ['Partenaire', 'partner'],
 ])
