@@ -71,6 +71,7 @@ test('separate collection routes keep their own identity and shared filtering', 
     await expect(page.locator('.app-shell__header')).toBeVisible()
     await expect(page.locator('.app-shell__header')).toContainText('Movera Host')
     await expect(page.locator('.beach-hero__top, .beach-glass-button, .beach-hero__counter')).toHaveCount(0)
+    await expect(page.locator('.beach-hero__image')).toHaveAttribute('src', /page-hero\.webp$/)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(collection.title)
     await page.getByLabel('Ville en Tunisie').fill(collection.city)
     await expect(page.locator('.beach-results__head > div > span')).toHaveText(`Séjours à ${collection.city}`)

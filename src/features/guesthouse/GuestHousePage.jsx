@@ -10,7 +10,7 @@ export function GuestHousePage() {
       offers={GUESTHOUSE_OFFERS}
       pageClassName="portrait-collection-page"
       hero={{
-        src: '/Movera-host1/assets/guesthouse-page-hero.jpeg',
+        src: '/Movera-host1/assets/guesthouse-page-hero.webp',
         alt: 'Maison d’hôte Movera',
         className: 'portrait-collection-hero__image',
         testId: 'page-guesthouse',
