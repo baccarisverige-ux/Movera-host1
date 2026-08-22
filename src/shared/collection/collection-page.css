@@ -1,12 +1,6 @@
 .beach-page{width:min(100%,430px);min-height:100svh;margin:0 auto;padding:0 0 92px;background:#f6f5f2;color:#171816;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .beach-hero{position:relative;height:clamp(310px,43svh,390px);overflow:hidden;background:#ddd;border-radius:0 0 30px 30px;isolation:isolate}
 .beach-hero__image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;transform:scale(1.01)}
-.beach-hero__veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,14,12,.2) 0%,rgba(12,14,12,.03) 38%,rgba(12,14,12,.12) 60%,rgba(12,14,12,.76) 100%)}
-.beach-hero__top{position:absolute;z-index:2;top:0;left:0;right:0;display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:max(16px,env(safe-area-inset-top)) 16px 12px}
-.beach-glass-button{width:40px;height:40px;border:1px solid rgba(255,255,255,.55);border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.32);color:#fff;backdrop-filter:blur(16px) saturate(125%);-webkit-backdrop-filter:blur(16px) saturate(125%);box-shadow:0 7px 24px rgba(0,0,0,.13)}
-.beach-glass-button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.beach-hero__brand{justify-self:center;margin-left:34px;color:#fff;font-size:12px;font-weight:760;letter-spacing:.01em;text-shadow:0 1px 8px rgba(0,0,0,.16)}
-.beach-hero__counter{border:1px solid rgba(255,255,255,.42);border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.2);color:#fff;font-size:10px;font-weight:700;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .beach-hero__copy{position:absolute;z-index:2;left:20px;right:20px;bottom:28px;color:#fff}
 .beach-hero__copy>span{display:inline-block;margin-bottom:8px;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;opacity:.88}
 .beach-hero__copy h1{margin:0;font-size:clamp(34px,10vw,46px);font-weight:720;line-height:.94;letter-spacing:-.047em;text-shadow:0 3px 18px rgba(0,0,0,.2)}
@@ -71,12 +65,6 @@
 /* Requested hero/search refinement */
 .beach-hero{height:auto;overflow:visible;background:#fff;border-radius:0;isolation:auto}
 .beach-hero__image{position:relative;inset:auto;width:100%;height:clamp(205px,60vw,255px);display:block;object-fit:contain;object-position:center;transform:none;background:#fff;filter:none}
-.beach-hero__veil{display:none}
-.beach-hero__top{position:relative;top:auto;left:auto;right:auto;z-index:2;grid-template-columns:36px 1fr auto;gap:8px;padding:8px 14px 0;background:#fff}
-.beach-glass-button{width:34px;height:34px;border:1px solid #e6e6e1;background:#f7f7f4;color:#252724;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
-.beach-glass-button svg{width:17px;height:17px}
-.beach-hero__brand{margin-left:24px;color:#252724;font-size:10px;text-shadow:none}
-.beach-hero__counter{border-color:#e5e5e0;padding:6px 9px;background:#f7f7f4;color:#555954;font-size:9px;backdrop-filter:none;-webkit-backdrop-filter:none}
 .beach-hero__copy{position:relative;left:auto;right:auto;bottom:auto;z-index:1;padding:10px 16px 14px;background:#fff;color:#171816}
 .beach-hero__copy>span{margin-bottom:5px;font-size:8px;letter-spacing:.13em;opacity:.62}
 .beach-hero__copy h1{font-size:clamp(22px,6.4vw,27px);line-height:1;letter-spacing:-.035em;text-shadow:none}
