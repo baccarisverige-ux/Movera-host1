@@ -39,6 +39,18 @@ export function zoomViewport(viewport, delta) {
   return { ...viewport, zoom: clamp(viewport.zoom + delta, MIN_ZOOM, MAX_ZOOM) }
 }
 
+export function zoomViewportAtPoint(viewport, delta, point, size) {
+  const zoom = clamp(viewport.zoom + delta, MIN_ZOOM, MAX_ZOOM)
+  if (zoom === viewport.zoom) return viewport
+  const center = project(viewport.lat, viewport.lng, viewport.zoom)
+  const offsetX = point.x - size.width / 2
+  const offsetY = point.y - size.height / 2
+  const anchor = unproject(center.x + offsetX, center.y + offsetY, viewport.zoom)
+  const projectedAnchor = project(anchor.lat, anchor.lng, zoom)
+  const nextCenter = unproject(projectedAnchor.x - offsetX, projectedAnchor.y - offsetY, zoom)
+  return { ...viewport, ...nextCenter, zoom }
+}
+
 export function screenPoint(lat, lng, viewport, size) {
   const point = project(lat, lng, viewport.zoom)
   const center = project(viewport.lat, viewport.lng, viewport.zoom)

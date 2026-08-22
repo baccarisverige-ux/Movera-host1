@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { storageAdapter } from '../../services/storage/storageAdapter.js'
-import { MapContainer } from '../map-engine/MapContainer.jsx'
+import { SearchMapPreview } from '../map-engine/SearchMapPreview.jsx'
 import { beginMapHandoff, endMapHandoff, MAP_READY_EVENT } from './mapHandoff.js'
 import { GuestSelector } from './GuestSelector.jsx'
 import { SearchCalendar } from './SearchCalendar.jsx'
@@ -349,7 +349,7 @@ export function SearchTransitionHost({ onNavigate }) {
   return createPortal(
     <div className={rootClass} style={rootStyle} data-testid="search-transition" data-step={step} data-ready={ready ? 'true' : 'false'} data-address-mode={addressMode ? 'true' : 'false'} data-exact-fit="true">
       <div className="movera-st__map-stage" aria-hidden="true">
-        <MapContainer key={state.destination?.id || 'search-overview'} initialViewport={selectedViewport} />
+        <SearchMapPreview viewport={selectedViewport} />
       </div>
       <div className="movera-st__map-veil" aria-hidden="true" />
 

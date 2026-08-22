@@ -105,14 +105,12 @@ test.describe('Movera critical permanent regressions', () => {
     expect(errors).toEqual([])
   })
 
-  test('map keeps a visible raster base when the vector provider fails', async ({ page }) => {
-    await page.route('https://tiles.openfreemap.org/**', (route) => route.abort())
+  test('map uses one reliable raster renderer without a hidden vector runtime', async ({ page }) => {
     await page.goto('/map')
 
-    const base = page.locator('.map-base-stack')
-    await expect(base).toBeVisible()
     await expect(page.locator('.map-tiles img').first()).toBeVisible()
-    await expect(base).toHaveAttribute('data-vector-status', 'fallback', { timeout: 9000 })
+    await expect(page.locator('.maplibregl-map')).toHaveCount(0)
+    await expect(page.locator('canvas')).toHaveCount(0)
     await expect(page.getByTestId('map-engine')).toBeVisible()
   })
 
@@ -133,11 +131,23 @@ test.describe('Movera critical permanent regressions', () => {
       pointer('pointerdown', 1, 100)
       pointer('pointerdown', 2, 200)
       pointer('pointermove', 2, 210)
+      pointer('pointerup', 1, 100)
+      pointer('pointerup', 2, 210)
     })
 
     await page.waitForTimeout(80)
     const after = Number(await surface.getAttribute('data-zoom'))
     expect(after).toBeGreaterThan(before)
     expect(after - before).toBeLessThan(0.2)
+    const scale = Number(await page.getByTestId('map-tile-layer').getAttribute('data-scale'))
+    expect(scale).toBeGreaterThan(1)
+  })
+
+  test('search popup uses a lightweight map preview', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: /où souhaitez-vous aller|rechercher/i }).first().click()
+    await expect(page.getByTestId('search-map-preview')).toBeVisible()
+    await expect(page.locator('.movera-st__map-stage canvas')).toHaveCount(0)
+    await expect(page.locator('.movera-st__map-stage .map-controls')).toHaveCount(0)
   })
 })
