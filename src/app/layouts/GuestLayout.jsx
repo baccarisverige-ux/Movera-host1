@@ -37,9 +37,10 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
   const activePath = getGuestNavigationPath(currentPath)
   const isMapRoute = currentPath === '/map'
   const isCollectionRoute = isGuestCollectionRoute(currentPath)
+  const isBeachRoute = currentPath === '/plage'
 
   return (
-    <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isCollectionRoute ? ' app-shell--collection' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
+    <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isCollectionRoute ? ' app-shell--collection' : ''}${isBeachRoute ? ' app-shell--beach' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
       <header className="app-shell__header" style={isMapRoute ? { display: 'none' } : undefined}>
         <strong>Movera Host</strong>
       </header>
