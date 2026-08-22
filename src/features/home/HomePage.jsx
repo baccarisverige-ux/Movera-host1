@@ -11,10 +11,23 @@ import BEACH_CATEGORY_ICON from './assets/plage-category.jpg'
 import APPARTEMENT_CATEGORY_ICON from './assets/appartement-category.png'
 import GUESTHOUSE_CATEGORY_ICON from './assets/maison-hote-category.png'
 import VILLA_CATEGORY_ICON from './assets/villa-category.png'
+import EXPERIENCE_CATEGORY_ICON from './assets/experience-category.webp'
+import PARTNER_CATEGORY_ICON from './assets/partner-category.png'
 import { getSelectedHomeCategory, setSelectedHomeCategory } from './homeCategorySelection.js'
+
+const CATEGORY_ARTWORK = {
+ all: ALL_CATEGORY_GLOBE,
+ guesthouse: GUESTHOUSE_CATEGORY_ICON,
+ beach: BEACH_CATEGORY_ICON,
+ family: APPARTEMENT_CATEGORY_ICON,
+ prestige: VILLA_CATEGORY_ICON,
+ experience: EXPERIENCE_CATEGORY_ICON,
+ partner: PARTNER_CATEGORY_ICON,
+}
 
 function SearchIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>}
 function ArrowIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>}
+function CategoryArtwork({id}){const src=CATEGORY_ARTWORK[id];return src?<img className="b225-category-icon" data-category-icon={id} src={src} alt="" aria-hidden="true" decoding="async"/>:null}
 function ListingCard({item,featured=false}){return <article className={`b225-card${featured?' b225-featured-card':''}`} data-testid={`home-card-${item.id}`}><div className="b225-card__image"><img src={item.image} alt={item.title} loading="lazy" decoding="async"/>{item.badge?<span className="b225-card__badge">{item.badge}</span>:null}<button type="button" className="b225-card__heart" aria-label={`Ajouter ${item.title} aux favoris`}>♡</button></div><div className="b225-card__body">{featured?<p className="b225-featured-line"><strong>{item.title}</strong><span> — {item.price} {item.currency}</span></p>:<><div className="b225-card__topline"><h3>{item.title}</h3><span>★ {item.rating||'4.90'}</span></div><p>{item.location} · Tunisie</p><p className="b225-card__price"><strong>{item.price} {item.currency}</strong> <span>/ nuit</span></p></>}</div></article>}
 function Collection({title,items}){return <section className="b225-section"><div className="b225-section__title"><h2>{title}</h2><button type="button" aria-label={`Voir ${title}`}><ArrowIcon/></button></div><div className="b225-scroll">{items.map(item=><ListingCard key={`${title}-${item.id}`} item={item}/>)}</div></section>}
 
@@ -24,7 +37,7 @@ export function HomePage({onNavigate}){
  const featured=useMemo(()=>{const q=query.trim().toLowerCase();return homeFeatured.filter(item=>(category==='all'||item.category.split(' ').includes(category))&&(!q||`${item.title} ${item.location}`.toLowerCase().includes(q)))},[category,query]);
  return <div className="b225-home" data-testid="page-home">
  <header className="b225-home-header"><div className="b225-brand">Movera Host</div><label className="b225-search b225-home-map-search" aria-label="Rechercher une destination"><SearchIcon/><span className="b225-home-map-search__copy"><strong>Explorez autrement</strong><span>Destination · Dates · Voyageurs</span></span><input data-testid="home-search" type="search" value={query} onChange={e=>setQuery(e.target.value)} aria-label="Destination"/><span className="b225-home-map-filter-button" aria-hidden="true">≡</span></label></header>
- <div className="b225-categories" data-testid="home-categories">{homeCategories.map(item=><button key={item.id} type="button" data-category-id={item.id} data-active={category===item.id?'true':'false'} aria-pressed={category===item.id} onClick={()=>selectCategory(item)}>{item.id==='all'?<img src={ALL_CATEGORY_GLOBE} alt="" aria-hidden="true"/>:item.id==='guesthouse'?<img src={GUESTHOUSE_CATEGORY_ICON} alt="" aria-hidden="true" style={{width:22,height:22,objectFit:'contain',display:'block',flex:'0 0 22px',background:'transparent',transform:'scale(1.15)'}}/>:item.id==='beach'?<img src={BEACH_CATEGORY_ICON} alt="" aria-hidden="true" style={{width:24,height:24,objectFit:'contain',display:'block',flex:'0 0 24px',background:'transparent',mixBlendMode:'multiply',transform:'scale(1.15)'}}/>:item.id==='family'?<img src={APPARTEMENT_CATEGORY_ICON} alt="" aria-hidden="true" style={{width:24,height:24,objectFit:'contain',display:'block',flex:'0 0 24px',background:'transparent'}}/>:item.id==='prestige'?<img src={VILLA_CATEGORY_ICON} alt="" aria-hidden="true" style={{width:24,height:24,objectFit:'contain',display:'block',flex:'0 0 24px',background:'transparent'}}/>:<span aria-hidden="true">{item.icon}</span>}{item.label}</button>)}</div>
+ <div className="b225-categories" data-testid="home-categories">{homeCategories.map(item=><button key={item.id} type="button" data-category-id={item.id} data-active={category===item.id?'true':'false'} aria-pressed={category===item.id} onClick={()=>selectCategory(item)}><CategoryArtwork id={item.id}/>{item.label}</button>)}</div>
  <section className="b225-welcome" aria-label="Bienvenue chez Movera"><div><span>Bienvenue chez Movera</span><div className="b225-signs"><button type="button" onClick={()=>onNavigate('/map?destination=sidi-bou-said')}>Sidi Bou Saïd</button><button type="button" onClick={()=>onNavigate('/map?destination=sousse')}>Sousse</button><button type="button" onClick={()=>onNavigate('/map?destination=hammamet')}>Hammamet</button></div></div><button type="button" className="b225-welcome__visual" data-testid="home-tunisia-map" aria-label="Explorer la carte de Tunisie" onClick={()=>onNavigate('/map')}><span aria-hidden="true">MH</span></button></section>
  <section className="b225-section b225-featured-section" data-testid="home-featured"><div className="b225-section__title"><h2>Sélection d'Exception</h2></div><div className="b225-scroll b225-featured-scroll">{featured.length?featured.map(item=><ListingCard key={item.id} item={item} featured/>):<p className="b225-empty">Aucune offre pour cette sélection.</p>}</div></section>
  <section className="b225-section b225-destinations-section" data-testid="home-destinations"><div className="b225-section__title"><h2>Destinations Privilégiées</h2></div><div className="b225-cities">{homeDestinations.map((item,index)=><button key={item.id} type="button" className="b225-city" onClick={()=>onNavigate(`/map?destination=${item.id}`)}><span className="b225-city__image"><img src={item.image} alt={item.label} loading={index===0?'eager':'lazy'} decoding="async"/></span><span className="b225-city__copy"><strong>{item.label}</strong><span>{item.subtitle}</span></span></button>)}</div></section>
