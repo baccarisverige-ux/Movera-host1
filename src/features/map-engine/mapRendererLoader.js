@@ -9,7 +9,3 @@ export function loadMapRenderer() {
   }
   return rendererPromise
 }
-
-export function preloadMapRenderer() {
-  void loadMapRenderer()
-}
