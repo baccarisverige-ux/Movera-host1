@@ -1,6 +1,6 @@
 import { listingCatalog } from '../../entities/listing/listingCatalog.js'
 import { CollectionPage } from '../../shared/collection/CollectionPage.jsx'
-import './guesthouse-page.css'
+import '../../shared/collection/portrait-collection.css'
 
 const GUESTHOUSE_OFFERS = listingCatalog.filter((item) => item.category.split(' ').includes('guesthouse'))
 
@@ -9,11 +9,11 @@ export function GuestHousePage({ onNavigate }) {
     <CollectionPage
       onNavigate={onNavigate}
       offers={GUESTHOUSE_OFFERS}
-      pageClassName="guesthouse-page"
+      pageClassName="portrait-collection-page"
       hero={{
         src: '/Movera-host1/assets/guesthouse-page-hero.jpeg',
         alt: 'Maison d’hôte Movera',
-        className: 'guesthouse-hero__image',
+        className: 'portrait-collection-hero__image',
         testId: 'page-guesthouse',
       }}
       collectionLabel="Collection Maison d’hôte"
