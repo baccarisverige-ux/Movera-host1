@@ -1,46 +1,42 @@
-/* Final physical category-button layer.
-   Keeps current size/palette; makes both raised and pressed states read as real physical buttons. */
+/* Final category-button material layer.
+   Compact, premium and physical without the heavy plastic 6D effect. */
 
 .b225-home .b225-categories{
   overflow-x:auto!important;
   overflow-y:visible!important;
-  padding-bottom:22px!important;
+  padding-bottom:15px!important;
 }
 
-/* UNSELECTED = clearly raised 6D physical button. */
+/* UNSELECTED = compact raised Airbnb-style physical pill. */
 .b225-home .b225-categories button{
   position:relative!important;
   isolation:isolate!important;
   overflow:visible!important;
-  border-radius:999px!important;
-  border:1px solid rgba(145,145,140,.34)!important;
-  background:linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #fefefd 28%,
-    #f8f8f6 60%,
-    #eeeeeb 100%
-  )!important;
+  height:44px!important;
+  min-height:44px!important;
+  max-height:44px!important;
+  padding:0 14px!important;
+  gap:7px!important;
+  border-radius:22px!important;
+  border:1px solid rgba(128,128,123,.18)!important;
+  background:linear-gradient(180deg,#ffffff 0%,#fbfbfa 58%,#f4f4f2 100%)!important;
   box-shadow:
-    inset 0 2px 1px rgba(255,255,255,1),
-    inset 1px 0 1px rgba(255,255,255,.82),
-    inset -1px 0 1px rgba(112,112,107,.10),
-    inset 0 -2px 2px rgba(96,96,91,.14),
-    1px 0 0 rgba(126,126,120,.08),
-    -1px 0 0 rgba(255,255,255,.88),
-    0 2px 0 rgba(255,255,255,.92),
-    0 4px 0 rgba(190,190,184,.78),
-    0 7px 0 rgba(158,158,152,.50),
-    0 11px 15px rgba(35,35,32,.16)!important;
-  transform:translateY(-3px)!important;
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(95,95,90,.08),
+    0 1px 0 rgba(255,255,255,.9),
+    0 2px 0 rgba(198,198,193,.62),
+    0 4px 7px rgba(35,35,32,.07)!important;
+  transform:translateY(-1px)!important;
+  font-size:13.5px!important;
+  font-weight:560!important;
   transition:
-    transform .15s cubic-bezier(.2,.8,.2,1),
-    box-shadow .15s ease,
-    background .15s ease,
-    border-color .15s ease!important;
+    transform .14s cubic-bezier(.2,.8,.2,1),
+    box-shadow .14s ease,
+    background .14s ease,
+    border-color .14s ease!important;
 }
 
-/* Real lower body / tranche visible before click. */
+/* Slim lower edge: enough depth to read as a real button, not a plastic block. */
 .b225-home .b225-categories button::before{
   content:""!important;
   position:absolute!important;
@@ -48,24 +44,15 @@
   pointer-events:none!important;
   left:2px!important;
   right:2px!important;
-  top:6px!important;
-  bottom:-8px!important;
-  border-radius:999px!important;
-  background:linear-gradient(
-    180deg,
-    rgba(230,230,226,.98) 0%,
-    rgba(206,206,200,.98) 48%,
-    rgba(178,178,171,.96) 100%
-  )!important;
-  border:1px solid rgba(150,150,144,.16)!important;
-  box-shadow:
-    inset 0 -2px 1px rgba(105,105,100,.10),
-    0 4px 0 rgba(136,136,130,.11),
-    0 7px 9px rgba(35,35,32,.13)!important;
-  opacity:1!important;
+  top:4px!important;
+  bottom:-3px!important;
+  border-radius:inherit!important;
+  background:linear-gradient(180deg,#ececea 0%,#d9d9d5 100%)!important;
+  box-shadow:0 2px 3px rgba(35,35,32,.055)!important;
+  opacity:.92!important;
 }
 
-/* Curved highlight on the upper face. */
+/* Small curved light reflection. */
 .b225-home .b225-categories button::after{
   content:""!important;
   position:absolute!important;
@@ -73,61 +60,67 @@
   pointer-events:none!important;
   left:7px!important;
   right:7px!important;
-  top:3px!important;
-  height:44%!important;
+  top:2px!important;
+  height:34%!important;
   border-radius:999px 999px 48% 48%!important;
-  background:linear-gradient(
-    180deg,
-    rgba(255,255,255,.92) 0%,
-    rgba(255,255,255,.42) 48%,
-    rgba(255,255,255,0) 100%
-  )!important;
-  opacity:.88!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,0))!important;
+  opacity:.54!important;
 }
 
-/* SELECTED = physically pushed down into the base. */
+.b225-home .b225-category-icon{
+  width:22px!important;
+  height:22px!important;
+  max-width:22px!important;
+  max-height:22px!important;
+  flex:0 0 22px!important;
+}
+
+/* SELECTED = softly pressed into the same material. */
 .b225-home .b225-categories button[data-active='true']{
-  border-color:rgba(137,137,132,.30)!important;
-  background:linear-gradient(
-    180deg,
-    #e8e8e5 0%,
-    #eeeeeb 46%,
-    #f4f4f2 100%
-  )!important;
+  border-color:rgba(116,116,111,.16)!important;
+  background:linear-gradient(180deg,#e9e9e6 0%,#eeeeeb 58%,#f3f3f1 100%)!important;
   box-shadow:
-    inset 0 4px 7px rgba(48,48,44,.18),
-    inset 0 1px 1px rgba(70,70,66,.09),
-    inset 0 -2px 1px rgba(255,255,255,.88),
-    inset 2px 0 2px rgba(65,65,61,.04),
-    inset -2px 0 2px rgba(65,65,61,.04),
-    0 1px 0 rgba(255,255,255,.62),
-    0 2px 3px rgba(35,35,32,.07)!important;
-  transform:translateY(4px)!important;
+    inset 0 2px 4px rgba(44,44,40,.11),
+    inset 0 -1px 0 rgba(255,255,255,.82),
+    0 1px 1px rgba(35,35,32,.035)!important;
+  transform:translateY(1.5px)!important;
 }
 
 .b225-home .b225-categories button[data-active='true']::before{
-  top:8px!important;
-  bottom:-2px!important;
-  opacity:.30!important;
-  box-shadow:0 1px 2px rgba(35,35,32,.06)!important;
+  top:5px!important;
+  bottom:-1px!important;
+  opacity:.26!important;
+  box-shadow:none!important;
 }
 
 .b225-home .b225-categories button[data-active='true']::after{
-  opacity:.24!important;
+  opacity:.20!important;
 }
 
-/* Touch gives one more millimetre of travel. */
 .b225-home .b225-categories button:active{
-  transform:translateY(5px) scale(.987)!important;
+  transform:translateY(2px) scale(.986)!important;
   box-shadow:
-    inset 0 5px 8px rgba(45,45,42,.20),
-    inset 0 -1px 1px rgba(255,255,255,.76),
-    0 1px 2px rgba(35,35,32,.045)!important;
+    inset 0 3px 5px rgba(44,44,40,.13),
+    inset 0 -1px 0 rgba(255,255,255,.76),
+    0 1px 1px rgba(35,35,32,.025)!important;
 }
 
-.b225-home .b225-categories button:active::before{
-  bottom:-1px!important;
-  opacity:.22!important;
+@media(max-width:350px){
+  .b225-home .b225-categories button{
+    height:42px!important;
+    min-height:42px!important;
+    max-height:42px!important;
+    padding-inline:13px!important;
+    border-radius:21px!important;
+    font-size:13px!important;
+  }
+  .b225-home .b225-category-icon{
+    width:21px!important;
+    height:21px!important;
+    max-width:21px!important;
+    max-height:21px!important;
+    flex-basis:21px!important;
+  }
 }
 
 @media(prefers-reduced-motion:reduce){
