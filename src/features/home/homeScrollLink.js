@@ -100,6 +100,7 @@ window.addEventListener('scroll', requestMoveraCategorySync, { passive: true })
 window.addEventListener('resize', refreshMoveraCategoryScroll, { passive: true })
 window.visualViewport?.addEventListener('resize', refreshMoveraCategoryScroll, { passive: true })
 window.addEventListener('popstate', refreshMoveraCategoryScroll)
+window.addEventListener('movera-search-restored', refreshMoveraCategoryScroll)
 
 const homeMountObserver = new MutationObserver(() => {
   if (measureMoveraCategoryScroll()) requestMoveraCategorySync()
