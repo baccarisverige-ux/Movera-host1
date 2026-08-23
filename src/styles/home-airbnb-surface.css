@@ -1,0 +1,171 @@
+/* Final Home surface layer — matched to the supplied Airbnb reference.
+   Geometry/material only: keep Movera content, icons and functionality unchanged. */
+
+.b225-home{
+  background:#f7f7f5!important;
+  color:#222320;
+}
+
+/* Top search area: quiet warm off-white with no heavy glass tint. */
+.b225-home .b225-home-header{
+  background:#f5f5f3!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+
+.b225-home .b225-home-header::before,
+.b225-home .b225-home-header::after{
+  opacity:0!important;
+}
+
+.b225-home .b225-search{
+  min-height:62px!important;
+  border:1px solid rgba(110,110,106,.10)!important;
+  border-radius:34px!important;
+  background:#fff!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 2px 5px rgba(30,30,28,.045),
+    0 11px 24px rgba(30,30,28,.055)!important;
+}
+
+.b225-home .b225-search::before,
+.b225-home .b225-search::after{
+  content:none!important;
+}
+
+.b225-home .b225-home-map-filter-button{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+/* Category shelf + pills: same proportions and restrained 3D as the reference. */
+.b225-home .b225-categories{
+  gap:10px!important;
+  padding-top:10px!important;
+  padding-bottom:16px!important;
+  background:#f5f5f3!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:
+    inset 0 -1px 0 rgba(78,78,74,.05),
+    0 7px 16px rgba(42,42,38,.035)!important;
+}
+
+.b225-home .b225-categories::before,
+.b225-home .b225-categories::after{
+  content:none!important;
+}
+
+.b225-home .b225-categories button{
+  min-height:48px!important;
+  padding:0 19px!important;
+  border:1px solid rgba(82,82,78,.10)!important;
+  border-radius:24px!important;
+  background:linear-gradient(180deg,#fff 0%,#fbfbfa 58%,#f1f1ef 100%)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(76,76,72,.07),
+    0 2px 3px rgba(30,30,28,.07),
+    0 5px 9px rgba(30,30,28,.06)!important;
+  transform:none!important;
+  filter:none!important;
+  font-weight:590!important;
+  transition:transform .14s cubic-bezier(.2,.8,.2,1),box-shadow .14s ease,background .14s ease!important;
+}
+
+.b225-home .b225-categories button::before,
+.b225-home .b225-categories button::after{
+  content:none!important;
+}
+
+.b225-home .b225-categories button[data-active='true']{
+  background:linear-gradient(180deg,#f0f0ee 0%,#e7e7e4 100%)!important;
+  border-color:rgba(65,65,62,.08)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.88),
+    inset 0 -1px 0 rgba(70,70,66,.07),
+    0 2px 4px rgba(30,30,28,.075),
+    0 5px 9px rgba(30,30,28,.055)!important;
+  transform:none!important;
+}
+
+.b225-home .b225-categories button:active{
+  transform:translateY(1px) scale(.98)!important;
+  box-shadow:
+    inset 0 2px 4px rgba(40,40,38,.065),
+    0 1px 2px rgba(30,30,28,.05)!important;
+}
+
+/* Keep current category artwork, but scale it to the reference's compact icon treatment. */
+.b225-home .b225-category-icon{
+  filter:none!important;
+}
+
+/* Main content uses the same quiet off-white field as the reference. */
+.b225-home .b225-section,
+.b225-home .b225-destinations-section,
+.b225-home .b225-featured-section,
+.b225-home .b225-services,
+.b225-home .b225-experiences{
+  background:transparent!important;
+}
+
+/* Small section action buttons: simple circular controls like Airbnb. */
+.b225-home .b225-section__title>button{
+  width:34px!important;
+  height:34px!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:#eeeeec!important;
+  box-shadow:none!important;
+}
+
+.b225-home .b225-section__title>button:active{
+  transform:scale(.94)!important;
+  background:#e7e7e4!important;
+}
+
+/* Property images keep clean rounded Airbnb geometry. */
+.b225-home .b225-featured-card .b225-card__image,
+.b225-home .b225-city__image,
+.b225-home .b225-section:not(.b225-featured-section) .b225-card__image{
+  border-radius:20px!important;
+  border:0!important;
+  box-shadow:0 2px 7px rgba(25,25,23,.055)!important;
+}
+
+.b225-home .b225-featured-card .b225-card__image img,
+.b225-home .b225-city__image img,
+.b225-home .b225-section:not(.b225-featured-section) .b225-card__image img{
+  border-radius:inherit!important;
+}
+
+/* Bottom navigation: white, quiet and flat like the reference. */
+.app-shell--guest:has(.b225-home) > .app-shell__nav{
+  background:rgba(255,255,255,.97)!important;
+  border-top:1px solid rgba(70,70,66,.08)!important;
+  box-shadow:none!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+
+@media(max-width:350px){
+  .b225-home .b225-search{
+    min-height:58px!important;
+    border-radius:30px!important;
+  }
+  .b225-home .b225-categories button{
+    min-height:45px!important;
+    padding-inline:16px!important;
+    border-radius:23px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .b225-home .b225-categories button,
+  .b225-home .b225-section__title>button{
+    transition:none!important;
+  }
+}
