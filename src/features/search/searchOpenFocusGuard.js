@@ -1,10 +1,16 @@
 const SEARCH_TRIGGER = '.b225-search'
 const SEARCH_TRANSITION = '[data-testid="search-transition"]'
+const SEARCH_CLOSE_CONTROL = '.movera-st__persistent-toggle, .movera-st__close'
 const KEYBOARD_FREE_STEPS = new Set(['dates', 'guests'])
 
 function blurCurrentField() {
   const active = document.activeElement
   if (active instanceof HTMLElement && active !== document.body) active.blur()
+}
+
+function dismissKeyboardNow() {
+  blurCurrentField()
+  requestAnimationFrame(blurCurrentField)
 }
 
 function currentSearchStep() {
@@ -13,19 +19,38 @@ function currentSearchStep() {
 
 function dismissKeyboardForStep() {
   if (!KEYBOARD_FREE_STEPS.has(currentSearchStep())) return
-  blurCurrentField()
+  dismissKeyboardNow()
+}
+
+function eventElement(event) {
+  return event.target instanceof Element ? event.target : null
+}
+
+function isSearchCloseControl(event) {
+  const target = eventElement(event)
+  return Boolean(target?.closest(SEARCH_CLOSE_CONTROL) && document.querySelector(SEARCH_TRANSITION))
 }
 
 function onSearchPointerDown(event) {
-  const trigger = event.target instanceof Element ? event.target.closest(SEARCH_TRIGGER) : null
+  if (isSearchCloseControl(event)) {
+    dismissKeyboardNow()
+    return
+  }
+
+  const trigger = eventElement(event)?.closest(SEARCH_TRIGGER)
   if (!trigger || !document.querySelector('[data-testid="page-home"]')) return
-  blurCurrentField()
+  dismissKeyboardNow()
 }
 
 function onSearchClick(event) {
-  const trigger = event.target instanceof Element ? event.target.closest(SEARCH_TRIGGER) : null
+  if (isSearchCloseControl(event)) {
+    dismissKeyboardNow()
+    return
+  }
+
+  const trigger = eventElement(event)?.closest(SEARCH_TRIGGER)
   if (!trigger || !document.querySelector('[data-testid="page-home"]')) return
-  blurCurrentField()
+  dismissKeyboardNow()
 }
 
 function onFocusIn() {
@@ -37,15 +62,18 @@ const stepObserver = new MutationObserver((mutations) => {
   for (const mutation of mutations) {
     if (mutation.type === 'attributes' && mutation.attributeName === 'data-step') {
       dismissKeyboardForStep()
-      requestAnimationFrame(dismissKeyboardForStep)
       return
     }
 
     if (mutation.type === 'childList') {
       const popup = document.querySelector(SEARCH_TRANSITION)
-      if (popup && KEYBOARD_FREE_STEPS.has(popup.getAttribute('data-step'))) {
+      if (!popup) {
+        dismissKeyboardNow()
+        return
+      }
+
+      if (KEYBOARD_FREE_STEPS.has(popup.getAttribute('data-step'))) {
         dismissKeyboardForStep()
-        requestAnimationFrame(dismissKeyboardForStep)
         return
       }
     }
