@@ -2,6 +2,7 @@ const SEARCH_TRIGGER = '.b225-search'
 const SEARCH_TRANSITION = '[data-testid="search-transition"]'
 const SEARCH_CLOSE_CONTROL = '.movera-st__persistent-toggle, .movera-st__close'
 const KEYBOARD_FREE_STEPS = new Set(['dates', 'guests'])
+let searchWasMounted = false
 
 function blurCurrentField() {
   const active = document.activeElement
@@ -11,6 +12,12 @@ function blurCurrentField() {
 function dismissKeyboardNow() {
   blurCurrentField()
   requestAnimationFrame(blurCurrentField)
+}
+
+function announceSearchRestored() {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    window.dispatchEvent(new Event('movera-search-restored'))
+  }))
 }
 
 function currentSearchStep() {
@@ -59,25 +66,22 @@ function onFocusIn() {
 }
 
 const stepObserver = new MutationObserver((mutations) => {
+  const popup = document.querySelector(SEARCH_TRANSITION)
+  if (popup) searchWasMounted = true
+  else if (searchWasMounted) {
+    searchWasMounted = false
+    dismissKeyboardNow()
+    announceSearchRestored()
+  }
+
   for (const mutation of mutations) {
     if (mutation.type === 'attributes' && mutation.attributeName === 'data-step') {
       dismissKeyboardForStep()
       return
     }
-
-    if (mutation.type === 'childList') {
-      const popup = document.querySelector(SEARCH_TRANSITION)
-      if (!popup) {
-        dismissKeyboardNow()
-        return
-      }
-
-      if (KEYBOARD_FREE_STEPS.has(popup.getAttribute('data-step'))) {
-        dismissKeyboardForStep()
-        return
-      }
-    }
   }
+
+  if (popup && KEYBOARD_FREE_STEPS.has(popup.getAttribute('data-step'))) dismissKeyboardForStep()
 })
 
 stepObserver.observe(document.documentElement, {
