@@ -28,6 +28,16 @@ const CATEGORY_ARTWORK = {
  partner: PARTNER_CATEGORY_ICON,
 }
 
+const WELCOME_CITIES = [
+  { id: 'sidi-bou-said', label: 'Sidi Bou Saïd' },
+  { id: 'sousse', label: 'Sousse' },
+  { id: 'hammamet', label: 'Hammamet' },
+  { id: 'tunis', label: 'Tunis' },
+  { id: 'djerba', label: 'Djerba' },
+  { id: 'tozeur', label: 'Tozeur' },
+  { id: 'tabarka', label: 'Tabarka' },
+]
+
 function SearchIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>}
 function ArrowIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>}
 function CategoryArtwork({id}){const src=CATEGORY_ARTWORK[id];return src?<img className="b225-category-icon" data-category-icon={id} src={src} alt="" aria-hidden="true" decoding="async"/>:null}
@@ -41,7 +51,7 @@ export function HomePage({onNavigate}){
  return <div className="b225-home" data-testid="page-home">
  <header className="b225-home-header"><div className="b225-brand">Movera Host</div><label className="b225-search b225-home-map-search" aria-label="Rechercher une destination"><SearchIcon/><span className="b225-home-map-search__copy"><strong>Explorez autrement</strong><span>Destination · Dates · Voyageurs</span></span><input data-testid="home-search" type="search" value={query} onChange={e=>setQuery(e.target.value)} aria-label="Destination" readOnly tabIndex={-1}/><span className="b225-home-map-filter-button" aria-hidden="true">≡</span></label></header>
  <div className="b225-categories" data-testid="home-categories">{homeCategories.map(item=><button key={item.id} type="button" data-category-id={item.id} data-active={category===item.id?'true':'false'} aria-pressed={category===item.id} onClick={()=>selectCategory(item)}><CategoryArtwork id={item.id}/>{item.label}</button>)}</div>
- <section className="b225-welcome" aria-label="Bienvenue chez Movera"><div><span>Bienvenue chez Movera</span><div className="b225-signs"><button type="button" onClick={()=>onNavigate('/map?destination=sidi-bou-said')}>Sidi Bou Saïd</button><button type="button" onClick={()=>onNavigate('/map?destination=sousse')}>Sousse</button><button type="button" onClick={()=>onNavigate('/map?destination=hammamet')}>Hammamet</button></div></div><button type="button" className="b225-welcome__visual" data-testid="home-tunisia-map" aria-label="Explorer la carte de Tunisie" onClick={()=>onNavigate('/map')}><span aria-hidden="true">MH</span></button></section>
+ <section className="b225-welcome" aria-label="Bienvenue chez Movera"><span className="b225-welcome__title">Bienvenue chez Movera</span><div className="b225-welcome-cities" data-testid="home-welcome-cities">{WELCOME_CITIES.map(city=><button key={city.id} type="button" className="b225-welcome-city" data-city-id={city.id} onClick={()=>onNavigate(`/map?destination=${city.id}`)} aria-label={`Explorer ${city.label} sur la carte`}>{city.label}</button>)}</div></section>
  <section className="b225-section b225-featured-section" data-testid="home-featured"><div className="b225-section__title"><h2>Sélection d'Exception</h2></div><div className="b225-scroll b225-featured-scroll">{featured.length?featured.map(item=><ListingCard key={item.id} item={item} featured/>):<p className="b225-empty">Aucune offre pour cette sélection.</p>}</div></section>
  <section className="b225-section b225-destinations-section" data-testid="home-destinations"><div className="b225-section__title"><h2>Destinations Privilégiées</h2></div><div className="b225-cities">{homeDestinations.map((item,index)=><button key={item.id} type="button" className="b225-city" onClick={()=>onNavigate(`/map?destination=${item.id}`)}><span className="b225-city__image"><img src={item.image} alt={item.label} loading={index===0?'eager':'lazy'} decoding="async"/></span><span className="b225-city__copy"><strong>{item.label}</strong><span>{item.subtitle}</span></span></button>)}</div></section>
  <section className="b225-services" aria-label="Services Movera" data-testid="home-services">{homeServices.map(service=><button type="button" key={service.id} className="b225-service-card"><span className="b225-service-visual" aria-hidden="true">{service.symbol}</span><strong>{service.label}</strong></button>)}</section>
