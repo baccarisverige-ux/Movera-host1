@@ -1,15 +1,15 @@
 .b225-home-header,
 .b225-categories{
-  background:rgba(238,241,242,.64)!important;
-  -webkit-backdrop-filter:saturate(190%) blur(26px)!important;
-  backdrop-filter:saturate(190%) blur(26px)!important;
+  background:rgba(239,241,242,.68)!important;
+  -webkit-backdrop-filter:saturate(185%) blur(26px)!important;
+  backdrop-filter:saturate(185%) blur(26px)!important;
 }
 
 .b225-home-header{
   position:sticky;
   overflow:hidden;
   border-bottom:0!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.94)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.92)!important;
 }
 
 .b225-home-header::before{
@@ -22,9 +22,9 @@
   top:-36px;
   height:82px;
   border-radius:50%;
-  background:linear-gradient(180deg,rgba(255,255,255,.84),rgba(255,255,255,0));
+  background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(255,255,255,0));
   filter:blur(2px);
-  opacity:.82;
+  opacity:.80;
 }
 
 .b225-home-header>*{
@@ -33,22 +33,22 @@
 }
 
 .b225-search{
-  background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(247,249,250,.78) 56%,rgba(232,236,238,.70))!important;
-  border:1px solid rgba(255,255,255,.82)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(248,249,249,.82) 56%,rgba(234,237,237,.72))!important;
+  border:1px solid rgba(255,255,255,.80)!important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,1),
-    inset 0 -1px 0 rgba(146,154,160,.12),
-    0 5px 16px rgba(35,43,48,.08)!important;
+    inset 0 1px 0 rgba(255,255,255,.98),
+    inset 0 -1px 0 rgba(140,149,146,.10),
+    0 5px 16px rgba(31,39,35,.065)!important;
 }
 
 .b225-categories{
   position:relative;
   border-top:0!important;
   border-radius:0 0 24px 24px;
-  border-bottom:1px solid rgba(255,255,255,.66);
+  border-bottom:1px solid rgba(255,255,255,.64);
   box-shadow:
-    inset 0 -1px 0 rgba(255,255,255,.72),
-    0 8px 20px rgba(39,48,54,.065);
+    inset 0 -1px 0 rgba(255,255,255,.70),
+    0 8px 20px rgba(36,45,40,.052);
 }
 
 .b225-categories::after{
@@ -59,7 +59,7 @@
   bottom:3px;
   height:1px;
   pointer-events:none;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.78),transparent);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.74),transparent);
 }
 
 @media(max-width:350px){
