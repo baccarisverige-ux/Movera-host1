@@ -4,7 +4,7 @@
 .b225-home .b225-categories{
   overflow-x:auto!important;
   overflow-y:visible!important;
-  padding-bottom:16px!important;
+  padding-bottom:14px!important;
 }
 
 .b225-home .b225-categories button{
@@ -37,71 +37,67 @@
   z-index:2!important;
 }
 
-/* UNSELECTED: same vertical curve, with more physical depth. */
+/* UNSELECTED: thinner, cleaner vertical curvature with restrained physical depth. */
 .b225-home .b225-categories button:not([data-active='true']){
   color:#30312e!important;
-  border:1px solid rgba(116,116,111,.20)!important;
+  border:1px solid rgba(112,112,107,.15)!important;
   background:linear-gradient(
     180deg,
     #ffffff 0%,
-    #fefefd 14%,
-    #fbfbfa 31%,
-    #f8f8f6 49%,
-    #f3f3f0 67%,
-    #ecece8 85%,
-    #e3e3df 100%
+    #fefefd 18%,
+    #fbfbfa 38%,
+    #f8f8f6 58%,
+    #f4f4f1 76%,
+    #eeeeeb 100%
   )!important;
   box-shadow:
-    inset 0 2px 1px rgba(255,255,255,1),
-    inset 0 2px 5px rgba(255,255,255,.50),
-    inset 0 -3px 4px rgba(72,72,67,.12),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 1px 3px rgba(255,255,255,.38),
+    inset 0 -1px 2px rgba(70,70,66,.065),
     0 1px 0 rgba(255,255,255,.92),
-    0 3px 0 rgba(190,190,184,.76),
-    0 5px 0 rgba(166,166,160,.34),
-    0 8px 11px rgba(38,38,34,.10)!important;
-  transform:translateY(-2px)!important;
+    0 2px 0 rgba(198,198,192,.52),
+    0 4px 6px rgba(38,38,34,.055)!important;
+  transform:translateY(-.5px)!important;
 }
 
-/* Upper sheen follows the vertical curvature; no radial hollow or ring. */
+/* Fine upper sheen: polished, not glossy or plastic. */
 .b225-home .b225-categories button:not([data-active='true'])::before{
+  content:""!important;
+  position:absolute!important;
+  z-index:0!important;
+  pointer-events:none!important;
+  left:4px!important;
+  right:4px!important;
+  top:1px!important;
+  height:44%!important;
+  border-radius:20px 20px 11px 11px!important;
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.70) 0%,
+    rgba(255,255,255,.30) 46%,
+    rgba(255,255,255,0) 100%
+  )!important;
+  opacity:.62!important;
+}
+
+/* Very slim lower edge: just enough to read as a premium physical button. */
+.b225-home .b225-categories button:not([data-active='true'])::after{
   content:""!important;
   position:absolute!important;
   z-index:0!important;
   pointer-events:none!important;
   left:3px!important;
   right:3px!important;
-  top:1px!important;
-  height:52%!important;
-  border-radius:20px 20px 12px 12px!important;
-  background:linear-gradient(
-    180deg,
-    rgba(255,255,255,.88) 0%,
-    rgba(255,255,255,.50) 40%,
-    rgba(255,255,255,.12) 76%,
-    rgba(255,255,255,0) 100%
-  )!important;
-  opacity:.78!important;
-}
-
-/* Deeper lower edge: same reference shape, but with a more visible physical base. */
-.b225-home .b225-categories button:not([data-active='true'])::after{
-  content:""!important;
-  position:absolute!important;
-  z-index:0!important;
-  pointer-events:none!important;
-  left:2px!important;
-  right:2px!important;
   bottom:0!important;
-  height:10px!important;
-  border-radius:0 0 20px 20px!important;
+  height:6px!important;
+  border-radius:0 0 19px 19px!important;
   background:linear-gradient(
     180deg,
     rgba(255,255,255,0) 0%,
-    rgba(145,145,139,.055) 42%,
-    rgba(105,105,99,.13) 72%,
-    rgba(82,82,77,.17) 100%
+    rgba(132,132,126,.035) 52%,
+    rgba(91,91,86,.085) 100%
   )!important;
-  opacity:.94!important;
+  opacity:.76!important;
 }
 
 /* SELECTED: same material, a little darker and physically pressed. */
