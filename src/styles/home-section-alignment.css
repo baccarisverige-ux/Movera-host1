@@ -11,6 +11,7 @@
  */
 .b225-home .b225-welcome {
   margin-inline: var(--b225-home-content-edge) !important;
+  background: #f7f7f7 !important;
 }
 
 .b225-home .b225-categories,
