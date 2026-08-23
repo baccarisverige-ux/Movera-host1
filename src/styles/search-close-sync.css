@@ -14,11 +14,16 @@
 
 .movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__panel{
   opacity:0!important;
+  pointer-events:none!important;
   transition:
     transform 900ms var(--st-motion-close),
     border-radius 820ms var(--st-motion-close),
     box-shadow 820ms var(--st-motion-close),
     opacity 210ms ease-in 710ms!important;
+}
+
+.movera-st:not(.movera-st--open):not(.movera-st--complete) .movera-st__persistent-search{
+  pointer-events:none!important;
 }
 
 /* Content leaves first while the physical panel finishes its reverse motion. */
