@@ -24,6 +24,23 @@ async function chooseTwoAvailableDates(page) {
   await page.getByRole('button', { name: secondLabel, exact: true }).click()
 }
 
+async function expectSearchClosedCleanly(page) {
+  await expect(page.getByTestId('search-transition')).toBeHidden({ timeout: 5_000 })
+  await expect(page.getByTestId('page-home')).toBeVisible()
+  const locks = await page.evaluate(() => ({
+    html: document.documentElement.dataset.moveraSearchLock,
+    body: document.body.dataset.moveraSearchLock,
+    bodyPosition: document.body.style.position,
+    bodyTop: document.body.style.top,
+    activeSearchInput: document.activeElement?.matches?.('.movera-st__persistent-search input') || false,
+  }))
+  expect(locks.html).toBeUndefined()
+  expect(locks.body).toBeUndefined()
+  expect(locks.bodyPosition).not.toBe('fixed')
+  expect(locks.bodyTop).toBe('')
+  expect(locks.activeSearchInput).toBe(false)
+}
+
 test.describe('Search live E2E / UAT / cleanup safety', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
@@ -69,25 +86,21 @@ test.describe('Search live E2E / UAT / cleanup safety', () => {
   test('UAT: close returns cleanly to Home and unlocks document', async ({ page }) => {
     await openSearch(page)
     await page.getByRole('button', { name: 'Fermer' }).click()
-    await expect(page.getByTestId('search-transition')).toBeHidden({ timeout: 5_000 })
-    await expect(page.getByTestId('page-home')).toBeVisible()
-    const locks = await page.evaluate(() => ({
-      html: document.documentElement.dataset.moveraSearchLock,
-      body: document.body.dataset.moveraSearchLock,
-      bodyPosition: document.body.style.position,
-    }))
-    expect(locks.html).toBeUndefined()
-    expect(locks.body).toBeUndefined()
-    expect(locks.bodyPosition).not.toBe('fixed')
+    await expectSearchClosedCleanly(page)
   })
 
-  test('regression: close after Home scroll dismisses focus, restores position and unlocks document', async ({ page }) => {
+  test('regression: close after Home scroll dismisses focus, restores position and keeps top bar geometry stable', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByTestId('page-home')).toBeVisible()
 
     await page.evaluate(() => window.scrollTo(0, Math.min(900, Math.max(500, document.documentElement.scrollHeight * 0.35))))
     await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeGreaterThan(300)
-    const beforeOpen = await page.evaluate(() => window.scrollY)
+    const beforeOpen = await page.evaluate(() => ({
+      scrollY: Math.round(window.scrollY),
+      headerHeight: document.querySelector('.b225-home-header')?.getBoundingClientRect().height || 0,
+      categoriesTop: document.querySelector('.b225-categories')?.getBoundingClientRect().top || 0,
+      travel: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel')) || 0,
+    }))
 
     await openSearchOnCurrentPage(page)
     const destinationInput = page.locator('.movera-st__persistent-search input')
@@ -96,20 +109,74 @@ test.describe('Search live E2E / UAT / cleanup safety', () => {
 
     await page.getByRole('button', { name: 'Fermer' }).click()
     await expect.poll(async () => page.evaluate(() => document.activeElement?.matches('.movera-st__persistent-search input') || false)).toBe(false)
-    await expect(page.getByTestId('search-transition')).toBeHidden({ timeout: 5_000 })
+    await expectSearchClosedCleanly(page)
+    await expect.poll(async () => page.evaluate(() => Math.round(window.scrollY))).toBe(beforeOpen.scrollY)
+    await page.waitForTimeout(300)
+
+    const afterClose = await page.evaluate(() => ({
+      headerHeight: document.querySelector('.b225-home-header')?.getBoundingClientRect().height || 0,
+      categoriesTop: document.querySelector('.b225-categories')?.getBoundingClientRect().top || 0,
+      travel: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel')) || 0,
+    }))
+    expect(Math.abs(afterClose.headerHeight - beforeOpen.headerHeight)).toBeLessThanOrEqual(1)
+    expect(Math.abs(afterClose.categoriesTop - beforeOpen.categoriesTop)).toBeLessThanOrEqual(2)
+    expect(Math.abs(afterClose.travel - beforeOpen.travel)).toBeLessThanOrEqual(2)
+  })
+
+  test('regression: close is safe from Destination, Dates and Voyageurs then can reopen', async ({ page }) => {
+    await page.goto('/')
     await expect(page.getByTestId('page-home')).toBeVisible()
 
-    await expect.poll(async () => page.evaluate(() => Math.round(window.scrollY))).toBe(Math.round(beforeOpen))
-    const locks = await page.evaluate(() => ({
-      html: document.documentElement.dataset.moveraSearchLock,
-      body: document.body.dataset.moveraSearchLock,
-      bodyPosition: document.body.style.position,
-      bodyTop: document.body.style.top,
-    }))
-    expect(locks.html).toBeUndefined()
-    expect(locks.body).toBeUndefined()
-    expect(locks.bodyPosition).not.toBe('fixed')
-    expect(locks.bodyTop).toBe('')
+    let transition = await openSearchOnCurrentPage(page)
+    const destinationInput = page.locator('.movera-st__persistent-search input')
+    await destinationInput.focus()
+    await destinationInput.fill('La Marsa')
+    await expect(transition).toHaveAttribute('data-address-mode', 'true')
+    await page.getByRole('button', { name: 'Fermer' }).click()
+    await expectSearchClosedCleanly(page)
+
+    transition = await openSearchOnCurrentPage(page)
+    await page.locator('[data-destination="la-marsa"]').click()
+    await expect(transition).toHaveAttribute('data-step', 'dates')
+    await page.getByRole('button', { name: 'Fermer' }).click()
+    await expectSearchClosedCleanly(page)
+
+    transition = await openSearchOnCurrentPage(page)
+    await page.locator('[data-destination="la-marsa"]').click()
+    await expect(transition).toHaveAttribute('data-step', 'dates')
+    await chooseTwoAvailableDates(page)
+    await page.getByRole('button', { name: /Continuer vers les voyageurs/i }).click()
+    await expect(transition).toHaveAttribute('data-step', 'guests')
+    await page.getByRole('button', { name: 'Fermer' }).click()
+    await expectSearchClosedCleanly(page)
+
+    transition = await openSearchOnCurrentPage(page)
+    await expect(transition).toHaveAttribute('data-step', 'destination')
+    await page.getByRole('button', { name: 'Fermer' }).click()
+    await expectSearchClosedCleanly(page)
+  })
+
+  test('regression: close during opening cannot leave an invisible locked popup', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByTestId('page-home')).toBeVisible()
+    await page.locator('.b225-search').click({ position: { x: 80, y: 25 } })
+    const transition = page.getByTestId('search-transition')
+    await expect(transition).toBeVisible()
+    await expect(transition).toHaveClass(/movera-st--open/)
+    await page.getByRole('button', { name: 'Fermer' }).click()
+    await expectSearchClosedCleanly(page)
+  })
+
+  test('mobile regression: tapping Home search opens popup without retaining focus on the Home input', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-chromium', 'Touch-specific regression')
+    await page.goto('/')
+    await expect(page.getByTestId('page-home')).toBeVisible()
+    await page.locator('.b225-search').tap({ position: { x: 80, y: 25 } })
+    const transition = page.getByTestId('search-transition')
+    await expect(transition).toBeVisible()
+    await expect.poll(async () => page.evaluate(() => document.activeElement?.getAttribute('data-testid') || '')).not.toBe('home-search')
+    await page.getByRole('button', { name: 'Fermer' }).click()
+    await expectSearchClosedCleanly(page)
   })
 
   test('cleanup safety: only the live Search transition is mounted', async ({ page }) => {
