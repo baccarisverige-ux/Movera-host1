@@ -8,6 +8,7 @@ import '../../styles/home-map-search-copy.css'
 import '../../styles/home-section-alignment.css'
 import ALL_CATEGORY_GLOBE from './assets/all-category-globe.png'
 import BEACH_CATEGORY_ICON from './assets/plage-category.png'
+import HOTEL_CATEGORY_ICON from './assets/hotel-category.png'
 import APPARTEMENT_CATEGORY_ICON from './assets/appartement-category.png'
 import GUESTHOUSE_CATEGORY_ICON from './assets/maison-hote-category.png'
 import VILLA_CATEGORY_ICON from './assets/villa-category.png'
@@ -19,6 +20,7 @@ const CATEGORY_ARTWORK = {
  all: ALL_CATEGORY_GLOBE,
  guesthouse: GUESTHOUSE_CATEGORY_ICON,
  beach: BEACH_CATEGORY_ICON,
+ hotel: HOTEL_CATEGORY_ICON,
  family: APPARTEMENT_CATEGORY_ICON,
  prestige: VILLA_CATEGORY_ICON,
  experience: EXPERIENCE_CATEGORY_ICON,
