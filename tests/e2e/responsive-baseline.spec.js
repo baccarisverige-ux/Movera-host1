@@ -15,6 +15,7 @@ const routes = [
   ['map', '/map', 'page-map'],
   ['plage', '/plage', 'page-beach'],
   ['maison-d-hote', '/maison-d-hote', 'page-guesthouse'],
+  ['hotel', '/hotel', 'page-hotel'],
 ]
 
 for (const viewport of viewports) {
