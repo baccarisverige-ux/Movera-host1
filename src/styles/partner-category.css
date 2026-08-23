@@ -38,7 +38,14 @@
   transform:scale(1.15)!important;
 }
 
-.b225-categories .b225-category-icon[data-category-icon="family"],
+.b225-categories .b225-category-icon[data-category-icon="family"]{
+  width:34px!important;
+  height:28px!important;
+  min-width:34px!important;
+  flex:0 0 34px!important;
+  object-fit:contain!important;
+}
+
 .b225-categories .b225-category-icon[data-category-icon="prestige"]{
   width:26px!important;
   height:26px!important;
