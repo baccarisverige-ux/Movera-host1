@@ -145,7 +145,7 @@ test.describe('Movera critical permanent regressions', () => {
 
   test('search popup uses a lightweight map preview', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: /où souhaitez-vous aller|rechercher/i }).first().click()
+    await page.locator('.b225-search').click({ position: { x: 80, y: 25 } })
     await expect(page.getByTestId('search-map-preview')).toBeVisible()
     await expect(page.locator('.movera-st__map-stage canvas')).toHaveCount(0)
     await expect(page.locator('.movera-st__map-stage .map-controls')).toHaveCount(0)
