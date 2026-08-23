@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { homeCategories, homeFeatured } from './data/homeData.js'
+import { homeCategories, homeCategoryOffers } from './data/homeData.js'
 import { getCollectionRouteForCategory } from '../../shared/navigation/guestCollectionRoutes.js'
 import '../../styles/home-b225.css'
 import '../../styles/home-b225-block2.css'
@@ -12,6 +12,7 @@ import '../../styles/home-reference-gloss.css'
 import '../../styles/home-category-3d-strong.css'
 import '../../styles/home-airbnb-surface.css'
 import '../../styles/home-category-6d.css'
+import '../../styles/home-category-offers.css'
 import ALL_CATEGORY_GLOBE from './assets/all-category-globe.png'
 import BEACH_CATEGORY_ICON from './assets/plage-category.png'
 import HOTEL_CATEGORY_ICON from './assets/hotel-category.png'
@@ -45,8 +46,8 @@ const WELCOME_CITIES = [
 
 function SearchIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>}
 function CategoryArtwork({id}){const src=CATEGORY_ARTWORK[id];return src?<img className="b225-category-icon" data-category-icon={id} src={src} alt="" aria-hidden="true" decoding="async"/>:null}
-function ListingCard({item}){return <article className="b225-card b225-featured-card" data-testid={`home-card-${item.id}`}><div className="b225-card__image"><img src={item.image} alt={item.title} loading="lazy" decoding="async"/>{item.badge?<span className="b225-card__badge">{item.badge}</span>:null}<button type="button" className="b225-card__heart" aria-label={`Ajouter ${item.title} aux favoris`}>♡</button></div><div className="b225-card__body"><p className="b225-featured-line"><strong>{item.title}</strong><span> — {item.price} {item.currency}</span></p></div></article>}
-function CategorySelection({id,title,items}){return <section className="b225-section b225-featured-section b225-category-selection" data-category-selection={id} data-testid={`home-selection-${id}`}><div className="b225-section__title"><h2>{title}</h2></div>{items.length?<div className="b225-scroll b225-featured-scroll">{items.map(item=><ListingCard key={`${id}-${item.id}`} item={item}/>)}</div>:<p className="b225-empty">Sélection à venir.</p>}</section>}
+function ListingCard({item,sectionId}){return <article className="b225-offer-card" data-testid={`home-card-${sectionId}-${item.id}`} aria-label={`${item.title}, ${item.priceTotal}, note ${item.rating}`}><div className="b225-offer-card__image"><img src={item.image} alt={item.title} loading="lazy" decoding="async"/>{item.badge?<span className="b225-offer-card__badge">{item.badge}</span>:null}<span className="b225-offer-card__heart" aria-hidden="true">♡</span></div><div className="b225-offer-card__body"><h3 className="b225-offer-card__title">{item.title}</h3><p className="b225-offer-card__meta"><strong>{item.priceTotal}</strong><span className="b225-offer-card__dot">·</span><span>★ {item.rating}</span></p></div></article>}
+function CategorySelection({id,title,items}){return <section className="b225-section b225-category-selection" data-category-selection={id} data-testid={`home-selection-${id}`}><div className="b225-section__title"><h2>{title}</h2></div>{items.length?<div className="b225-offer-scroll">{items.map(item=><ListingCard key={`${id}-${item.id}`} item={item} sectionId={id}/>)}</div>:<p className="b225-empty">Sélection à venir.</p>}</section>}
 
 export function HomePage({onNavigate}){
  const [category,setCategory]=useState(getSelectedHomeCategory); const [query,setQuery]=useState('');
@@ -56,9 +57,8 @@ export function HomePage({onNavigate}){
   return homeCategories.map(item=>({
    id:item.id,
    title:item.label,
-   items:homeFeatured.filter(listing=>
-    (item.id==='all'||listing.category.split(' ').includes(item.id))&&
-    (!q||`${listing.title} ${listing.location}`.toLowerCase().includes(q))
+   items:(homeCategoryOffers[item.id]||[]).filter(listing=>
+    !q||`${listing.title} ${listing.location}`.toLowerCase().includes(q)
    ),
   }))
  },[query])
