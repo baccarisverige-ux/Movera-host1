@@ -38,6 +38,14 @@
   transform:scale(1.15)!important;
 }
 
+.b225-categories .b225-category-icon[data-category-icon="hotel"]{
+  width:19px!important;
+  height:19px!important;
+  min-width:19px!important;
+  flex:0 0 19px!important;
+  object-fit:contain!important;
+}
+
 .b225-categories .b225-category-icon[data-category-icon="family"]{
   width:23px!important;
   height:19px!important;
