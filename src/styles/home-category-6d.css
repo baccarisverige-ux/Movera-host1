@@ -35,21 +35,22 @@
   flex:0 0 22px!important;
 }
 
-/* UNSELECTED = inverse of bombé: a soft concave/curved surface. */
+/* UNSELECTED = puffy outer rim with a softly recessed centre. */
 .b225-home .b225-categories button:not([data-active='true']){
-  border:1px solid rgba(120,120,115,.14)!important;
+  border:1px solid rgba(128,128,123,.16)!important;
   background:
-    radial-gradient(ellipse at 50% 54%,#efefec 0%,#f4f4f1 43%,#fafaf8 74%,#ffffff 100%)!important;
+    radial-gradient(ellipse at 50% 52%,#eeeeeb 0%,#f2f2ef 38%,#f8f8f6 68%,#ffffff 100%)!important;
   box-shadow:
-    inset 0 2px 5px rgba(44,44,40,.085),
-    inset 0 -1px 1px rgba(255,255,255,.96),
-    inset 1px 0 2px rgba(55,55,51,.035),
-    inset -1px 0 2px rgba(255,255,255,.74),
-    0 1px 2px rgba(35,35,32,.028)!important;
+    inset 0 3px 5px rgba(46,46,42,.085),
+    inset 0 -2px 3px rgba(255,255,255,.98),
+    inset 2px 0 3px rgba(255,255,255,.72),
+    inset -2px 0 3px rgba(70,70,66,.035),
+    0 1px 0 rgba(255,255,255,.92),
+    0 2px 4px rgba(35,35,32,.045)!important;
   transform:none!important;
 }
 
-/* No lower body/tranche on the inactive state. */
+/* Soft inflated rim around the recessed centre. */
 .b225-home .b225-categories button:not([data-active='true'])::before{
   content:""!important;
   position:absolute!important;
@@ -59,24 +60,28 @@
   border-radius:inherit!important;
   background:transparent!important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.66),
-    inset 0 -1px 0 rgba(72,72,68,.035)!important;
+    inset 0 0 0 1px rgba(255,255,255,.54),
+    inset 0 2px 2px rgba(255,255,255,.72),
+    inset 0 -2px 2px rgba(80,80,75,.04)!important;
   opacity:1!important;
 }
 
-/* Gentle edge light; centre stays visually recessed. */
+/* Inner curved well: keeps the middle visibly creusé while the edge stays full. */
 .b225-home .b225-categories button:not([data-active='true'])::after{
   content:""!important;
   position:absolute!important;
   pointer-events:none!important;
   z-index:0!important;
-  left:6px!important;
-  right:6px!important;
-  top:2px!important;
-  bottom:2px!important;
-  border-radius:inherit!important;
-  background:radial-gradient(ellipse at 50% 110%,rgba(255,255,255,.48),rgba(255,255,255,0) 66%)!important;
-  opacity:.52!important;
+  left:9px!important;
+  right:9px!important;
+  top:8px!important;
+  bottom:8px!important;
+  border-radius:999px!important;
+  background:radial-gradient(ellipse at 50% 46%,rgba(78,78,73,.07) 0%,rgba(78,78,73,.025) 52%,rgba(255,255,255,0) 76%)!important;
+  box-shadow:
+    inset 0 1px 2px rgba(48,48,44,.055),
+    0 1px 1px rgba(255,255,255,.46)!important;
+  opacity:.82!important;
 }
 
 /* SELECTED = darker, realistically pressed into the same material. */
