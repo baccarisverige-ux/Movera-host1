@@ -35,7 +35,7 @@ test.describe('Movera critical permanent regressions', () => {
 
   test('responsive, accessibility and reduced motion guard stays active', async ({ page }) => {
     const sizes = [[320, 568], [375, 812], [390, 844], [430, 932], [768, 1024], [1024, 768]]
-    const routes = ['/', '/map', '/plage', '/maison-d-hote']
+    const routes = ['/', '/map', '/plage', '/maison-d-hote', '/hotel']
 
     for (const [width, height] of sizes) {
       await page.setViewportSize({ width, height })
