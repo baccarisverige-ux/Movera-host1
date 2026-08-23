@@ -1,0 +1,78 @@
+.b225-welcome{
+  display:block!important;
+  position:relative;
+  min-height:188px!important;
+  padding:17px 14px 13px 18px!important;
+  overflow:hidden!important;
+}
+
+.b225-welcome>span,
+.b225-welcome__title{
+  display:block;
+  position:relative;
+  z-index:8;
+  font-size:11px;
+  font-weight:750;
+  color:#576058;
+  letter-spacing:.02em;
+}
+
+.b225-welcome-cities{
+  position:relative;
+  height:146px;
+  margin-top:3px;
+}
+
+.b225-welcome-city{
+  position:absolute;
+  min-height:46px;
+  border:1px solid rgba(90,96,92,.08);
+  border-radius:11px;
+  display:grid;
+  place-items:center;
+  padding:0 11px;
+  color:#454a47;
+  font:760 10.7px/1.1 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  letter-spacing:-.08px;
+  white-space:nowrap;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.90),
+    inset 0 -1px 0 rgba(65,71,67,.035),
+    0 3px 5px rgba(41,47,43,.06),
+    0 10px 18px rgba(41,47,43,.075);
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .14s cubic-bezier(.2,.8,.2,1),box-shadow .14s ease,filter .14s ease;
+}
+
+.b225-welcome-city:active{
+  transform:translateY(2px) scale(.97)!important;
+  box-shadow:inset 0 2px 5px rgba(45,51,47,.08),0 2px 5px rgba(41,47,43,.06);
+  filter:brightness(.99);
+}
+
+.b225-welcome-city:focus-visible{
+  outline:2px solid rgba(58,76,66,.30);
+  outline-offset:3px;
+}
+
+.b225-welcome-city:nth-child(1){left:0;top:25px;width:36%;background:#f6eadc;transform:rotate(-1.4deg)}
+.b225-welcome-city:nth-child(2){left:6%;top:79px;width:28%;background:#e3edf8;transform:rotate(1.3deg)}
+.b225-welcome-city:nth-child(3){left:27%;top:62px;width:34%;background:#e5ecd9;transform:rotate(-.8deg)}
+.b225-welcome-city:nth-child(4){left:55%;top:0;width:24%;background:#f6dfe6;transform:rotate(.8deg)}
+.b225-welcome-city:nth-child(5){right:0;top:15px;width:23%;background:#f6ebc9;transform:rotate(1.1deg)}
+.b225-welcome-city:nth-child(6){right:0;top:72px;width:25%;background:#dcefe8;transform:rotate(-.6deg)}
+.b225-welcome-city:nth-child(7){left:43%;top:105px;width:29%;background:#e9e0f2;transform:rotate(.7deg)}
+
+@media(max-width:350px){
+  .b225-welcome{min-height:178px!important;padding-inline:14px!important}
+  .b225-welcome-cities{height:139px}
+  .b225-welcome-city{min-height:44px;padding-inline:8px;font-size:9.7px}
+  .b225-welcome-city:nth-child(1){width:38%}
+  .b225-welcome-city:nth-child(3){left:28%;width:35%}
+  .b225-welcome-city:nth-child(4){left:57%;width:22%}
+  .b225-welcome-city:nth-child(5){width:22%}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .b225-welcome-city{transition:none}
+}
