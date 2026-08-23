@@ -81,7 +81,7 @@ test.describe('Search live E2E / UAT / cleanup safety', () => {
     expect(locks.bodyPosition).not.toBe('fixed')
   })
 
-  test('regression: close after Home scroll restores position and unlocks document', async ({ page }) => {
+  test('regression: close after Home scroll dismisses focus, restores position and unlocks document', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByTestId('page-home')).toBeVisible()
 
@@ -90,7 +90,12 @@ test.describe('Search live E2E / UAT / cleanup safety', () => {
     const beforeOpen = await page.evaluate(() => window.scrollY)
 
     await openSearchOnCurrentPage(page)
+    const destinationInput = page.locator('.movera-st__persistent-search input')
+    await destinationInput.focus()
+    await expect.poll(async () => page.evaluate(() => document.activeElement?.matches('.movera-st__persistent-search input'))).toBe(true)
+
     await page.getByRole('button', { name: 'Fermer' }).click()
+    await expect.poll(async () => page.evaluate(() => document.activeElement?.matches('.movera-st__persistent-search input') || false)).toBe(false)
     await expect(page.getByTestId('search-transition')).toBeHidden({ timeout: 5_000 })
     await expect(page.getByTestId('page-home')).toBeVisible()
 
