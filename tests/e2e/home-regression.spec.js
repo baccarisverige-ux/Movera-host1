@@ -12,7 +12,8 @@ test('home keeps its structure, media and approved navigation stable', async ({ 
   await expect(page.locator('.b225-city')).toHaveCount(10)
   await expect(page.getByTestId('home-services').locator('.b225-service-card')).toHaveCount(4)
   expect(await page.getByTestId('home-featured').locator('.b225-featured-card').count()).toBeGreaterThanOrEqual(3)
-  await expect(page.getByTestId('home-tunisia-map')).toHaveCount(1)
+  await expect(page.getByTestId('home-welcome-cities').locator('.b225-welcome-city')).toHaveCount(7)
+  await expect(page.getByTestId('home-tunisia-map')).toHaveCount(0)
 
   for (const id of ['prestige', 'experience', 'partner']) {
     const button = page.locator(`.b225-categories button[data-category-id="${id}"]`)
@@ -41,6 +42,19 @@ test('home keeps its structure, media and approved navigation stable', async ({ 
     await expect(nav.locator('.app-shell__nav-item', { hasText: label })).toHaveAttribute('aria-disabled', 'true')
   }
   expect(errors).toEqual([])
+})
+
+test('Bienvenue city cards open their exact map destination', async ({ page }) => {
+  for (const id of ['sidi-bou-said', 'sousse', 'hammamet', 'tunis', 'djerba', 'tozeur', 'tabarka']) {
+    await page.goto('/')
+    await expect(page.getByTestId('page-home')).toBeVisible()
+    const city = page.locator(`.b225-welcome-city[data-city-id="${id}"]`)
+    await expect(city).toBeVisible()
+    await city.click()
+    await expect(page.getByTestId('page-map')).toBeVisible()
+    await expect(page.getByTestId('page-map')).toHaveAttribute('data-destination', id)
+    await expect(page).toHaveURL(new RegExp(`/map\\?destination=${id}$`))
+  }
 })
 
 test('critical collection pages contain no broken project images', async ({ page }) => {
