@@ -7,7 +7,7 @@
   bottom:0!important;
   z-index:90!important;
   width:min(100%,430px)!important;
-  height:calc(60px + env(safe-area-inset-bottom))!important;
+  height:calc(60px + env(safe-area-inset-bottom,0px))!important;
   min-height:0!important;
   max-height:none!important;
   transform:translateX(-50%)!important;
@@ -15,7 +15,7 @@
   grid-template-columns:repeat(5,minmax(0,1fr))!important;
   align-items:start!important;
   gap:0!important;
-  padding:7px 6px env(safe-area-inset-bottom)!important;
+  padding:7px 6px env(safe-area-inset-bottom,0px)!important;
   box-sizing:border-box!important;
   overflow:visible!important;
   border-top:1px solid rgba(31,37,33,.05)!important;
@@ -25,7 +25,7 @@
   box-shadow:0 -4px 20px rgba(30,36,32,.022)!important;
 }
 
-.app-shell--guest > .app-shell__content{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+.app-shell--guest > .app-shell__content{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 
 .app-shell--guest > .app-shell__nav > .app-shell__nav-item,
 .app-shell--guest:has(.b225-home) > .app-shell__nav > .app-shell__nav-item{
@@ -60,7 +60,9 @@
 .app-shell--guest > .app-shell__nav > .app-shell__nav-item::before,
 .app-shell--guest > .app-shell__nav > .app-shell__nav-item::after,
 .app-shell--guest:has(.b225-home) > .app-shell__nav > .app-shell__nav-item::before,
-.app-shell--guest:has(.b225-home) > .app-shell__nav > .app-shell__nav-item::after{
+.app-shell--guest:has(.b225-home) > .app-shell__nav > .app-shell__nav-item::after,
+.app-shell--guest:has(.b225-home) > .app-shell__nav > .app-shell__nav-item:nth-child(n)::before,
+.app-shell--guest:has(.b225-home) > .app-shell__nav > .app-shell__nav-item:nth-child(n)::after{
   content:none!important;
   display:none!important;
 }
