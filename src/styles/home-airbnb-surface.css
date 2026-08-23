@@ -40,9 +40,9 @@
   box-shadow:none!important;
 }
 
-/* Category shelf + pills: same proportions and restrained 3D as the reference. */
+/* Category shelf: same quiet off-white field as the Airbnb reference. */
 .b225-home .b225-categories{
-  gap:10px!important;
+  gap:9px!important;
   padding-top:10px!important;
   padding-bottom:16px!important;
   background:#f5f5f3!important;
@@ -58,20 +58,26 @@
   content:none!important;
 }
 
+/* Airbnb-like category geometry: rounded rectangle, not a full capsule. */
 .b225-home .b225-categories button{
-  min-height:48px!important;
-  padding:0 19px!important;
-  border:1px solid rgba(82,82,78,.10)!important;
-  border-radius:24px!important;
-  background:linear-gradient(180deg,#fff 0%,#fbfbfa 58%,#f1f1ef 100%)!important;
+  height:52px!important;
+  min-height:52px!important;
+  max-height:52px!important;
+  padding:0 18px!important;
+  gap:9px!important;
+  border:1px solid #dfdfdc!important;
+  border-radius:21px!important;
+  background:#fff!important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,1),
-    inset 0 -1px 0 rgba(76,76,72,.07),
-    0 2px 3px rgba(30,30,28,.07),
-    0 5px 9px rgba(30,30,28,.06)!important;
+    0 2px 0 rgba(32,32,30,.10),
+    0 4px 8px rgba(32,32,30,.07)!important;
   transform:none!important;
   filter:none!important;
-  font-weight:590!important;
+  font-size:14.5px!important;
+  line-height:1!important;
+  font-weight:520!important;
+  letter-spacing:-.12px!important;
+  white-space:nowrap!important;
   transition:transform .14s cubic-bezier(.2,.8,.2,1),box-shadow .14s ease,background .14s ease!important;
 }
 
@@ -81,25 +87,29 @@
 }
 
 .b225-home .b225-categories button[data-active='true']{
-  background:linear-gradient(180deg,#f0f0ee 0%,#e7e7e4 100%)!important;
-  border-color:rgba(65,65,62,.08)!important;
+  background:#e9e9e6!important;
+  border-color:#dededb!important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.88),
-    inset 0 -1px 0 rgba(70,70,66,.07),
-    0 2px 4px rgba(30,30,28,.075),
-    0 5px 9px rgba(30,30,28,.055)!important;
+    0 2px 0 rgba(32,32,30,.105),
+    0 4px 8px rgba(32,32,30,.065)!important;
   transform:none!important;
 }
 
 .b225-home .b225-categories button:active{
-  transform:translateY(1px) scale(.98)!important;
+  transform:translateY(1px) scale(.985)!important;
   box-shadow:
-    inset 0 2px 4px rgba(40,40,38,.065),
-    0 1px 2px rgba(30,30,28,.05)!important;
+    0 1px 0 rgba(32,32,30,.10),
+    0 2px 4px rgba(32,32,30,.055)!important;
 }
 
-/* Keep current category artwork, but scale it to the reference's compact icon treatment. */
+/* Compact icon treatment matching the reference proportions. */
 .b225-home .b225-category-icon{
+  width:25px!important;
+  height:25px!important;
+  max-width:25px!important;
+  max-height:25px!important;
+  object-fit:contain!important;
+  flex:0 0 25px!important;
   filter:none!important;
 }
 
@@ -157,9 +167,19 @@
     border-radius:30px!important;
   }
   .b225-home .b225-categories button{
-    min-height:45px!important;
+    height:49px!important;
+    min-height:49px!important;
+    max-height:49px!important;
     padding-inline:16px!important;
-    border-radius:23px!important;
+    border-radius:20px!important;
+    font-size:14px!important;
+  }
+  .b225-home .b225-category-icon{
+    width:23px!important;
+    height:23px!important;
+    max-width:23px!important;
+    max-height:23px!important;
+    flex-basis:23px!important;
   }
 }
 
