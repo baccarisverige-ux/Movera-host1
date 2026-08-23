@@ -79,6 +79,7 @@ export function SearchTransitionHost({ onNavigate }) {
   const mapHandoffRef = useRef(false)
   const skipScrollRestoreRef = useRef(false)
   const lockedScrollYRef = useRef(0)
+  const closingRef = useRef(false)
 
   const selectedViewport = state.destination?.viewport || SEARCH_OVERVIEW_VIEWPORT
   const datesValid = isDateRangeValid(state.checkin, state.checkout)
@@ -129,7 +130,8 @@ export function SearchTransitionHost({ onNavigate }) {
   }, [])
 
   const closeTransition = () => {
-    if (!active || complete) return
+    if (!active || complete || closingRef.current) return
+    closingRef.current = true
     clearTimers()
     setReady(false)
     setOpen(false)
@@ -137,7 +139,15 @@ export function SearchTransitionHost({ onNavigate }) {
       setActive(false)
       setDestinationQuery('')
       setAddressMode(false)
+      closingRef.current = false
     }, CLOSE_MS)
+  }
+
+  const closeFromPointer = (event) => {
+    if (event.pointerType !== 'touch') return
+    event.preventDefault()
+    event.stopPropagation()
+    closeTransition()
   }
 
   useEffect(() => {
@@ -151,6 +161,7 @@ export function SearchTransitionHost({ onNavigate }) {
       endMapHandoff()
       mapHandoffRef.current = false
       skipScrollRestoreRef.current = false
+      closingRef.current = false
       const rect = trigger.getBoundingClientRect()
       const viewportHeight = Math.round(window.visualViewport?.height || window.innerHeight || 760)
       setOrigin({ top: rect.top, left: rect.left, width: rect.width, height: rect.height })
@@ -176,7 +187,8 @@ export function SearchTransitionHost({ onNavigate }) {
     if (!active) return undefined
     const body = document.body
     const html = document.documentElement
-    lockedScrollYRef.current = window.scrollY
+    lockedScrollYRef.current = Math.max(0, window.scrollY || window.pageYOffset || 0)
+    const restoreScrollY = lockedScrollYRef.current
     const previous = {
       bodyPosition: body.style.position,
       bodyTop: body.style.top,
@@ -197,7 +209,7 @@ export function SearchTransitionHost({ onNavigate }) {
     html.style.overflow = 'hidden'
     html.style.overscrollBehavior = 'none'
     body.style.position = 'fixed'
-    body.style.top = `-${lockedScrollYRef.current}px`
+    body.style.top = `-${restoreScrollY}px`
     body.style.left = '0'
     body.style.right = '0'
     body.style.width = '100%'
@@ -206,17 +218,12 @@ export function SearchTransitionHost({ onNavigate }) {
     body.style.overscrollBehavior = 'none'
 
     const preventMove = (event) => event.preventDefault()
-    const keepScrollLocked = () => {
-      if (window.scrollY !== lockedScrollYRef.current) window.scrollTo(0, lockedScrollYRef.current)
-    }
     document.addEventListener('touchmove', preventMove, { passive: false })
     document.addEventListener('wheel', preventMove, { passive: false })
-    window.addEventListener('scroll', keepScrollLocked, { passive: true })
 
     return () => {
       document.removeEventListener('touchmove', preventMove)
       document.removeEventListener('wheel', preventMove)
-      window.removeEventListener('scroll', keepScrollLocked)
       delete html.dataset.moveraSearchLock
       delete body.dataset.moveraSearchLock
       body.style.position = previous.bodyPosition
@@ -230,8 +237,11 @@ export function SearchTransitionHost({ onNavigate }) {
       html.style.height = previous.htmlHeight
       html.style.overflow = previous.htmlOverflow
       html.style.overscrollBehavior = previous.htmlOverscroll
-      if (!skipScrollRestoreRef.current) window.scrollTo(0, lockedScrollYRef.current)
+      const shouldRestoreScroll = !skipScrollRestoreRef.current
       skipScrollRestoreRef.current = false
+      if (shouldRestoreScroll) {
+        window.requestAnimationFrame(() => window.scrollTo(0, restoreScrollY))
+      }
     }
   }, [active, lockedViewportHeight])
 
@@ -375,7 +385,7 @@ export function SearchTransitionHost({ onNavigate }) {
           />
           <span className="movera-st__persistent-meta">Destination · Dates · Voyageurs</span>
         </div>
-        <button type="button" className="movera-st__persistent-toggle" onClick={closeTransition} aria-label="Fermer">
+        <button type="button" className="movera-st__persistent-toggle" onPointerDown={closeFromPointer} onClick={closeTransition} aria-label="Fermer">
           <span className="movera-st__persistent-menu" aria-hidden="true">≡</span>
           <span className="movera-st__persistent-x" aria-hidden="true">×</span>
         </button>
@@ -388,7 +398,7 @@ export function SearchTransitionHost({ onNavigate }) {
             <span className="movera-st__brandmark" aria-hidden="true"><span /></span>
             <div className="movera-st__brandcopy"><strong>Movera</strong><span>Votre séjour, simplement</span></div>
             <span className="movera-st__progress">{stepIndex}/3</span>
-            <button type="button" className="movera-st__close" onClick={closeTransition} aria-label="Fermer">×</button>
+            <button type="button" className="movera-st__close" onPointerDown={closeFromPointer} onClick={closeTransition} aria-label="Fermer">×</button>
           </div>
 
           {addressMode ? (
