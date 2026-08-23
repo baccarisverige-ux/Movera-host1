@@ -1,0 +1,15 @@
+.b225-categories button{
+  height:54px!important;
+  padding-left:23px!important;
+  padding-right:23px!important;
+  border-radius:27px!important;
+}
+
+@media(max-width:350px){
+  .b225-categories button{
+    height:52px!important;
+    padding-left:20px!important;
+    padding-right:20px!important;
+    border-radius:26px!important;
+  }
+}
