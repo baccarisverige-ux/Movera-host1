@@ -9,7 +9,7 @@ test.describe('Movera core quality', () => {
     await expect(page.getByTestId('page-map')).toBeVisible()
   })
 
-  test('search transition opens without page scroll and supports compact focus', async ({ page }) => {
+  test('search transition opens without page scroll and supports address focus', async ({ page }) => {
     await page.goto('/')
     const startScroll = await page.evaluate(() => window.scrollY)
     await page.locator('.b225-search').click({ position: { x: 80, y: 25 } })
@@ -17,10 +17,11 @@ test.describe('Movera core quality', () => {
     await expect(transition).toBeVisible()
     await expect.poll(async () => transition.getAttribute('data-ready')).toBe('true')
 
-    const input = page.getByPlaceholder('Rechercher une destination')
+    const input = page.getByLabel('Destination ou adresse')
     await input.focus()
     await expect(input).toBeFocused()
-    await expect(page.getByText('Recherches récentes')).toBeVisible()
+    await expect(transition).toHaveAttribute('data-address-mode', 'true')
+    await expect(page.getByText('Adresses populaires')).toBeVisible()
     await expect(page.getByText('Destinations suggérées')).toBeHidden()
 
     const fontSize = await input.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
