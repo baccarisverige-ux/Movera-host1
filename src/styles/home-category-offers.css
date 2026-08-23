@@ -11,7 +11,7 @@
 
 .b225-home .b225-category-selection .b225-section__title h2{
   margin:0!important;
-  font-size:24px!important;
+  font-size:16.8px!important;
   line-height:1.08!important;
   font-weight:720!important;
   letter-spacing:-.55px!important;
@@ -155,7 +155,7 @@
   }
 
   .b225-home .b225-category-selection .b225-section__title h2{
-    font-size:22px!important;
+    font-size:15.4px!important;
   }
 
   /* 37% smaller than the previous 222px mobile card. */
