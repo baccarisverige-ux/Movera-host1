@@ -100,8 +100,13 @@
   user-select:none!important;
 }
 
+/* Exactly two compact text rows under every photo: title + price/rating. */
 .b225-home .b225-offer-card__body{
-  padding:10px 3px 0!important;
+  display:grid!important;
+  grid-template-rows:auto auto!important;
+  row-gap:2px!important;
+  padding:6px 2px 0!important;
+  overflow:hidden!important;
 }
 
 .b225-home .b225-offer-card__title{
@@ -110,22 +115,26 @@
   text-overflow:ellipsis!important;
   white-space:nowrap!important;
   color:#171816!important;
-  font-size:17.5px!important;
-  line-height:1.2!important;
+  font-size:10.5px!important;
+  line-height:1.15!important;
   font-weight:650!important;
-  letter-spacing:-.28px!important;
+  letter-spacing:-.17px!important;
 }
 
 .b225-home .b225-offer-card__meta{
   display:flex!important;
   align-items:center!important;
-  gap:4px!important;
-  margin:5px 0 0!important;
+  gap:2px!important;
+  margin:0!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  white-space:nowrap!important;
+  text-overflow:ellipsis!important;
   color:#666862!important;
-  font-size:15px!important;
-  line-height:1.2!important;
+  font-size:9px!important;
+  line-height:1.15!important;
   font-weight:440!important;
-  letter-spacing:-.12px!important;
+  letter-spacing:-.07px!important;
 }
 
 .b225-home .b225-offer-card__meta strong{
@@ -158,10 +167,10 @@
   }
 
   .b225-home .b225-offer-card__title{
-    font-size:16.5px!important;
+    font-size:10px!important;
   }
 
   .b225-home .b225-offer-card__meta{
-    font-size:14px!important;
+    font-size:8.5px!important;
   }
 }
