@@ -5,7 +5,7 @@ test('home keeps its structure, media and approved navigation stable', async ({ 
   page.on('pageerror', error => errors.push(error.message))
   await page.goto('/')
   await expect(page.getByTestId('page-home')).toBeVisible()
-  await expect(page.locator('.b225-categories button')).toHaveCount(7)
+  await expect(page.locator('.b225-categories button')).toHaveCount(8)
   const familyIcon = page.locator('.b225-categories button[data-category-id="family"] img')
   await expect(familyIcon).toBeVisible()
   await expect.poll(() => familyIcon.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0)
@@ -44,7 +44,7 @@ test('home keeps its structure, media and approved navigation stable', async ({ 
 })
 
 test('critical collection pages contain no broken project images', async ({ page }) => {
-  for (const route of ['/', '/plage', '/maison-d-hote']) {
+  for (const route of ['/', '/plage', '/maison-d-hote', '/hotel']) {
     await page.goto(route === '/' ? '/' : `/Movera-host1${route}`)
     await expect(page.locator('img')).not.toHaveCount(0)
     await page.waitForTimeout(1_000)
@@ -66,19 +66,23 @@ test('critical collection pages contain no broken project images', async ({ page
 
 test('separate collection routes keep their own identity and shared filtering', async ({ page }) => {
   for (const collection of [
-    { route: '/plage', testId: 'page-beach', title: /La Tunisie\s*côté mer\./, city: 'Gammarth' },
-    { route: '/maison-d-hote', testId: 'page-guesthouse', title: /L’accueil tunisien,\s*autrement\./, city: 'La Marsa' },
+    { route: '/plage', testId: 'page-beach', title: /La Tunisie\s*côté mer\./, city: 'Gammarth', expectOffers: true },
+    { route: '/maison-d-hote', testId: 'page-guesthouse', title: /L’accueil tunisien,\s*autrement\./, city: 'La Marsa', expectOffers: true },
+    { route: '/hotel', testId: 'page-hotel', title: /L’hôtel,\s*autrement\./, city: 'Tunis', expectOffers: false },
   ]) {
     await page.goto(`/Movera-host1${collection.route}`)
     await expect(page.getByTestId(collection.testId)).toBeVisible()
     await expect(page.locator('.app-shell__header')).toBeVisible()
     await expect(page.locator('.app-shell__header')).toContainText('Movera Host')
     await expect(page.locator('.beach-hero__top, .beach-glass-button, .beach-hero__counter')).toHaveCount(0)
-    await expect(page.locator('.beach-hero__image')).toHaveAttribute('src', /page-hero\.webp$/)
+    const hero = page.locator('.portrait-collection-hero__image')
+    await expect(hero).toHaveAttribute('src', /hero-.*\.webp$/)
+    await expect.poll(() => hero.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(collection.title)
     await page.getByLabel('Ville en Tunisie').fill(collection.city)
     await expect(page.locator('.beach-results__head > div > span')).toHaveText(`Séjours à ${collection.city}`)
-    expect(await page.locator('.beach-offer').count()).toBeGreaterThan(0)
+    if (collection.expectOffers) expect(await page.locator('.beach-offer').count()).toBeGreaterThan(0)
+    else await expect(page.locator('.beach-empty')).toBeVisible()
   }
 })
 
@@ -96,10 +100,11 @@ test('category scroll animation reattaches after returning to Home', async ({ pa
   await expect(page.getByTestId('home-categories')).toHaveClass(/movera-categories-moving-under-header/)
 })
 
-test('Plage and Maison selections remain active after returning Home', async ({ page }) => {
+test('Plage, Maison and Hôtel selections remain active after returning Home', async ({ page }) => {
   for (const category of [
     { id: 'beach', pageTestId: 'page-beach' },
     { id: 'guesthouse', pageTestId: 'page-guesthouse' },
+    { id: 'hotel', pageTestId: 'page-hotel' },
   ]) {
     await page.goto('/')
     const button = page.locator(`.b225-categories button[data-category-id="${category.id}"]`)
