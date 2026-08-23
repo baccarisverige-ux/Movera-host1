@@ -90,7 +90,7 @@ export function CollectionPage({
   return (
     <div className={`beach-page${pageClassName ? ` ${pageClassName}` : ''}`} data-testid={hero.testId}>
       <section className="beach-hero" aria-label={collectionLabel}>
-        <img className={`beach-hero__image${hero.className ? ` ${hero.className}` : ''}`} src={hero.src} alt={hero.alt} decoding="async" fetchPriority="high" />
+        <img className={`beach-hero__image${hero.className ? ` ${hero.className}` : ''}`} src={hero.src} alt={hero.alt} loading="eager" decoding="sync" fetchPriority="high" />
         <div className="beach-hero__copy">
           <span>{collectionLabel}</span>
           <h1>{title}</h1>
