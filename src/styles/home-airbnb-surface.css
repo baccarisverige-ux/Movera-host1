@@ -58,20 +58,22 @@
   content:none!important;
 }
 
-/* Airbnb category SHAPE only: true pill/stadium ends, while preserving the existing size. */
+/* Unselected: curvy raised 3D pill, same dimensions. */
 .b225-home .b225-categories button{
   height:52px!important;
   min-height:52px!important;
   max-height:52px!important;
   padding:0 18px!important;
   gap:9px!important;
-  border:1px solid #dfdfdc!important;
+  border:1px solid #dededb!important;
   border-radius:26px!important;
-  background:#fff!important;
+  background:linear-gradient(180deg,#ffffff 0%,#fbfbfa 58%,#f1f1ef 100%)!important;
   box-shadow:
-    0 2px 0 rgba(32,32,30,.10),
-    0 4px 8px rgba(32,32,30,.07)!important;
-  transform:none!important;
+    inset 0 1.5px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(70,70,66,.08),
+    0 2px 0 rgba(35,35,32,.11),
+    0 5px 9px rgba(32,32,30,.075)!important;
+  transform:translateY(0)!important;
   filter:none!important;
   font-size:14.5px!important;
   line-height:1!important;
@@ -86,20 +88,25 @@
   content:none!important;
 }
 
+/* Selected: visibly pressed 3D state, like a physical Home button. */
 .b225-home .b225-categories button[data-active='true']{
-  background:#e9e9e6!important;
-  border-color:#dededb!important;
+  background:linear-gradient(180deg,#e7e7e4 0%,#eeeeeb 58%,#f3f3f1 100%)!important;
+  border-color:#d7d7d3!important;
   box-shadow:
-    0 2px 0 rgba(32,32,30,.105),
-    0 4px 8px rgba(32,32,30,.065)!important;
-  transform:none!important;
+    inset 0 3px 6px rgba(35,35,32,.14),
+    inset 0 -1px 0 rgba(255,255,255,.86),
+    inset 1px 0 0 rgba(45,45,42,.035),
+    inset -1px 0 0 rgba(45,45,42,.035),
+    0 1px 1px rgba(32,32,30,.045)!important;
+  transform:translateY(2px)!important;
 }
 
 .b225-home .b225-categories button:active{
-  transform:translateY(1px) scale(.985)!important;
+  transform:translateY(3px) scale(.985)!important;
   box-shadow:
-    0 1px 0 rgba(32,32,30,.10),
-    0 2px 4px rgba(32,32,30,.055)!important;
+    inset 0 4px 7px rgba(35,35,32,.16),
+    inset 0 -1px 0 rgba(255,255,255,.76),
+    0 1px 1px rgba(32,32,30,.035)!important;
 }
 
 /* Compact icon treatment matching the reference proportions. */
