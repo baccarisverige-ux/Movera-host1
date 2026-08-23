@@ -7,7 +7,7 @@
   padding-bottom:15px!important;
 }
 
-/* UNSELECTED = compact raised Airbnb-style physical pill. */
+/* Base dimensions. */
 .b225-home .b225-categories button{
   position:relative!important;
   isolation:isolate!important;
@@ -18,15 +18,6 @@
   padding:0 14px!important;
   gap:7px!important;
   border-radius:22px!important;
-  border:1px solid rgba(128,128,123,.18)!important;
-  background:linear-gradient(180deg,#ffffff 0%,#fbfbfa 58%,#f4f4f2 100%)!important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,1),
-    inset 0 -1px 0 rgba(95,95,90,.08),
-    0 1px 0 rgba(255,255,255,.9),
-    0 2px 0 rgba(198,198,193,.62),
-    0 4px 7px rgba(35,35,32,.07)!important;
-  transform:translateY(-1px)!important;
   font-size:13.5px!important;
   font-weight:560!important;
   transition:
@@ -36,43 +27,56 @@
     border-color .14s ease!important;
 }
 
-/* Slim lower edge: enough depth to read as a real button, not a plastic block. */
-.b225-home .b225-categories button::before{
-  content:""!important;
-  position:absolute!important;
-  z-index:-1!important;
-  pointer-events:none!important;
-  left:2px!important;
-  right:2px!important;
-  top:4px!important;
-  bottom:-3px!important;
-  border-radius:inherit!important;
-  background:linear-gradient(180deg,#ececea 0%,#d9d9d5 100%)!important;
-  box-shadow:0 2px 3px rgba(35,35,32,.055)!important;
-  opacity:.92!important;
-}
-
-/* Small curved light reflection. */
-.b225-home .b225-categories button::after{
-  content:""!important;
-  position:absolute!important;
-  z-index:0!important;
-  pointer-events:none!important;
-  left:7px!important;
-  right:7px!important;
-  top:2px!important;
-  height:34%!important;
-  border-radius:999px 999px 48% 48%!important;
-  background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,0))!important;
-  opacity:.54!important;
-}
-
 .b225-home .b225-category-icon{
   width:22px!important;
   height:22px!important;
   max-width:22px!important;
   max-height:22px!important;
   flex:0 0 22px!important;
+}
+
+/* UNSELECTED = inverse of bombé: a soft concave/curved surface. */
+.b225-home .b225-categories button:not([data-active='true']){
+  border:1px solid rgba(120,120,115,.14)!important;
+  background:
+    radial-gradient(ellipse at 50% 54%,#efefec 0%,#f4f4f1 43%,#fafaf8 74%,#ffffff 100%)!important;
+  box-shadow:
+    inset 0 2px 5px rgba(44,44,40,.085),
+    inset 0 -1px 1px rgba(255,255,255,.96),
+    inset 1px 0 2px rgba(55,55,51,.035),
+    inset -1px 0 2px rgba(255,255,255,.74),
+    0 1px 2px rgba(35,35,32,.028)!important;
+  transform:none!important;
+}
+
+/* No lower body/tranche on the inactive state. */
+.b225-home .b225-categories button:not([data-active='true'])::before{
+  content:""!important;
+  position:absolute!important;
+  pointer-events:none!important;
+  z-index:0!important;
+  inset:1px!important;
+  border-radius:inherit!important;
+  background:transparent!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.66),
+    inset 0 -1px 0 rgba(72,72,68,.035)!important;
+  opacity:1!important;
+}
+
+/* Gentle edge light; centre stays visually recessed. */
+.b225-home .b225-categories button:not([data-active='true'])::after{
+  content:""!important;
+  position:absolute!important;
+  pointer-events:none!important;
+  z-index:0!important;
+  left:6px!important;
+  right:6px!important;
+  top:2px!important;
+  bottom:2px!important;
+  border-radius:inherit!important;
+  background:radial-gradient(ellipse at 50% 110%,rgba(255,255,255,.48),rgba(255,255,255,0) 66%)!important;
+  opacity:.52!important;
 }
 
 /* SELECTED = darker, realistically pressed into the same material. */
@@ -91,13 +95,31 @@
 }
 
 .b225-home .b225-categories button[data-active='true']::before{
+  content:""!important;
+  position:absolute!important;
+  pointer-events:none!important;
+  z-index:-1!important;
+  left:2px!important;
+  right:2px!important;
   top:5px!important;
   bottom:-1px!important;
+  border-radius:inherit!important;
+  background:linear-gradient(180deg,#ececea 0%,#d9d9d5 100%)!important;
   opacity:.16!important;
   box-shadow:none!important;
 }
 
 .b225-home .b225-categories button[data-active='true']::after{
+  content:""!important;
+  position:absolute!important;
+  pointer-events:none!important;
+  z-index:0!important;
+  left:7px!important;
+  right:7px!important;
+  top:2px!important;
+  height:34%!important;
+  border-radius:999px 999px 48% 48%!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,0))!important;
   opacity:.12!important;
 }
 
