@@ -1,13 +1,17 @@
 import { expect, test } from '@playwright/test'
 
-async function openSearch(page) {
-  await page.goto('/')
-  await expect(page.getByTestId('page-home')).toBeVisible()
+async function openSearchOnCurrentPage(page) {
   await page.locator('.b225-search').click({ position: { x: 80, y: 25 } })
   const transition = page.getByTestId('search-transition')
   await expect(transition).toBeVisible()
   await expect.poll(async () => transition.getAttribute('data-ready')).toBe('true')
   return transition
+}
+
+async function openSearch(page) {
+  await page.goto('/')
+  await expect(page.getByTestId('page-home')).toBeVisible()
+  return openSearchOnCurrentPage(page)
 }
 
 async function chooseTwoAvailableDates(page) {
@@ -75,6 +79,32 @@ test.describe('Search live E2E / UAT / cleanup safety', () => {
     expect(locks.html).toBeUndefined()
     expect(locks.body).toBeUndefined()
     expect(locks.bodyPosition).not.toBe('fixed')
+  })
+
+  test('regression: close after Home scroll restores position and unlocks document', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByTestId('page-home')).toBeVisible()
+
+    await page.evaluate(() => window.scrollTo(0, Math.min(900, Math.max(500, document.documentElement.scrollHeight * 0.35))))
+    await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeGreaterThan(300)
+    const beforeOpen = await page.evaluate(() => window.scrollY)
+
+    await openSearchOnCurrentPage(page)
+    await page.getByRole('button', { name: 'Fermer' }).click()
+    await expect(page.getByTestId('search-transition')).toBeHidden({ timeout: 5_000 })
+    await expect(page.getByTestId('page-home')).toBeVisible()
+
+    await expect.poll(async () => page.evaluate(() => Math.round(window.scrollY))).toBe(Math.round(beforeOpen))
+    const locks = await page.evaluate(() => ({
+      html: document.documentElement.dataset.moveraSearchLock,
+      body: document.body.dataset.moveraSearchLock,
+      bodyPosition: document.body.style.position,
+      bodyTop: document.body.style.top,
+    }))
+    expect(locks.html).toBeUndefined()
+    expect(locks.body).toBeUndefined()
+    expect(locks.bodyPosition).not.toBe('fixed')
+    expect(locks.bodyTop).toBe('')
   })
 
   test('cleanup safety: only the live Search transition is mounted', async ({ page }) => {
