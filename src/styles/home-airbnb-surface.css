@@ -58,7 +58,7 @@
   content:none!important;
 }
 
-/* Airbnb-like category geometry: rounded rectangle, not a full capsule. */
+/* Airbnb category SHAPE only: rounded rectangle/squircle, not a capsule. */
 .b225-home .b225-categories button{
   height:52px!important;
   min-height:52px!important;
@@ -66,7 +66,7 @@
   padding:0 18px!important;
   gap:9px!important;
   border:1px solid #dfdfdc!important;
-  border-radius:21px!important;
+  border-radius:17px!important;
   background:#fff!important;
   box-shadow:
     0 2px 0 rgba(32,32,30,.10),
@@ -171,7 +171,7 @@
     min-height:49px!important;
     max-height:49px!important;
     padding-inline:16px!important;
-    border-radius:20px!important;
+    border-radius:16px!important;
     font-size:14px!important;
   }
   .b225-home .b225-category-icon{
