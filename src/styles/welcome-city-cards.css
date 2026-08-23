@@ -4,6 +4,15 @@
   min-height:188px!important;
   padding:17px 14px 13px 18px!important;
   overflow:hidden!important;
+  background:linear-gradient(
+    180deg,
+    rgba(239,241,242,.68) 0%,
+    rgba(239,241,242,.62) 36%,
+    rgba(239,241,242,.38) 66%,
+    rgba(239,241,242,.14) 84%,
+    rgba(239,241,242,0) 100%
+  )!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.88)!important;
 }
 
 .b225-welcome>span,
