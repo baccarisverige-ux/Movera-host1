@@ -9,10 +9,10 @@ const guestNav = [
   { label: 'Profil', path: '/profile', disabled: true, icon: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></> },
 ]
 
-const mapShellStyle = { maxWidth: 430, margin: '0 auto', background: '#eef0ee' }
+const mapShellStyle = { maxWidth: 430, margin: '0 auto', background: '#eff1ef' }
 const mapContentStyle = { padding: 0, overflow: 'hidden' }
 const mapNavStyle = { position: 'fixed', left: '50%', right: 'auto', bottom: 0, width: 'min(100%, 430px)', transform: 'translateX(-50%)', zIndex: 50 }
-const collectionContentStyle = { padding: 0, overflow: 'auto', background: '#f6f5f2' }
+const collectionContentStyle = { padding: 0, overflow: 'auto', background: '#f7f7f5' }
 
 function AppLink({ children, className, href, onNavigate, active, disabled = false }) {
   return (
