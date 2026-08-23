@@ -39,6 +39,12 @@ function onSearchPointerDown(event) {
 
   const trigger = eventElement(event)?.closest(SEARCH_TRIGGER)
   if (!trigger || !document.querySelector('[data-testid="page-home"]')) return
+
+  // The Home search shell contains a native input. On iOS that input can gain
+  // focus during pointerdown before the popup click handler runs, shrinking the
+  // visual viewport and opening the keyboard underneath the transition.
+  // Prevent only that native focus; the subsequent click still opens Search.
+  event.preventDefault()
   dismissKeyboardNow()
 }
 
