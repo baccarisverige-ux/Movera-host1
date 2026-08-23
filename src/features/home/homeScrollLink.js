@@ -10,6 +10,15 @@ let moveraObservedCategories = null
 let moveraObservedWelcome = null
 const MOVERA_CATEGORY_FOLLOW_MS = 220
 
+function getMoveraDocumentScrollY() {
+  const body = document.body
+  if (body?.dataset.moveraSearchLock === 'true' && body.style.position === 'fixed') {
+    const lockedTop = Number.parseFloat(body.style.top)
+    if (Number.isFinite(lockedTop)) return Math.max(0, -lockedTop)
+  }
+  return Math.max(0, window.scrollY || window.pageYOffset || 0)
+}
+
 function observeMoveraHome(header, categories, welcome) {
   if (
     moveraObservedHeader === header
@@ -47,7 +56,7 @@ function measureMoveraCategoryScroll() {
 
   moveraHeaderHeight = header.getBoundingClientRect().height
   moveraCategoriesHeight = categories.getBoundingClientRect().height
-  moveraWelcomeExitScrollY = window.scrollY + welcome.getBoundingClientRect().bottom
+  moveraWelcomeExitScrollY = getMoveraDocumentScrollY() + welcome.getBoundingClientRect().bottom
 
   document.documentElement.style.setProperty('--movera-home-header-height', `${moveraHeaderHeight}px`)
   categories.classList.add('movera-categories-linked')
@@ -61,7 +70,7 @@ function syncMoveraCategoryScroll(timestamp = performance.now()) {
   if (!categories && !measureMoveraCategoryScroll()) return false
   if (!moveraCategoriesHeight && !measureMoveraCategoryScroll()) return false
 
-  const distanceAfterWelcomeExit = Math.max(0, window.scrollY - moveraWelcomeExitScrollY)
+  const distanceAfterWelcomeExit = Math.max(0, getMoveraDocumentScrollY() - moveraWelcomeExitScrollY)
   const targetTravel = Math.min(distanceAfterWelcomeExit, moveraCategoriesHeight)
   const elapsed = moveraLastFrameTime ? Math.min(64, Math.max(1, timestamp - moveraLastFrameTime)) : 16.67
   moveraLastFrameTime = timestamp
@@ -89,6 +98,7 @@ function refreshMoveraCategoryScroll() {
 
 window.addEventListener('scroll', requestMoveraCategorySync, { passive: true })
 window.addEventListener('resize', refreshMoveraCategoryScroll, { passive: true })
+window.visualViewport?.addEventListener('resize', refreshMoveraCategoryScroll, { passive: true })
 window.addEventListener('popstate', refreshMoveraCategoryScroll)
 
 const homeMountObserver = new MutationObserver(() => {
