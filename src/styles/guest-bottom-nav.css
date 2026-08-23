@@ -1,4 +1,4 @@
-:root{--movera-nav-active:#4b795f}
+:root{--movera-nav-active:#50735f}
 
 .app-shell--guest > .app-shell__nav{
   position:fixed!important;
@@ -18,11 +18,11 @@
   padding:7px 6px env(safe-area-inset-bottom)!important;
   box-sizing:border-box!important;
   overflow:visible!important;
-  border-top:1px solid rgba(0,0,0,.04)!important;
-  background:rgba(255,255,255,.9)!important;
-  -webkit-backdrop-filter:saturate(180%) blur(20px)!important;
-  backdrop-filter:saturate(180%) blur(20px)!important;
-  box-shadow:0 -4px 20px rgba(0,0,0,.025)!important;
+  border-top:1px solid rgba(31,37,33,.05)!important;
+  background:rgba(254,254,253,.92)!important;
+  -webkit-backdrop-filter:saturate(175%) blur(20px)!important;
+  backdrop-filter:saturate(175%) blur(20px)!important;
+  box-shadow:0 -4px 20px rgba(30,36,32,.022)!important;
 }
 
 .app-shell--guest > .app-shell__content{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
@@ -46,7 +46,7 @@
   border:0!important;
   border-radius:12px!important;
   background:transparent!important;
-  color:#66666a!important;
+  color:#6d716f!important;
   font-size:9.5px!important;
   font-weight:500!important;
   line-height:1!important;
