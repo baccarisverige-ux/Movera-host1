@@ -1,0 +1,165 @@
+/* Category offer rails: Airbnb-inspired image-first cards with text below.
+   Display-only: no offer-detail navigation is attached to these cards. */
+
+.b225-home .b225-category-selection{
+  margin-top:24px!important;
+}
+
+.b225-home .b225-category-selection .b225-section__title{
+  margin-bottom:12px!important;
+}
+
+.b225-home .b225-category-selection .b225-section__title h2{
+  margin:0!important;
+  font-size:24px!important;
+  line-height:1.08!important;
+  font-weight:720!important;
+  letter-spacing:-.55px!important;
+  color:#171816!important;
+}
+
+.b225-home .b225-offer-scroll{
+  display:flex!important;
+  gap:13px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scroll-snap-type:x proximity!important;
+  scrollbar-width:none!important;
+  padding:1px 2px 5px!important;
+  margin-inline:-2px!important;
+}
+
+.b225-home .b225-offer-scroll::-webkit-scrollbar{
+  display:none!important;
+}
+
+.b225-home .b225-offer-card{
+  flex:0 0 238px!important;
+  min-width:238px!important;
+  max-width:238px!important;
+  scroll-snap-align:start!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+.b225-home .b225-offer-card__image{
+  position:relative!important;
+  width:100%!important;
+  aspect-ratio:1 / 1.04!important;
+  overflow:hidden!important;
+  border-radius:24px!important;
+  background:#ececea!important;
+}
+
+.b225-home .b225-offer-card__image img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+}
+
+.b225-home .b225-offer-card__badge{
+  position:absolute!important;
+  top:12px!important;
+  left:12px!important;
+  max-width:calc(100% - 64px)!important;
+  padding:8px 13px!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.94)!important;
+  border:1px solid rgba(255,255,255,.76)!important;
+  box-shadow:0 2px 8px rgba(28,28,25,.08)!important;
+  backdrop-filter:blur(8px)!important;
+  -webkit-backdrop-filter:blur(8px)!important;
+  color:#171816!important;
+  font-size:12.5px!important;
+  line-height:1!important;
+  font-weight:690!important;
+  letter-spacing:-.15px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+.b225-home .b225-offer-card__heart{
+  position:absolute!important;
+  top:10px!important;
+  right:11px!important;
+  display:grid!important;
+  place-items:center!important;
+  width:34px!important;
+  height:34px!important;
+  color:#fff!important;
+  font-size:29px!important;
+  line-height:1!important;
+  font-family:Arial,sans-serif!important;
+  font-weight:400!important;
+  text-shadow:0 1px 3px rgba(0,0,0,.28)!important;
+  user-select:none!important;
+}
+
+.b225-home .b225-offer-card__body{
+  padding:10px 3px 0!important;
+}
+
+.b225-home .b225-offer-card__title{
+  margin:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:#171816!important;
+  font-size:17.5px!important;
+  line-height:1.2!important;
+  font-weight:650!important;
+  letter-spacing:-.28px!important;
+}
+
+.b225-home .b225-offer-card__meta{
+  display:flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  margin:5px 0 0!important;
+  color:#666862!important;
+  font-size:15px!important;
+  line-height:1.2!important;
+  font-weight:440!important;
+  letter-spacing:-.12px!important;
+}
+
+.b225-home .b225-offer-card__meta strong{
+  color:#5c5e59!important;
+  font-weight:530!important;
+}
+
+.b225-home .b225-offer-card__dot{
+  opacity:.55!important;
+}
+
+@media(max-width:390px){
+  .b225-home .b225-category-selection{
+    margin-top:22px!important;
+  }
+
+  .b225-home .b225-category-selection .b225-section__title h2{
+    font-size:22px!important;
+  }
+
+  .b225-home .b225-offer-card{
+    flex-basis:222px!important;
+    min-width:222px!important;
+    max-width:222px!important;
+  }
+
+  .b225-home .b225-offer-card__image{
+    border-radius:22px!important;
+  }
+
+  .b225-home .b225-offer-card__title{
+    font-size:16.5px!important;
+  }
+
+  .b225-home .b225-offer-card__meta{
+    font-size:14px!important;
+  }
+}
