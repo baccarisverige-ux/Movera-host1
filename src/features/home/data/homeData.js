@@ -3,8 +3,8 @@ import { listingCatalog } from '../../../entities/listing/listingCatalog.js'
 export const homeCategories = [
   { id: 'all', label: 'Tout', icon: '◉' },
   { id: 'guesthouse', label: "Maison d’hôte", icon: '⌂' },
-  { id: 'hotel', label: 'Hôtel', icon: '▦' },
   { id: 'beach', label: 'Plage', icon: '◒' },
+  { id: 'hotel', label: 'Hôtel', icon: '▦' },
   { id: 'family', label: 'Appartement', icon: '♡' },
   { id: 'prestige', label: 'Villa', icon: '◇' },
   { id: 'experience', label: 'Expérience', icon: '✦' },
