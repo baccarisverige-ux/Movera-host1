@@ -9,12 +9,24 @@ for (const collection of collections) {
   test(`${collection.categoryId} category opens its collection page with the shared collection shell`, async ({ page }) => {
     await page.goto('/')
 
+    const criticalHeroPreloads = page.locator('link[rel="preload"][as="image"][fetchpriority="high"]')
+    await expect(criticalHeroPreloads).toHaveCount(2)
+    await expect.poll(async () => page.evaluate(() => {
+      const links = [...document.querySelectorAll('link[rel="preload"][as="image"][fetchpriority="high"]')]
+      return links.length === 2 && links.every((link) => performance.getEntriesByName(link.href).length > 0)
+    })).toBe(true)
+
     const categoryButton = page.locator(`.b225-categories button[data-category-id="${collection.categoryId}"]`)
     await expect(categoryButton).toHaveCount(1)
     await categoryButton.click()
 
     await expect(page).toHaveURL(new RegExp(`${collection.route.replaceAll('-', '\\-')}$`))
     await expect(page.getByTestId(collection.pageTestId)).toBeVisible()
+
+    const heroImage = page.locator('.portrait-collection-hero__image')
+    await expect(heroImage).toHaveAttribute('loading', 'eager')
+    await expect(heroImage).toHaveAttribute('fetchpriority', 'high')
+    await expect.poll(() => heroImage.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
 
     const shell = page.locator('.app-shell--guest')
     await expect(shell).toHaveClass(/app-shell--collection/)
