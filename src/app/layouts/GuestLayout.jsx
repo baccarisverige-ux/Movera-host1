@@ -9,6 +9,12 @@ const guestNav = [
   { label: 'Profil', path: '/profile', disabled: true, icon: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></> },
 ]
 
+const COLLECTION_HEADER_LABELS = Object.freeze({
+  '/plage': 'Collection Plage',
+  '/maison-d-hote': "Collection Maison d’hôte",
+  '/hotel': 'Collection Hôtel',
+})
+
 const mapShellStyle = { maxWidth: 430, margin: '0 auto', background: '#eff1ef' }
 const mapContentStyle = { padding: 0, overflow: 'hidden' }
 const mapNavStyle = { position: 'fixed', left: '50%', right: 'auto', bottom: 0, width: 'min(100%, 430px)', transform: 'translateX(-50%)', zIndex: 50 }
@@ -38,11 +44,13 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
   const isMapRoute = currentPath === '/map'
   const isCollectionRoute = isGuestCollectionRoute(currentPath)
   const isBeachRoute = currentPath === '/plage'
+  const collectionHeaderLabel = COLLECTION_HEADER_LABELS[currentPath] || ''
 
   return (
     <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isCollectionRoute ? ' app-shell--collection' : ''}${isBeachRoute ? ' app-shell--beach' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
       <header className="app-shell__header" style={isMapRoute ? { display: 'none' } : undefined}>
         <strong>Movera Host</strong>
+        {collectionHeaderLabel ? <span className="app-shell__collection-badge">{collectionHeaderLabel}</span> : null}
       </header>
       <main
         className="app-shell__content"
