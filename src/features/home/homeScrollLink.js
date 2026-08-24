@@ -1,47 +1,101 @@
+let moveraScrollRaf = 0
 let moveraResizeObserver = null
 let moveraObservedHeader = null
 let moveraObservedShell = null
+let moveraObservedWelcome = null
+let moveraHeaderHeight = 0
+let moveraShellHeight = 0
 
-function syncMoveraCategorySticky() {
-  const header = document.querySelector('.b225-home-header')
-  const shell = document.querySelector('.b225-categories-shell')
-  const rail = document.querySelector('.b225-categories')
+function getHomeElements() {
+  return {
+    header: document.querySelector('.b225-home-header'),
+    shell: document.querySelector('.b225-categories-shell'),
+    rail: document.querySelector('.b225-categories'),
+    welcome: document.querySelector('.b225-welcome'),
+  }
+}
 
-  if (!header || !shell || !rail) return false
+function observeHomeGeometry(header, shell, welcome) {
+  if (
+    moveraObservedHeader === header
+    && moveraObservedShell === shell
+    && moveraObservedWelcome === welcome
+  ) return
 
-  const headerHeight = header.getBoundingClientRect().height
-  document.documentElement.style.setProperty('--movera-home-header-height', `${headerHeight}px`)
+  moveraResizeObserver?.disconnect()
+  moveraResizeObserver = null
+  moveraObservedHeader = header
+  moveraObservedShell = shell
+  moveraObservedWelcome = welcome
+
+  if ('ResizeObserver' in window) {
+    moveraResizeObserver = new ResizeObserver(() => {
+      measureHomeGeometry()
+      requestCategorySync()
+    })
+    moveraResizeObserver.observe(header)
+    moveraResizeObserver.observe(shell)
+    moveraResizeObserver.observe(welcome)
+  }
+}
+
+function measureHomeGeometry() {
+  const { header, shell, rail, welcome } = getHomeElements()
+  if (!header || !shell || !rail || !welcome) return false
+
+  observeHomeGeometry(header, shell, welcome)
+  moveraHeaderHeight = header.getBoundingClientRect().height
+  moveraShellHeight = shell.getBoundingClientRect().height
+
+  document.documentElement.style.setProperty('--movera-home-header-height', `${moveraHeaderHeight}px`)
   shell.classList.add('movera-categories-linked')
   rail.classList.add('movera-categories-linked')
-
-  if (moveraObservedHeader !== header || moveraObservedShell !== shell) {
-    moveraResizeObserver?.disconnect()
-    moveraObservedHeader = header
-    moveraObservedShell = shell
-
-    if ('ResizeObserver' in window) {
-      moveraResizeObserver = new ResizeObserver(syncMoveraCategorySticky)
-      moveraResizeObserver.observe(header)
-      moveraResizeObserver.observe(shell)
-    }
-  }
-
   return true
 }
 
-function scheduleMoveraCategorySticky() {
-  requestAnimationFrame(syncMoveraCategorySticky)
+function syncCategoryPosition() {
+  moveraScrollRaf = 0
+  const { header, shell, rail, welcome } = getHomeElements()
+  if (!header || !shell || !rail || !welcome) return false
+  if ((!moveraHeaderHeight || !moveraShellHeight) && !measureHomeGeometry()) return false
+
+  const welcomeBottom = welcome.getBoundingClientRect().bottom
+  const dockBottom = moveraHeaderHeight + moveraShellHeight
+  const upwardTravel = Math.min(
+    moveraShellHeight,
+    Math.max(0, dockBottom - welcomeBottom),
+  )
+
+  document.documentElement.style.setProperty('--movera-category-upward-travel', `${upwardTravel}px`)
+  const moving = upwardTravel > 0.5
+  const hiddenUnderSearch = upwardTravel >= moveraShellHeight - 0.5
+  shell.classList.toggle('movera-categories-moving-under-header', moving)
+  rail.classList.toggle('movera-categories-moving-under-header', moving)
+  shell.classList.toggle('movera-categories-under-search', hiddenUnderSearch)
+  rail.classList.toggle('movera-categories-under-search', hiddenUnderSearch)
+  return true
 }
 
-window.addEventListener('resize', scheduleMoveraCategorySticky, { passive: true })
-window.visualViewport?.addEventListener('resize', scheduleMoveraCategorySticky, { passive: true })
-window.addEventListener('popstate', scheduleMoveraCategorySticky)
-window.addEventListener('movera-search-restored', scheduleMoveraCategorySticky)
+function requestCategorySync() {
+  if (moveraScrollRaf) return
+  moveraScrollRaf = requestAnimationFrame(syncCategoryPosition)
+}
+
+function refreshCategoryLink() {
+  if (measureHomeGeometry()) requestCategorySync()
+}
+
+window.addEventListener('scroll', requestCategorySync, { passive: true })
+window.addEventListener('resize', refreshCategoryLink, { passive: true })
+window.visualViewport?.addEventListener('resize', refreshCategoryLink, { passive: true })
+window.addEventListener('popstate', refreshCategoryLink)
+window.addEventListener('movera-search-restored', refreshCategoryLink)
 
 const root = document.getElementById('root') || document.documentElement
 const homeMountObserver = new MutationObserver((mutations) => {
-  if (mutations.some((mutation) => mutation.type === 'childList')) scheduleMoveraCategorySticky()
+  if (!mutations.some((mutation) => mutation.type === 'childList')) return
+  requestAnimationFrame(refreshCategoryLink)
 })
 homeMountObserver.observe(root, { childList: true, subtree: true })
 
-scheduleMoveraCategorySticky()
+refreshCategoryLink()
