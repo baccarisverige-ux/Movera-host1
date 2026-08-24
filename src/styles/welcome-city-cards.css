@@ -135,6 +135,63 @@
 .b225-welcome-city:nth-child(6){--city-rotate:-.6deg;--city-surface:#eaf5f1;--city-mid:#e0efe9;--city-deep:#cee5dc;--city-edge:#b7cec3;right:0;top:63px;width:25%}
 .b225-welcome-city:nth-child(7){--city-rotate:.7deg;--city-surface:#f2ecf7;--city-mid:#e9e0f0;--city-deep:#dacfe5;--city-edge:#c5b7d0;left:43%;top:91px;width:29%}
 
+/* Smaller category-style badges complement the destination cards without adding navigation. */
+.b225-welcome-types{
+  position:relative;
+  z-index:9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-top:-1px;
+  padding:0 4px 2px;
+}
+
+.b225-welcome-type{
+  --type-surface:#f1f2f1;
+  --type-mid:#e9ebe9;
+  --type-deep:#dfe2df;
+  --type-edge:#cbd0cc;
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  place-items:center;
+  min-height:27px;
+  padding:0 9px;
+  border:1px solid rgba(87,94,89,.10);
+  border-radius:8px;
+  color:#444a46;
+  font:740 7.6px/1 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  letter-spacing:-.03px;
+  white-space:nowrap;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.10) 24%,rgba(255,255,255,0) 38%),
+    linear-gradient(145deg,var(--type-surface) 0%,var(--type-mid) 56%,var(--type-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.98),
+    inset 0 -1.5px 0 var(--type-edge),
+    0 1.5px 0 rgba(80,88,82,.045),
+    0 3px 5px rgba(41,47,43,.065),
+    0 6px 10px rgba(41,47,43,.055);
+}
+
+.b225-welcome-type::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:5px;
+  right:5px;
+  bottom:-3px;
+  height:4px;
+  border-radius:0 0 6px 6px;
+  background:linear-gradient(180deg,var(--type-edge),rgba(95,103,97,.08));
+  opacity:.68;
+}
+
+.b225-welcome-type:nth-child(1){--type-surface:#eef4f9;--type-mid:#e4eef6;--type-deep:#d6e4f0;--type-edge:#bed0df}
+.b225-welcome-type:nth-child(2){--type-surface:#eff3e8;--type-mid:#e6ecdc;--type-deep:#d8e2cc;--type-edge:#c1cdb4}
+.b225-welcome-type:nth-child(3){--type-surface:#f2ecf7;--type-mid:#e9e0f0;--type-deep:#dacfe5;--type-edge:#c5b7d0}
+
 @media(max-width:350px){
   .b225-welcome{min-height:155px!important;padding-inline:12px!important}
   .b225-welcome-cities{height:121px}
@@ -143,6 +200,8 @@
   .b225-welcome-city:nth-child(3){left:28%;width:35%}
   .b225-welcome-city:nth-child(4){left:57%;width:22%}
   .b225-welcome-city:nth-child(5){width:22%}
+  .b225-welcome-types{gap:5px;margin-top:-2px}
+  .b225-welcome-type{min-height:25px;padding-inline:7px;font-size:7px;border-radius:7px}
 }
 
 @media(prefers-reduced-motion:reduce){
