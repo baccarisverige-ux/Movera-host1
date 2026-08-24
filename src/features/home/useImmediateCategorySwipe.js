@@ -3,7 +3,9 @@ import { useEffect, useRef } from 'react'
 const START_THRESHOLD_PX = 2
 const HORIZONTAL_BIAS = 1.04
 const CLICK_SUPPRESS_MS = 320
-const MAX_MOMENTUM_PX_PER_MS = 1.7
+const DRAG_GAIN = 0.82
+const MAX_MOMENTUM_PX_PER_MS = 0.9
+const MOMENTUM_DECAY = 0.875
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
@@ -35,20 +37,20 @@ export function useImmediateCategorySwipe() {
     }
 
     const startMomentum = () => {
-      if (Math.abs(velocity) < 0.04) return
+      if (Math.abs(velocity) < 0.035) return
       velocity = clamp(velocity, -MAX_MOMENTUM_PX_PER_MS, MAX_MOMENTUM_PX_PER_MS)
       momentumTime = performance.now()
 
       const step = (time) => {
-        const dt = Math.min(24, Math.max(1, time - momentumTime))
+        const dt = Math.min(22, Math.max(1, time - momentumTime))
         momentumTime = time
         const maxScroll = Math.max(0, rail.scrollWidth - rail.clientWidth)
         const next = clamp(rail.scrollLeft + velocity * dt, 0, maxScroll)
         const hitEdge = next === 0 || next === maxScroll
         rail.scrollLeft = next
-        velocity *= Math.pow(0.92, dt / 16.67)
+        velocity *= Math.pow(MOMENTUM_DECAY, dt / 16.67)
 
-        if (hitEdge || Math.abs(velocity) < 0.025) {
+        if (hitEdge || Math.abs(velocity) < 0.02) {
           stopMomentum()
           return
         }
@@ -89,12 +91,12 @@ export function useImmediateCategorySwipe() {
       if (event.cancelable) event.preventDefault()
 
       const maxScroll = Math.max(0, rail.scrollWidth - rail.clientWidth)
-      rail.scrollLeft = clamp(startScrollLeft - dx, 0, maxScroll)
+      rail.scrollLeft = clamp(startScrollLeft - dx * DRAG_GAIN, 0, maxScroll)
 
       const now = performance.now()
       const dt = Math.max(1, now - lastMoveTime)
       const instantaneousVelocity = (rail.scrollLeft - lastScrollLeft) / dt
-      velocity = velocity * 0.55 + instantaneousVelocity * 0.45
+      velocity = velocity * 0.68 + instantaneousVelocity * 0.32
       lastScrollLeft = rail.scrollLeft
       lastMoveTime = now
     }
