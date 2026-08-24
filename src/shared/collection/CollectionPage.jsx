@@ -108,7 +108,6 @@ export function CollectionPage({
           </div>
         </div>
         <div className="beach-hero__copy collection-hero__copy">
-          <span>{collectionLabel}</span>
           <h1>{title}</h1>
           <p>{description}</p>
         </div>
