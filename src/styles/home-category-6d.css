@@ -1,10 +1,33 @@
 /* Category-button material layer.
    Reference direction: compact pill with a continuous vertical curve from top to bottom. */
 
+/* Categories shell now uses the exact same premium surface language as
+   the "Bienvenue chez Movera" shell: same outer margins, rim, radius,
+   neutral gradient and grounded depth. */
 .b225-home .b225-categories{
+  box-sizing:border-box!important;
+  margin:18px 14px 8px!important;
+  padding:17px 14px 13px 18px!important;
   overflow-x:auto!important;
   overflow-y:visible!important;
-  padding-bottom:12.5px!important;
+  border:1px solid rgba(255,255,255,.96)!important;
+  border-radius:25px!important;
+  background:linear-gradient(
+    180deg,
+    rgba(250,249,248,.92) 0%,
+    rgba(247,247,246,.86) 62%,
+    rgba(246,246,245,.78) 100%
+  )!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(124,116,107,.08),
+    0 8px 18px rgba(75,67,58,.075),
+    0 2px 4px rgba(75,67,58,.045)!important;
+  scrollbar-width:none!important;
+}
+
+.b225-home .b225-categories::-webkit-scrollbar{
+  display:none!important;
 }
 
 .b225-home .b225-categories button{
@@ -159,6 +182,11 @@
 }
 
 @media(max-width:350px){
+  .b225-home .b225-categories{
+    margin-inline:10px!important;
+    border-radius:22px!important;
+    padding-inline:14px!important;
+  }
   .b225-home .b225-categories button{
     height:38.5px!important;
     min-height:38.5px!important;
