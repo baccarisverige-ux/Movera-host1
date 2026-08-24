@@ -43,8 +43,6 @@ const WELCOME_CITIES = [
   { id: 'tabarka', label: 'Tabarka' },
 ]
 
-const WELCOME_STAY_TYPES = ['Hôtel', 'Appartement', 'Villa']
-
 function SearchIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>}
 function ScrollArrowIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 7l5 5-5 5"/></svg>}
 function CategoryArtwork({id}){const src=CATEGORY_ARTWORK[id];return src?<img className="b225-category-icon" data-category-icon={id} src={src} alt="" aria-hidden="true" decoding="async"/>:null}
@@ -71,7 +69,7 @@ export function HomePage({onNavigate}){
  return <div className="b225-home" data-testid="page-home">
  <header className="b225-home-header"><div className="b225-brand">Movera Host</div><label className="b225-search b225-home-map-search" aria-label="Rechercher une destination"><SearchIcon/><span className="b225-home-map-search__copy"><strong>Explorez autrement</strong><span>Destination · Dates · Voyageurs</span></span><input data-testid="home-search" type="search" value={query} onChange={e=>setQuery(e.target.value)} aria-label="Destination" readOnly tabIndex={-1}/><span className="b225-home-map-filter-button" aria-hidden="true">≡</span></label></header>
  <div className="b225-categories-shell" aria-label="Catégories"><div className="b225-categories" data-testid="home-categories"><div className="b225-categories-track">{homeCategories.map(item=><Fragment key={item.id}><button type="button" data-category-id={item.id} data-active={category===item.id?'true':'false'} aria-pressed={category===item.id} onClick={()=>selectCategory(item)}><CategoryArtwork id={item.id}/>{item.label}</button>{item.id==='beach'?<span className="b225-category-swipe-hint" aria-hidden="true"><span>›</span><span>›</span></span>:null}</Fragment>)}</div></div></div>
- <section className="b225-welcome" aria-label="Bienvenue chez Movera"><span className="b225-welcome__title">Bienvenue chez Movera</span><div className="b225-welcome-cities" data-testid="home-welcome-cities">{WELCOME_CITIES.map(city=><button key={city.id} type="button" className="b225-welcome-city" data-city-id={city.id} onClick={()=>onNavigate(`/map?destination=${city.id}`)} aria-label={`Explorer ${city.label} sur la carte`}>{city.label}</button>)}</div><div className="b225-welcome-types" data-testid="home-welcome-types" aria-label="Types de séjour">{WELCOME_STAY_TYPES.map(type=><span key={type} className="b225-welcome-type">{type}</span>)}</div></section>
+ <section className="b225-welcome" aria-label="Bienvenue chez Movera"><span className="b225-welcome__title">Bienvenue chez Movera</span><div className="b225-welcome-cities" data-testid="home-welcome-cities">{WELCOME_CITIES.map(city=><button key={city.id} type="button" className="b225-welcome-city" data-city-id={city.id} onClick={()=>onNavigate(`/map?destination=${city.id}`)} aria-label={`Explorer ${city.label} sur la carte`}>{city.label}</button>)}</div></section>
  {categorySelections.map(selection=><CategorySelection key={selection.id} id={selection.id} title={selection.title} items={selection.items}/>)}
  </div>
 }
