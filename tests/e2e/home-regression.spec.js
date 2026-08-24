@@ -1,35 +1,41 @@
 import { expect, test } from '@playwright/test'
 
-test('home keeps its structure, media and approved navigation stable', async ({ page }) => {
+test('home keeps its current category structure, media and approved navigation stable', async ({ page }) => {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   await page.goto('/')
   await expect(page.getByTestId('page-home')).toBeVisible()
-  await expect(page.locator('.b225-categories button')).toHaveCount(8)
-  const familyIcon = page.locator('.b225-categories button[data-category-id="family"] img')
-  await expect(familyIcon).toBeVisible()
-  await expect.poll(() => familyIcon.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0)
-  await expect(page.locator('.b225-city')).toHaveCount(10)
-  await expect(page.getByTestId('home-services').locator('.b225-service-card')).toHaveCount(4)
-  expect(await page.getByTestId('home-featured').locator('.b225-featured-card').count()).toBeGreaterThanOrEqual(3)
-  await expect(page.getByTestId('home-welcome-cities').locator('.b225-welcome-city')).toHaveCount(7)
-  await expect(page.getByTestId('home-tunisia-map')).toHaveCount(0)
 
-  for (const id of ['prestige', 'experience', 'partner']) {
-    const button = page.locator(`.b225-categories button[data-category-id="${id}"]`)
+  const categoryIds = ['all', 'guesthouse', 'beach', 'hotel', 'family', 'prestige', 'experience', 'partner']
+  const categoryRail = page.getByTestId('home-categories')
+  await expect(categoryRail.locator(':scope > button')).toHaveCount(8)
+  await expect(page.locator('.b225-category-swipe-hint')).toHaveCount(1)
+
+  for (const id of categoryIds) {
+    const button = categoryRail.locator(`button[data-category-id="${id}"]`)
     await expect(button).toHaveCount(1)
-    await button.click()
     await expect(button).toBeVisible()
+    const icon = button.locator('img')
+    await expect(icon).toHaveCount(1)
+    await expect.poll(() => icon.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0)
   }
-  await page.locator('.b225-categories button[data-category-id="all"]').click()
+
+  await expect(page.getByTestId('home-welcome-cities').locator('.b225-welcome-city')).toHaveCount(7)
+  await expect(page.locator('[data-category-selection]')).toHaveCount(8)
+  for (const id of categoryIds) {
+    expect(await page.getByTestId(`home-selection-${id}`).locator('.b225-offer-card').count()).toBeGreaterThan(0)
+  }
+
+  for (const id of ['family', 'prestige', 'experience', 'partner']) {
+    const button = categoryRail.locator(`button[data-category-id="${id}"]`)
+    await button.click()
+    await expect(page.getByTestId('page-home')).toBeVisible()
+    await expect(button).toHaveAttribute('data-active', 'true')
+  }
+  await categoryRail.locator('button[data-category-id="all"]').click()
 
   const overflow = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth)
   expect(overflow).toBeLessThanOrEqual(1)
-  const blanks = await page.locator('.b225-card__image').evaluateAll(nodes => nodes.filter(node => {
-    const img = node.querySelector('img')
-    return !img || !img.getAttribute('src')
-  }).length)
-  expect(blanks).toBe(0)
 
   const nav = page.locator('.app-shell--guest > .app-shell__nav')
   await expect(nav).toBeVisible()
@@ -72,10 +78,9 @@ test('critical collection pages contain no broken project images', async ({ page
   }
 
   await page.goto('/')
-  const villaImage = page.getByTestId('home-card-villa-emeraude').locator('img').first()
-  await expect(villaImage).toHaveAttribute('src', /villa-emeraude-.*\.webp$/)
-  await villaImage.scrollIntoViewIfNeeded()
-  await expect.poll(() => villaImage.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
+  const villaCategoryIcon = page.locator('.b225-category-icon[data-category-icon="prestige"]')
+  await expect(villaCategoryIcon).toBeVisible()
+  await expect.poll(() => villaCategoryIcon.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
 })
 
 test('separate collection routes keep their own identity and shared filtering', async ({ page }) => {
@@ -100,7 +105,7 @@ test('separate collection routes keep their own identity and shared filtering', 
   }
 })
 
-test('category scroll animation reattaches after returning to Home', async ({ page }) => {
+test('category shell scroll animation reattaches after returning to Home', async ({ page }) => {
   await page.goto('/')
   await page.locator('.b225-categories button[data-category-id="beach"]').click()
   await expect(page.getByTestId('page-beach')).toBeVisible()
@@ -111,6 +116,7 @@ test('category scroll animation reattaches after returning to Home', async ({ pa
   await expect.poll(() => page.evaluate(() => Number.parseFloat(
     getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel'),
   ))).toBeGreaterThan(10)
+  await expect(page.locator('.b225-categories-shell')).toHaveClass(/movera-categories-moving-under-header/)
   await expect(page.getByTestId('home-categories')).toHaveClass(/movera-categories-moving-under-header/)
 })
 
