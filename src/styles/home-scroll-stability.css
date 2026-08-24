@@ -63,27 +63,34 @@
   padding-bottom:10px!important;
 }
 
-/* Keep the swipe hint inside Catégories but visually just above the final
-   Partenaire pill. It no longer occupies space between categories. */
-.b225-home .b225-categories-track>button[data-category-id='partner']{
-  overflow:visible!important;
+/* Persistent swipe hint: always visible in Catégories, slightly above the
+   right-most visible category rather than attached to an off-screen item. */
+.b225-home .b225-categories-shell>.b225-category-swipe-hint--overlay{
+  position:absolute!important;
+  z-index:24!important;
+  top:4px!important;
+  right:18px!important;
+  left:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:0!important;
+  width:24px!important;
+  height:15px!important;
+  margin:0!important;
+  transform:none!important;
+  color:rgba(58,59,56,.90)!important;
+  font-size:17px!important;
+  line-height:1!important;
+  letter-spacing:-4px!important;
+  font-weight:350!important;
+  pointer-events:none!important;
+  filter:drop-shadow(0 1px 1.5px rgba(48,48,44,.10))!important;
 }
 
-.b225-home .b225-categories-track>button[data-category-id='partner']>.b225-category-swipe-hint{
-  position:absolute!important;
-  z-index:12!important;
-  left:50%!important;
-  top:0!important;
-  flex:none!important;
-  align-self:auto!important;
-  width:22px!important;
-  height:12px!important;
-  margin:0!important;
-  transform:translate(-50%,-35%)!important;
-  font-size:16.5px!important;
-  letter-spacing:-4px!important;
-  line-height:1!important;
-  pointer-events:none!important;
+.b225-home .b225-categories-shell>.b225-category-swipe-hint--overlay>span{
+  display:block!important;
+  width:10px!important;
 }
 
 /* Neutralize the old masked pseudo-element implementation from home-b225.
@@ -117,9 +124,11 @@
     min-height:54px!important;
   }
 
-  .b225-home .b225-categories-track>button[data-category-id='partner']>.b225-category-swipe-hint{
-    width:20px!important;
-    height:11px!important;
-    font-size:15.5px!important;
+  .b225-home .b225-categories-shell>.b225-category-swipe-hint--overlay{
+    top:3px!important;
+    right:16px!important;
+    width:22px!important;
+    height:14px!important;
+    font-size:16px!important;
   }
 }
