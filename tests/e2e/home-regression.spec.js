@@ -8,7 +8,9 @@ test('home keeps its current category structure, media and approved navigation s
 
   const categoryIds = ['all', 'guesthouse', 'beach', 'hotel', 'family', 'prestige', 'experience', 'partner']
   const categoryRail = page.getByTestId('home-categories')
-  await expect(categoryRail.locator(':scope > button')).toHaveCount(8)
+  const categoryTrack = categoryRail.locator('.b225-categories-track')
+  await expect(categoryTrack).toBeVisible()
+  await expect(categoryRail.locator('button[data-category-id]')).toHaveCount(8)
   await expect(page.locator('.b225-category-swipe-hint')).toHaveCount(1)
 
   for (const id of categoryIds) {
@@ -19,6 +21,11 @@ test('home keeps its current category structure, media and approved navigation s
     await expect(icon).toHaveCount(1)
     await expect.poll(() => icon.evaluate((image) => image.naturalWidth)).toBeGreaterThan(0)
   }
+
+  await expect.poll(() => categoryRail.evaluate(node => node.scrollWidth > node.clientWidth)).toBe(true)
+  await categoryRail.evaluate(node => { node.scrollLeft = node.scrollWidth })
+  await expect.poll(() => categoryRail.evaluate(node => node.scrollLeft)).toBeGreaterThan(0)
+  await categoryRail.evaluate(node => { node.scrollLeft = 0 })
 
   await expect(page.getByTestId('home-welcome-cities').locator('.b225-welcome-city')).toHaveCount(7)
   await expect(page.locator('[data-category-selection]')).toHaveCount(8)
@@ -105,19 +112,18 @@ test('separate collection routes keep their own identity and shared filtering', 
   }
 })
 
-test('category shell scroll animation reattaches after returning to Home', async ({ page }) => {
+test('category shell stays sticky after returning to Home', async ({ page }) => {
   await page.goto('/')
   await page.locator('.b225-categories button[data-category-id="beach"]').click()
   await expect(page.getByTestId('page-beach')).toBeVisible()
   await page.getByRole('button', { name: 'Retour à l’accueil' }).click()
   await expect(page.getByTestId('page-home')).toBeVisible()
 
+  const shell = page.locator('.b225-categories-shell')
+  await expect(shell).toHaveClass(/movera-categories-linked/)
+  await expect.poll(() => shell.evaluate(node => getComputedStyle(node).position)).toBe('sticky')
   await page.evaluate(() => window.scrollTo(0, 900))
-  await expect.poll(() => page.evaluate(() => Number.parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel'),
-  ))).toBeGreaterThan(10)
-  await expect(page.locator('.b225-categories-shell')).toHaveClass(/movera-categories-moving-under-header/)
-  await expect(page.getByTestId('home-categories')).toHaveClass(/movera-categories-moving-under-header/)
+  await expect(shell).toBeVisible()
 })
 
 test('Plage, Maison and Hôtel selections remain active after returning Home', async ({ page }) => {
@@ -132,6 +138,6 @@ test('Plage, Maison and Hôtel selections remain active after returning Home', a
     await expect(page.getByTestId(category.pageTestId)).toBeVisible()
     await page.goBack()
     await expect(page.getByTestId('page-home')).toBeVisible()
-    await expect(button).toHaveAttribute('data-active', 'true')
+    await expect(page.locator(`.b225-categories button[data-category-id="${category.id}"]`)).toHaveAttribute('data-active', 'true')
   }
 })
