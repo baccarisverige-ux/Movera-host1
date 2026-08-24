@@ -1,0 +1,244 @@
+/* Shared premium architecture for category collection pages.
+   One visual system for Plage, Maison d'hôte and Hôtel. */
+
+.portrait-collection-page.collection-page,
+.portrait-collection-page{
+  --collection-edge:14px;
+  --collection-surface:#f7f7f5;
+  --collection-card:#fcfcfb;
+  --collection-line:rgba(79,77,72,.075);
+  --collection-text:#20211f;
+  --collection-muted:#7a7c77;
+}
+
+.portrait-collection-page .collection-hero{
+  box-sizing:border-box!important;
+  height:auto!important;
+  padding:12px var(--collection-edge) 0!important;
+  overflow:visible!important;
+  background:var(--collection-surface)!important;
+  border-radius:0!important;
+}
+
+.portrait-collection-page .collection-hero__stage{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 76px;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  min-height:238px;
+  margin:0 auto;
+  padding:12px 12px 12px 14px;
+  border:1px solid rgba(255,255,255,.96);
+  border-radius:28px;
+  background:linear-gradient(155deg,#fefefd 0%,#f8f8f6 58%,#f1f1ee 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(77,75,70,.055),
+    0 2px 5px rgba(42,40,36,.035),
+    0 14px 32px rgba(42,40,36,.065);
+}
+
+.portrait-collection-page .collection-hero__media{
+  position:relative;
+  display:grid;
+  place-items:center;
+  min-width:0;
+  min-height:212px;
+  overflow:hidden;
+  border:1px solid rgba(108,105,98,.07);
+  border-radius:23px;
+  background:#fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.98),
+    0 1px 2px rgba(38,37,34,.025),
+    0 7px 18px rgba(38,37,34,.045);
+}
+
+.portrait-collection-page .collection-hero__media::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.34);
+}
+
+.portrait-collection-page .collection-hero__media .portrait-collection-hero__image,
+.portrait-collection-page .collection-hero__media .beach-hero__image{
+  position:relative!important;
+  inset:auto!important;
+  display:block!important;
+  width:min(70vw,258px)!important;
+  max-width:100%!important;
+  height:auto!important;
+  max-height:252px!important;
+  margin:0 auto!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  background:#fff!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  transform:none!important;
+  filter:none!important;
+  image-rendering:auto!important;
+}
+
+.portrait-collection-page .collection-hero__badge{
+  align-self:center;
+  min-width:0;
+  width:76px;
+  min-height:74px;
+  padding:11px 7px 10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  text-align:center;
+  border:1px solid rgba(107,104,97,.09);
+  border-radius:20px;
+  background:linear-gradient(155deg,#ffffff 0%,#f8f8f6 58%,#efefec 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(68,67,63,.055),
+    0 2px 0 rgba(196,194,188,.25),
+    0 8px 18px rgba(43,42,39,.065);
+  transform:translateY(-5px);
+}
+
+.portrait-collection-page .collection-hero__badge::before{
+  content:"";
+  width:18px;
+  height:3px;
+  border-radius:999px;
+  background:rgba(75,77,72,.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+}
+
+.portrait-collection-page .collection-hero__badge>span{
+  display:block;
+  max-width:64px;
+  color:#343633;
+  font-size:9.2px;
+  line-height:1.12;
+  font-weight:760;
+  letter-spacing:-.08px;
+  white-space:normal;
+}
+
+.portrait-collection-page .collection-hero__badge>small{
+  color:#92948f;
+  font-size:7.2px;
+  line-height:1;
+  font-weight:700;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+
+.portrait-collection-page .collection-hero__copy,
+.portrait-collection-page .beach-hero__copy.collection-hero__copy{
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  z-index:1!important;
+  width:100%;
+  padding:14px 3px 13px!important;
+  background:transparent!important;
+  color:var(--collection-text)!important;
+}
+
+.portrait-collection-page .collection-hero__copy>span{
+  display:inline-flex!important;
+  align-items:center;
+  min-height:22px;
+  margin:0 0 7px!important;
+  padding:0 9px;
+  border:1px solid rgba(89,87,81,.08);
+  border-radius:999px;
+  background:rgba(255,255,255,.72);
+  color:#777a75!important;
+  font-size:7.5px!important;
+  line-height:1!important;
+  font-weight:760!important;
+  letter-spacing:.11em!important;
+  text-transform:uppercase;
+  opacity:1!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 6px rgba(42,40,36,.03);
+}
+
+.portrait-collection-page .collection-hero__copy h1{
+  margin:0!important;
+  max-width:330px;
+  color:#20211f!important;
+  font-size:clamp(24px,7vw,30px)!important;
+  line-height:.98!important;
+  font-weight:690!important;
+  letter-spacing:-.043em!important;
+  text-shadow:none!important;
+}
+
+.portrait-collection-page .collection-hero__copy p{
+  max-width:300px!important;
+  margin:8px 0 0!important;
+  color:#747772!important;
+  font-size:10.2px!important;
+  line-height:1.45!important;
+}
+
+/* Search/discovery now reads as a separate module rather than visually merging
+   with the hero card. */
+.portrait-collection-page .beach-discovery{
+  margin:0!important;
+  padding:3px 0 4px!important;
+}
+
+.portrait-collection-page .beach-city-search{
+  border-top:1px solid rgba(75,73,68,.055)!important;
+  border-bottom:1px solid rgba(75,73,68,.055)!important;
+  background:rgba(252,252,251,.96)!important;
+}
+
+@media(max-width:380px){
+  .portrait-collection-page .collection-hero{
+    --collection-edge:11px;
+    padding-top:10px!important;
+  }
+
+  .portrait-collection-page .collection-hero__stage{
+    grid-template-columns:minmax(0,1fr) 68px;
+    gap:8px;
+    min-height:218px;
+    padding:10px;
+    border-radius:25px;
+  }
+
+  .portrait-collection-page .collection-hero__media{
+    min-height:194px;
+    border-radius:21px;
+  }
+
+  .portrait-collection-page .collection-hero__media .portrait-collection-hero__image,
+  .portrait-collection-page .collection-hero__media .beach-hero__image{
+    width:min(66vw,232px)!important;
+    max-height:230px!important;
+  }
+
+  .portrait-collection-page .collection-hero__badge{
+    width:68px;
+    min-height:67px;
+    padding-inline:6px;
+    border-radius:18px;
+    transform:translateY(-4px);
+  }
+
+  .portrait-collection-page .collection-hero__badge>span{font-size:8.5px}
+  .portrait-collection-page .collection-hero__copy h1{font-size:clamp(22px,7vw,27px)!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .portrait-collection-page .collection-hero__badge{transform:none}
+}
