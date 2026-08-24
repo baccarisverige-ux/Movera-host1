@@ -54,6 +54,56 @@ test('category rail reacts on the first horizontal move without stealing vertica
   await expect(page.getByTestId('page-home')).toBeVisible()
 })
 
+test('Categories stays pinned while Bienvenue passes underneath, then retires beneath Search', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  await expect(page.getByTestId('page-home')).toBeVisible()
+
+  const header = page.locator('.b225-home-header')
+  const shell = page.locator('.b225-categories-shell')
+  const welcome = page.locator('.b225-welcome')
+
+  await expect(shell).toHaveClass(/movera-categories-linked/)
+  await page.evaluate(() => window.scrollTo({ top: 80, behavior: 'auto' }))
+
+  const docked = await page.evaluate(() => {
+    const headerNode = document.querySelector('.b225-home-header')
+    const shellNode = document.querySelector('.b225-categories-shell')
+    const welcomeNode = document.querySelector('.b225-welcome')
+    const headerRect = headerNode.getBoundingClientRect()
+    const shellRect = shellNode.getBoundingClientRect()
+    const welcomeRect = welcomeNode.getBoundingClientRect()
+    return {
+      headerBottom: headerRect.bottom,
+      shellTop: shellRect.top,
+      shellHeight: shellRect.height,
+      welcomeBottom: welcomeRect.bottom,
+    }
+  })
+
+  expect(Math.abs(docked.shellTop - docked.headerBottom)).toBeLessThanOrEqual(3)
+  expect(docked.welcomeBottom).toBeGreaterThan(docked.headerBottom + docked.shellHeight)
+
+  await page.evaluate(() => {
+    const headerRect = document.querySelector('.b225-home-header').getBoundingClientRect()
+    const shellRect = document.querySelector('.b225-categories-shell').getBoundingClientRect()
+    const welcomeRect = document.querySelector('.b225-welcome').getBoundingClientRect()
+    const dockBottom = headerRect.bottom + shellRect.height
+    const delta = Math.max(0, welcomeRect.bottom - dockBottom + 18)
+    window.scrollBy({ top: delta, behavior: 'auto' })
+  })
+
+  await expect.poll(() => page.evaluate(() => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--movera-category-upward-travel')) || 0)).toBeGreaterThan(8)
+  await expect.poll(async () => {
+    const [headerBox, shellBox] = await Promise.all([header.boundingBox(), shell.boundingBox()])
+    return headerBox && shellBox ? shellBox.y - (headerBox.y + headerBox.height) : 0
+  }).toBeLessThan(-5)
+
+  const shellHeight = await shell.evaluate(node => node.getBoundingClientRect().height)
+  await page.evaluate((distance) => window.scrollBy({ top: distance + 24, behavior: 'auto' }), shellHeight)
+  await expect(shell).toHaveClass(/movera-categories-under-search/)
+})
+
 test('forward navigation starts at top and browser Back restores Home scroll', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByTestId('page-home')).toBeVisible()
