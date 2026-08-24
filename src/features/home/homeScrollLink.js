@@ -6,7 +6,7 @@ let moveraWelcomeExitScrollY = 0
 let moveraCategoriesHeight = 0
 let moveraHeaderHeight = 0
 let moveraObservedHeader = null
-let moveraObservedCategories = null
+let moveraObservedCategoryShell = null
 let moveraObservedWelcome = null
 const MOVERA_CATEGORY_FOLLOW_MS = 220
 
@@ -19,17 +19,24 @@ function getMoveraDocumentScrollY() {
   return Math.max(0, window.scrollY || window.pageYOffset || 0)
 }
 
-function observeMoveraHome(header, categories, welcome) {
+function getMoveraCategoryElements() {
+  return {
+    shell: document.querySelector('.b225-categories-shell'),
+    rail: document.querySelector('.b225-categories'),
+  }
+}
+
+function observeMoveraHome(header, categoryShell, welcome) {
   if (
     moveraObservedHeader === header
-    && moveraObservedCategories === categories
+    && moveraObservedCategoryShell === categoryShell
     && moveraObservedWelcome === welcome
   ) return
 
   moveraResizeObserver?.disconnect()
   moveraResizeObserver = null
   moveraObservedHeader = header
-  moveraObservedCategories = categories
+  moveraObservedCategoryShell = categoryShell
   moveraObservedWelcome = welcome
   moveraCategoryTravel = 0
   moveraLastFrameTime = 0
@@ -41,34 +48,39 @@ function observeMoveraHome(header, categories, welcome) {
       requestMoveraCategorySync()
     })
     moveraResizeObserver.observe(header)
-    moveraResizeObserver.observe(categories)
+    moveraResizeObserver.observe(categoryShell)
     moveraResizeObserver.observe(welcome)
   }
 }
 
 function measureMoveraCategoryScroll() {
   const header = document.querySelector('.b225-home-header')
-  const categories = document.querySelector('.b225-categories')
+  const { shell, rail } = getMoveraCategoryElements()
   const welcome = document.querySelector('.b225-welcome')
-  if (!header || !categories || !welcome) return false
+  if (!header || !shell || !rail || !welcome) return false
 
-  observeMoveraHome(header, categories, welcome)
+  observeMoveraHome(header, shell, welcome)
 
   moveraHeaderHeight = header.getBoundingClientRect().height
-  moveraCategoriesHeight = categories.getBoundingClientRect().height
+  moveraCategoriesHeight = shell.getBoundingClientRect().height
   moveraWelcomeExitScrollY = getMoveraDocumentScrollY() + welcome.getBoundingClientRect().bottom
 
   document.documentElement.style.setProperty('--movera-home-header-height', `${moveraHeaderHeight}px`)
-  categories.classList.add('movera-categories-linked')
+  shell.classList.add('movera-categories-linked')
+  rail.classList.add('movera-categories-linked')
 
   return true
 }
 
 function syncMoveraCategoryScroll(timestamp = performance.now()) {
   moveraScrollRaf = 0
-  const categories = document.querySelector('.b225-categories')
-  if (!categories && !measureMoveraCategoryScroll()) return false
+  const { shell, rail } = getMoveraCategoryElements()
+  if ((!shell || !rail) && !measureMoveraCategoryScroll()) return false
   if (!moveraCategoriesHeight && !measureMoveraCategoryScroll()) return false
+
+  const activeShell = document.querySelector('.b225-categories-shell')
+  const activeRail = document.querySelector('.b225-categories')
+  if (!activeShell || !activeRail) return false
 
   const distanceAfterWelcomeExit = Math.max(0, getMoveraDocumentScrollY() - moveraWelcomeExitScrollY)
   const targetTravel = Math.min(distanceAfterWelcomeExit, moveraCategoriesHeight)
@@ -80,7 +92,9 @@ function syncMoveraCategoryScroll(timestamp = performance.now()) {
   if (Math.abs(targetTravel - moveraCategoryTravel) < 0.08) moveraCategoryTravel = targetTravel
 
   document.documentElement.style.setProperty('--movera-category-upward-travel', `${moveraCategoryTravel}px`)
-  categories.classList.toggle('movera-categories-moving-under-header', moveraCategoryTravel > 0.08)
+  const isMoving = moveraCategoryTravel > 0.08
+  activeShell.classList.toggle('movera-categories-moving-under-header', isMoving)
+  activeRail.classList.toggle('movera-categories-moving-under-header', isMoving)
 
   if (Math.abs(targetTravel - moveraCategoryTravel) >= 0.08) requestMoveraCategorySync()
   return true
