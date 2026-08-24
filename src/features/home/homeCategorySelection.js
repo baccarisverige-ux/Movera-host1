@@ -1,4 +1,4 @@
-const VALID_CATEGORY_IDS = new Set(['all', 'guesthouse', 'beach', 'prestige', 'family', 'experience', 'partner'])
+const VALID_CATEGORY_IDS = new Set(['all', 'guesthouse', 'beach', 'hotel', 'prestige', 'family', 'experience', 'partner'])
 
 let selectedCategoryId = 'all'
 
