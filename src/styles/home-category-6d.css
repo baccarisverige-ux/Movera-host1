@@ -1,15 +1,14 @@
 /* Category-button material layer.
    Reference direction: compact pill with a continuous vertical curve from top to bottom. */
 
-/* Categories shell now uses the exact same premium surface language as
-   the "Bienvenue chez Movera" shell: same outer margins, rim, radius,
-   neutral gradient and grounded depth. */
-.b225-home .b225-categories{
+/* Categories shell keeps the same premium surface language as
+   the "Bienvenue chez Movera" shell while the inner row remains scrollable. */
+.b225-home .b225-categories-shell{
   box-sizing:border-box!important;
+  position:relative!important;
   margin:18px 14px 8px!important;
   padding:17px 14px 13px 18px!important;
-  overflow-x:auto!important;
-  overflow-y:visible!important;
+  overflow:hidden!important;
   border:1px solid rgba(255,255,255,.96)!important;
   border-radius:25px!important;
   background:linear-gradient(
@@ -23,11 +22,65 @@
     inset 0 -1px 0 rgba(124,116,107,.08),
     0 8px 18px rgba(75,67,58,.075),
     0 2px 4px rgba(75,67,58,.045)!important;
+}
+
+.b225-home .b225-categories{
+  box-sizing:border-box!important;
+  position:relative!important;
+  z-index:1!important;
+  margin:0!important;
+  padding:0 34px 0 0!important;
+  overflow-x:auto!important;
+  overflow-y:visible!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
   scrollbar-width:none!important;
 }
 
 .b225-home .b225-categories::-webkit-scrollbar{
   display:none!important;
+}
+
+/* Two line-free chevrons inside the category shell. They flash in sequence
+   to hint that more categories continue horizontally. */
+.b225-home .b225-category-swipe-hint{
+  position:absolute!important;
+  z-index:9!important;
+  top:50%!important;
+  right:8px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:0!important;
+  transform:translateY(-50%)!important;
+  pointer-events:none!important;
+  user-select:none!important;
+  color:rgba(71,72,68,.78)!important;
+  font-family:Arial,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-size:25px!important;
+  line-height:1!important;
+  font-weight:300!important;
+  letter-spacing:-7px!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.94)!important;
+  filter:drop-shadow(0 2px 3px rgba(48,48,44,.10))!important;
+}
+
+.b225-home .b225-category-swipe-hint>span{
+  display:block!important;
+  width:13px!important;
+  animation:b225-category-chevron-flash 1.28s cubic-bezier(.4,0,.2,1) infinite!important;
+  will-change:transform,opacity!important;
+}
+
+.b225-home .b225-category-swipe-hint>span:nth-child(2){
+  animation-delay:.16s!important;
+}
+
+@keyframes b225-category-chevron-flash{
+  0%,100%{opacity:.22;transform:translateX(-2px)}
+  38%{opacity:.96;transform:translateX(1px)}
+  62%{opacity:.58;transform:translateX(3px)}
 }
 
 .b225-home .b225-categories button{
@@ -182,10 +235,17 @@
 }
 
 @media(max-width:350px){
-  .b225-home .b225-categories{
+  .b225-home .b225-categories-shell{
     margin-inline:10px!important;
     border-radius:22px!important;
     padding-inline:14px!important;
+  }
+  .b225-home .b225-categories{
+    padding-right:30px!important;
+  }
+  .b225-home .b225-category-swipe-hint{
+    right:6px!important;
+    font-size:23px!important;
   }
   .b225-home .b225-categories button{
     height:38.5px!important;
@@ -206,4 +266,9 @@
 
 @media(prefers-reduced-motion:reduce){
   .b225-home .b225-categories button{transition:none!important}
+  .b225-home .b225-category-swipe-hint>span{
+    animation:none!important;
+    opacity:.72!important;
+    transform:none!important;
+  }
 }
