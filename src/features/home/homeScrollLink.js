@@ -1,127 +1,47 @@
-let moveraScrollRaf = 0
 let moveraResizeObserver = null
-let moveraCategoryTravel = 0
-let moveraLastFrameTime = 0
-let moveraWelcomeExitScrollY = 0
-let moveraCategoriesHeight = 0
-let moveraHeaderHeight = 0
 let moveraObservedHeader = null
-let moveraObservedCategoryShell = null
-let moveraObservedWelcome = null
-const MOVERA_CATEGORY_FOLLOW_MS = 220
+let moveraObservedShell = null
 
-function getMoveraDocumentScrollY() {
-  const body = document.body
-  if (body?.dataset.moveraSearchLock === 'true' && body.style.position === 'fixed') {
-    const lockedTop = Number.parseFloat(body.style.top)
-    if (Number.isFinite(lockedTop)) return Math.max(0, -lockedTop)
-  }
-  return Math.max(0, window.scrollY || window.pageYOffset || 0)
-}
-
-function getMoveraCategoryElements() {
-  return {
-    shell: document.querySelector('.b225-categories-shell'),
-    rail: document.querySelector('.b225-categories'),
-  }
-}
-
-function observeMoveraHome(header, categoryShell, welcome) {
-  if (
-    moveraObservedHeader === header
-    && moveraObservedCategoryShell === categoryShell
-    && moveraObservedWelcome === welcome
-  ) return
-
-  moveraResizeObserver?.disconnect()
-  moveraResizeObserver = null
-  moveraObservedHeader = header
-  moveraObservedCategoryShell = categoryShell
-  moveraObservedWelcome = welcome
-  moveraCategoryTravel = 0
-  moveraLastFrameTime = 0
-  document.documentElement.style.setProperty('--movera-category-upward-travel', '0px')
-
-  if ('ResizeObserver' in window) {
-    moveraResizeObserver = new ResizeObserver(() => {
-      measureMoveraCategoryScroll()
-      requestMoveraCategorySync()
-    })
-    moveraResizeObserver.observe(header)
-    moveraResizeObserver.observe(categoryShell)
-    moveraResizeObserver.observe(welcome)
-  }
-}
-
-function measureMoveraCategoryScroll() {
+function syncMoveraCategorySticky() {
   const header = document.querySelector('.b225-home-header')
-  const { shell, rail } = getMoveraCategoryElements()
-  const welcome = document.querySelector('.b225-welcome')
-  if (!header || !shell || !rail || !welcome) return false
+  const shell = document.querySelector('.b225-categories-shell')
+  const rail = document.querySelector('.b225-categories')
 
-  observeMoveraHome(header, shell, welcome)
+  if (!header || !shell || !rail) return false
 
-  moveraHeaderHeight = header.getBoundingClientRect().height
-  moveraCategoriesHeight = shell.getBoundingClientRect().height
-  moveraWelcomeExitScrollY = getMoveraDocumentScrollY() + welcome.getBoundingClientRect().bottom
-
-  document.documentElement.style.setProperty('--movera-home-header-height', `${moveraHeaderHeight}px`)
+  const headerHeight = header.getBoundingClientRect().height
+  document.documentElement.style.setProperty('--movera-home-header-height', `${headerHeight}px`)
   shell.classList.add('movera-categories-linked')
   rail.classList.add('movera-categories-linked')
 
+  if (moveraObservedHeader !== header || moveraObservedShell !== shell) {
+    moveraResizeObserver?.disconnect()
+    moveraObservedHeader = header
+    moveraObservedShell = shell
+
+    if ('ResizeObserver' in window) {
+      moveraResizeObserver = new ResizeObserver(syncMoveraCategorySticky)
+      moveraResizeObserver.observe(header)
+      moveraResizeObserver.observe(shell)
+    }
+  }
+
   return true
 }
 
-function syncMoveraCategoryScroll(timestamp = performance.now()) {
-  moveraScrollRaf = 0
-  const { shell, rail } = getMoveraCategoryElements()
-  if ((!shell || !rail) && !measureMoveraCategoryScroll()) return false
-  if (!moveraCategoriesHeight && !measureMoveraCategoryScroll()) return false
-
-  const activeShell = document.querySelector('.b225-categories-shell')
-  const activeRail = document.querySelector('.b225-categories')
-  if (!activeShell || !activeRail) return false
-
-  const distanceAfterWelcomeExit = Math.max(0, getMoveraDocumentScrollY() - moveraWelcomeExitScrollY)
-  const targetTravel = Math.min(distanceAfterWelcomeExit, moveraCategoriesHeight)
-  const elapsed = moveraLastFrameTime ? Math.min(64, Math.max(1, timestamp - moveraLastFrameTime)) : 16.67
-  moveraLastFrameTime = timestamp
-  const follow = 1 - Math.exp(-elapsed / MOVERA_CATEGORY_FOLLOW_MS)
-
-  moveraCategoryTravel += (targetTravel - moveraCategoryTravel) * follow
-  if (Math.abs(targetTravel - moveraCategoryTravel) < 0.08) moveraCategoryTravel = targetTravel
-
-  document.documentElement.style.setProperty('--movera-category-upward-travel', `${moveraCategoryTravel}px`)
-  const isMoving = moveraCategoryTravel > 0.08
-  activeShell.classList.toggle('movera-categories-moving-under-header', isMoving)
-  activeRail.classList.toggle('movera-categories-moving-under-header', isMoving)
-
-  if (Math.abs(targetTravel - moveraCategoryTravel) >= 0.08) requestMoveraCategorySync()
-  return true
+function scheduleMoveraCategorySticky() {
+  requestAnimationFrame(syncMoveraCategorySticky)
 }
 
-function requestMoveraCategorySync() {
-  if (moveraScrollRaf) return
-  moveraScrollRaf = requestAnimationFrame(syncMoveraCategoryScroll)
-}
+window.addEventListener('resize', scheduleMoveraCategorySticky, { passive: true })
+window.visualViewport?.addEventListener('resize', scheduleMoveraCategorySticky, { passive: true })
+window.addEventListener('popstate', scheduleMoveraCategorySticky)
+window.addEventListener('movera-search-restored', scheduleMoveraCategorySticky)
 
-function refreshMoveraCategoryScroll() {
-  moveraLastFrameTime = 0
-  if (measureMoveraCategoryScroll()) requestMoveraCategorySync()
-}
-
-window.addEventListener('scroll', requestMoveraCategorySync, { passive: true })
-window.addEventListener('resize', refreshMoveraCategoryScroll, { passive: true })
-window.visualViewport?.addEventListener('resize', refreshMoveraCategoryScroll, { passive: true })
-window.addEventListener('popstate', refreshMoveraCategoryScroll)
-window.addEventListener('movera-search-restored', refreshMoveraCategoryScroll)
-
-const homeMountObserver = new MutationObserver(() => {
-  if (measureMoveraCategoryScroll()) requestMoveraCategorySync()
+const root = document.getElementById('root') || document.documentElement
+const homeMountObserver = new MutationObserver((mutations) => {
+  if (mutations.some((mutation) => mutation.type === 'childList')) scheduleMoveraCategorySticky()
 })
-homeMountObserver.observe(document.getElementById('root') || document.documentElement, {
-  childList: true,
-  subtree: true,
-})
+homeMountObserver.observe(root, { childList: true, subtree: true })
 
-if (measureMoveraCategoryScroll()) requestMoveraCategorySync()
+scheduleMoveraCategorySticky()
