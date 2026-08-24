@@ -1,7 +1,7 @@
 .b225-welcome{
   display:block!important;
   position:relative;
-  min-height:164px!important;
+  min-height:194px!important;
   padding:15px 12px 11px 16px!important;
   overflow:hidden!important;
   background:linear-gradient(
@@ -143,8 +143,8 @@
   align-items:center;
   justify-content:center;
   gap:6px;
-  margin-top:-1px;
-  padding:0 4px 2px;
+  margin-top:1px;
+  padding:0 4px 3px;
 }
 
 .b225-welcome-type{
@@ -193,14 +193,14 @@
 .b225-welcome-type:nth-child(3){--type-surface:#f2ecf7;--type-mid:#e9e0f0;--type-deep:#dacfe5;--type-edge:#c5b7d0}
 
 @media(max-width:350px){
-  .b225-welcome{min-height:155px!important;padding-inline:12px!important}
+  .b225-welcome{min-height:184px!important;padding-inline:12px!important}
   .b225-welcome-cities{height:121px}
   .b225-welcome-city{min-height:38px;padding-inline:7px;font-size:8.4px}
   .b225-welcome-city:nth-child(1){width:38%}
   .b225-welcome-city:nth-child(3){left:28%;width:35%}
   .b225-welcome-city:nth-child(4){left:57%;width:22%}
   .b225-welcome-city:nth-child(5){width:22%}
-  .b225-welcome-types{gap:5px;margin-top:-2px}
+  .b225-welcome-types{gap:5px;margin-top:1px}
   .b225-welcome-type{min-height:25px;padding-inline:7px;font-size:7px;border-radius:7px}
 }
 
