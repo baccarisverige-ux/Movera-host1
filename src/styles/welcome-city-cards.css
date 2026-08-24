@@ -1,8 +1,8 @@
 .b225-welcome{
   display:block!important;
   position:relative;
-  min-height:188px!important;
-  padding:17px 14px 13px 18px!important;
+  min-height:164px!important;
+  padding:15px 12px 11px 16px!important;
   overflow:hidden!important;
   background:linear-gradient(
     180deg,
@@ -20,7 +20,7 @@
   display:block;
   position:relative;
   z-index:8;
-  font-size:11px;
+  font-size:9.6px;
   font-weight:750;
   color:#576058;
   letter-spacing:.02em;
@@ -28,8 +28,8 @@
 
 .b225-welcome-cities{
   position:relative;
-  height:146px;
-  margin-top:3px;
+  height:127px;
+  margin-top:2.6px;
   perspective:760px;
   transform-style:preserve-3d;
 }
@@ -42,15 +42,15 @@
   --city-edge:#cbd0cc;
   position:absolute;
   isolation:isolate;
-  min-height:46px;
+  min-height:40px;
   border:1px solid rgba(87,94,89,.11);
-  border-radius:11px;
+  border-radius:9.6px;
   display:grid;
   place-items:center;
-  padding:0 11px;
+  padding:0 9.6px;
   color:#404642;
-  font:760 10.7px/1.1 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  letter-spacing:-.08px;
+  font:760 9.3px/1.1 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  letter-spacing:-.07px;
   white-space:nowrap;
   background:
     linear-gradient(180deg,rgba(255,255,255,.58) 0%,rgba(255,255,255,.12) 16%,rgba(255,255,255,0) 28%),
@@ -75,11 +75,11 @@
   position:absolute;
   z-index:-1;
   pointer-events:none;
-  left:7px;
-  right:7px;
-  bottom:-5px;
-  height:7px;
-  border-radius:0 0 9px 9px;
+  left:6px;
+  right:6px;
+  bottom:-4px;
+  height:6px;
+  border-radius:0 0 8px 8px;
   background:linear-gradient(180deg,var(--city-edge),rgba(95,103,97,.12));
   opacity:.78;
 }
@@ -88,11 +88,11 @@
   content:"";
   position:absolute;
   pointer-events:none;
-  left:10px;
-  right:10px;
-  top:3px;
+  left:9px;
+  right:9px;
+  top:2.6px;
   height:30%;
-  border-radius:9px 9px 45% 45%;
+  border-radius:8px 8px 45% 45%;
   background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0));
   opacity:.62;
 }
@@ -127,18 +127,18 @@
   outline-offset:3px;
 }
 
-.b225-welcome-city:nth-child(1){--city-rotate:-1.4deg;--city-surface:#f8efe6;--city-mid:#f3e6da;--city-deep:#ead8c6;--city-edge:#d9c2aa;left:0;top:25px;width:36%}
-.b225-welcome-city:nth-child(2){--city-rotate:1.3deg;--city-surface:#eef4f9;--city-mid:#e4eef6;--city-deep:#d6e4f0;--city-edge:#bed0df;left:6%;top:79px;width:28%}
-.b225-welcome-city:nth-child(3){--city-rotate:-.8deg;--city-surface:#eff3e8;--city-mid:#e6ecdc;--city-deep:#d8e2cc;--city-edge:#c1cdb4;left:27%;top:62px;width:34%}
+.b225-welcome-city:nth-child(1){--city-rotate:-1.4deg;--city-surface:#f8efe6;--city-mid:#f3e6da;--city-deep:#ead8c6;--city-edge:#d9c2aa;left:0;top:22px;width:36%}
+.b225-welcome-city:nth-child(2){--city-rotate:1.3deg;--city-surface:#eef4f9;--city-mid:#e4eef6;--city-deep:#d6e4f0;--city-edge:#bed0df;left:6%;top:69px;width:28%}
+.b225-welcome-city:nth-child(3){--city-rotate:-.8deg;--city-surface:#eff3e8;--city-mid:#e6ecdc;--city-deep:#d8e2cc;--city-edge:#c1cdb4;left:27%;top:54px;width:34%}
 .b225-welcome-city:nth-child(4){--city-rotate:.8deg;--city-surface:#f9eaee;--city-mid:#f4e0e6;--city-deep:#ecd1da;--city-edge:#d7bac4;left:55%;top:0;width:24%}
-.b225-welcome-city:nth-child(5){--city-rotate:1.1deg;--city-surface:#faf3dc;--city-mid:#f6ebcc;--city-deep:#eddfb5;--city-edge:#d3c496;right:0;top:15px;width:23%}
-.b225-welcome-city:nth-child(6){--city-rotate:-.6deg;--city-surface:#eaf5f1;--city-mid:#e0efe9;--city-deep:#cee5dc;--city-edge:#b7cec3;right:0;top:72px;width:25%}
-.b225-welcome-city:nth-child(7){--city-rotate:.7deg;--city-surface:#f2ecf7;--city-mid:#e9e0f0;--city-deep:#dacfe5;--city-edge:#c5b7d0;left:43%;top:105px;width:29%}
+.b225-welcome-city:nth-child(5){--city-rotate:1.1deg;--city-surface:#faf3dc;--city-mid:#f6ebcc;--city-deep:#eddfb5;--city-edge:#d3c496;right:0;top:13px;width:23%}
+.b225-welcome-city:nth-child(6){--city-rotate:-.6deg;--city-surface:#eaf5f1;--city-mid:#e0efe9;--city-deep:#cee5dc;--city-edge:#b7cec3;right:0;top:63px;width:25%}
+.b225-welcome-city:nth-child(7){--city-rotate:.7deg;--city-surface:#f2ecf7;--city-mid:#e9e0f0;--city-deep:#dacfe5;--city-edge:#c5b7d0;left:43%;top:91px;width:29%}
 
 @media(max-width:350px){
-  .b225-welcome{min-height:178px!important;padding-inline:14px!important}
-  .b225-welcome-cities{height:139px}
-  .b225-welcome-city{min-height:44px;padding-inline:8px;font-size:9.7px}
+  .b225-welcome{min-height:155px!important;padding-inline:12px!important}
+  .b225-welcome-cities{height:121px}
+  .b225-welcome-city{min-height:38px;padding-inline:7px;font-size:8.4px}
   .b225-welcome-city:nth-child(1){width:38%}
   .b225-welcome-city:nth-child(3){left:28%;width:35%}
   .b225-welcome-city:nth-child(4){left:57%;width:22%}
