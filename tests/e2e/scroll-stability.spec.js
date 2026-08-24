@@ -22,6 +22,38 @@ test('Home keeps vertical scroll independent from horizontal rails', async ({ pa
   expect(pageOverflow).toBeLessThanOrEqual(1)
 })
 
+test('category rail reacts on the first horizontal move without stealing vertical page pan', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByTestId('page-home')).toBeVisible()
+  const categories = page.getByTestId('home-categories')
+
+  await expect.poll(() => categories.evaluate(node => getComputedStyle(node).touchAction)).toContain('pan-y')
+
+  const firstMoveScroll = await categories.evaluate((node) => {
+    node.scrollLeft = 0
+    const dispatchTouch = (type, x, y, active = true) => {
+      const event = new Event(type, { bubbles: true, cancelable: true })
+      Object.defineProperty(event, 'touches', {
+        configurable: true,
+        value: active ? [{ clientX: x, clientY: y }] : [],
+      })
+      node.dispatchEvent(event)
+    }
+
+    dispatchTouch('touchstart', 220, 24)
+    dispatchTouch('touchmove', 214, 24)
+    const scrollLeft = node.scrollLeft
+    dispatchTouch('touchend', 214, 24, false)
+    return scrollLeft
+  })
+
+  expect(firstMoveScroll).toBeGreaterThan(0)
+
+  const beach = categories.locator('button[data-category-id="beach"]')
+  await beach.evaluate(button => button.click())
+  await expect(page.getByTestId('page-home')).toBeVisible()
+})
+
 test('forward navigation starts at top and browser Back restores Home scroll', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByTestId('page-home')).toBeVisible()
