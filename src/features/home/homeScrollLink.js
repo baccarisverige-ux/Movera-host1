@@ -5,6 +5,9 @@ let moveraObservedShell = null
 let moveraObservedWelcome = null
 let moveraHeaderHeight = 0
 let moveraShellHeight = 0
+let moveraDisplayedTravel = 0
+let moveraLastFrameTime = 0
+const MOVERA_DOCK_FOLLOW_MS = 92
 
 function getHomeElements() {
   return {
@@ -27,6 +30,9 @@ function observeHomeGeometry(header, shell, welcome) {
   moveraObservedHeader = header
   moveraObservedShell = shell
   moveraObservedWelcome = welcome
+  moveraDisplayedTravel = 0
+  moveraLastFrameTime = 0
+  document.documentElement.style.setProperty('--movera-category-upward-travel', '0px')
 
   if ('ResizeObserver' in window) {
     moveraResizeObserver = new ResizeObserver(() => {
@@ -53,7 +59,7 @@ function measureHomeGeometry() {
   return true
 }
 
-function syncCategoryPosition() {
+function syncCategoryPosition(timestamp = performance.now()) {
   moveraScrollRaf = 0
   const { header, shell, rail, welcome } = getHomeElements()
   if (!header || !shell || !rail || !welcome) return false
@@ -61,18 +67,31 @@ function syncCategoryPosition() {
 
   const welcomeBottom = welcome.getBoundingClientRect().bottom
   const dockBottom = moveraHeaderHeight + moveraShellHeight
-  const upwardTravel = Math.min(
+  const targetTravel = Math.min(
     moveraShellHeight,
     Math.max(0, dockBottom - welcomeBottom),
   )
 
-  document.documentElement.style.setProperty('--movera-category-upward-travel', `${upwardTravel}px`)
-  const moving = upwardTravel > 0.5
-  const hiddenUnderSearch = upwardTravel >= moveraShellHeight - 0.5
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  if (reducedMotion) {
+    moveraDisplayedTravel = targetTravel
+  } else {
+    const elapsed = moveraLastFrameTime ? Math.min(34, Math.max(1, timestamp - moveraLastFrameTime)) : 16.67
+    const follow = 1 - Math.exp(-elapsed / MOVERA_DOCK_FOLLOW_MS)
+    moveraDisplayedTravel += (targetTravel - moveraDisplayedTravel) * follow
+    if (Math.abs(targetTravel - moveraDisplayedTravel) < 0.06) moveraDisplayedTravel = targetTravel
+  }
+  moveraLastFrameTime = timestamp
+
+  document.documentElement.style.setProperty('--movera-category-upward-travel', `${moveraDisplayedTravel}px`)
+  const moving = moveraDisplayedTravel > 0.5
+  const hiddenUnderSearch = moveraDisplayedTravel >= moveraShellHeight - 0.5
   shell.classList.toggle('movera-categories-moving-under-header', moving)
   rail.classList.toggle('movera-categories-moving-under-header', moving)
   shell.classList.toggle('movera-categories-under-search', hiddenUnderSearch)
   rail.classList.toggle('movera-categories-under-search', hiddenUnderSearch)
+
+  if (Math.abs(targetTravel - moveraDisplayedTravel) >= 0.06) requestCategorySync()
   return true
 }
 
@@ -82,6 +101,7 @@ function requestCategorySync() {
 }
 
 function refreshCategoryLink() {
+  moveraLastFrameTime = 0
   if (measureHomeGeometry()) requestCategorySync()
 }
 
