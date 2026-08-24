@@ -65,6 +65,17 @@ function onFocusIn() {
   requestAnimationFrame(blurCurrentField)
 }
 
+/* SearchTransitionHost locks the background with fixed body/html overflow.
+   Its older document-level touchmove/wheel blocker must not swallow native
+   scrolling that starts inside the search UI itself. This listener is
+   registered before the transition mounts, so it can stop only the later
+   background blocker without cancelling the browser's default scroll. */
+function preserveSearchNativeScroll(event) {
+  const target = eventElement(event)
+  if (!target?.closest(SEARCH_TRANSITION)) return
+  event.stopImmediatePropagation()
+}
+
 const stepObserver = new MutationObserver((mutations) => {
   const popup = document.querySelector(SEARCH_TRANSITION)
   if (popup) searchWasMounted = true
@@ -94,3 +105,5 @@ stepObserver.observe(document.documentElement, {
 document.addEventListener('pointerdown', onSearchPointerDown, true)
 document.addEventListener('click', onSearchClick, true)
 document.addEventListener('focusin', onFocusIn, true)
+document.addEventListener('touchmove', preserveSearchNativeScroll, { passive: true })
+document.addEventListener('wheel', preserveSearchNativeScroll, { passive: true })
