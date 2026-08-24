@@ -112,7 +112,7 @@ test('separate collection routes keep their own identity and shared filtering', 
   }
 })
 
-test('category shell stays sticky after returning to Home', async ({ page }) => {
+test('category shell stays static above Welcome after returning to Home', async ({ page }) => {
   await page.goto('/')
   await page.locator('.b225-categories button[data-category-id="beach"]').click()
   await expect(page.getByTestId('page-beach')).toBeVisible()
@@ -120,10 +120,13 @@ test('category shell stays sticky after returning to Home', async ({ page }) => 
   await expect(page.getByTestId('page-home')).toBeVisible()
 
   const shell = page.locator('.b225-categories-shell')
-  await expect(shell).toHaveClass(/movera-categories-linked/)
-  await expect.poll(() => shell.evaluate(node => getComputedStyle(node).position)).toBe('sticky')
-  await page.evaluate(() => window.scrollTo(0, 900))
-  await expect(shell).toBeVisible()
+  const welcome = page.locator('.b225-welcome')
+  await expect.poll(() => shell.evaluate(node => getComputedStyle(node).position)).toBe('relative')
+  await expect.poll(async () => {
+    const shellBox = await shell.boundingBox()
+    const welcomeBox = await welcome.boundingBox()
+    return Boolean(shellBox && welcomeBox && shellBox.y + shellBox.height <= welcomeBox.y + 2)
+  }).toBe(true)
 })
 
 test('Plage, Maison and Hôtel selections remain active after returning Home', async ({ page }) => {
