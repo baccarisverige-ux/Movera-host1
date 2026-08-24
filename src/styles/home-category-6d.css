@@ -1,13 +1,11 @@
-/* Category-button material layer.
-   Reference direction: compact pill with a continuous vertical curve from top to bottom. */
+/* Authoritative Home category layer.
+   Compact premium pills inside one stable scrollable shell. */
 
-/* Categories shell keeps the same premium surface language as
-   the "Bienvenue chez Movera" shell while the inner row remains scrollable. */
 .b225-home .b225-categories-shell{
   box-sizing:border-box!important;
   position:relative!important;
   margin:18px 14px 8px!important;
-  padding:17px 14px 13px 18px!important;
+  padding:13px 14px 9px 18px!important;
   overflow:hidden!important;
   border:1px solid rgba(255,255,255,.96)!important;
   border-radius:25px!important;
@@ -24,7 +22,6 @@
     0 2px 4px rgba(75,67,58,.045)!important;
 }
 
-/* Stable single-row category rail. */
 .b225-home .b225-categories{
   box-sizing:border-box!important;
   position:relative!important;
@@ -35,9 +32,9 @@
   gap:9px!important;
   width:100%!important;
   min-width:0!important;
-  min-height:44px!important;
+  min-height:53px!important;
   margin:0!important;
-  padding:1px 0 3px!important;
+  padding:4px 0 8px!important;
   overflow-x:auto!important;
   overflow-y:hidden!important;
   border:0!important;
@@ -49,15 +46,16 @@
   transform:none!important;
   scrollbar-width:none!important;
   -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-x!important;
+  touch-action:auto!important;
+  overscroll-behavior-x:contain!important;
 }
 
 .b225-home .b225-categories::-webkit-scrollbar{
   display:none!important;
 }
 
-/* Two line-free chevrons directly after Plage, before the remaining categories.
-   18.75px = 25% smaller than the previous 25px size. */
+/* Swipe hint lives in the rail immediately after Plage.
+   18.75px = 25% smaller than the original 25px hint. */
 .b225-home .b225-category-swipe-hint{
   position:relative!important;
   z-index:9!important;
@@ -141,9 +139,9 @@
   z-index:2!important;
   opacity:1!important;
   visibility:visible!important;
+  object-fit:contain!important;
 }
 
-/* UNSELECTED: thinner, cleaner vertical curvature with restrained physical depth. */
 .b225-home .b225-categories button:not([data-active='true']){
   color:#30312e!important;
   border:1px solid rgba(112,112,107,.15)!important;
@@ -265,7 +263,11 @@
   .b225-home .b225-categories-shell{
     margin-inline:10px!important;
     border-radius:22px!important;
-    padding-inline:14px!important;
+    padding:12px 14px 8px!important;
+  }
+  .b225-home .b225-categories{
+    min-height:51px!important;
+    padding-block:4px 8px!important;
   }
   .b225-home .b225-category-swipe-hint{
     flex-basis:17px!important;
