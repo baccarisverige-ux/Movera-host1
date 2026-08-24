@@ -1,12 +1,13 @@
 /* Authoritative Home category layer.
-   Compact premium pills inside one stable scrollable shell. */
+   The shell owns the premium surface, the viewport owns horizontal scrolling,
+   and the track owns button geometry. Keep these responsibilities separate. */
 
 .b225-home .b225-categories-shell{
   box-sizing:border-box!important;
   position:relative!important;
   margin:18px 14px 8px!important;
   padding:13px 14px 9px 18px!important;
-  overflow:hidden!important;
+  overflow:visible!important;
   border:1px solid rgba(255,255,255,.96)!important;
   border-radius:25px!important;
   background:linear-gradient(
@@ -22,19 +23,17 @@
     0 2px 4px rgba(75,67,58,.045)!important;
 }
 
+/* Native iOS horizontal viewport. It never owns button layout. */
 .b225-home .b225-categories{
   box-sizing:border-box!important;
   position:relative!important;
   z-index:1!important;
-  display:flex!important;
-  flex-flow:row nowrap!important;
-  align-items:center!important;
-  gap:9px!important;
+  display:block!important;
   width:100%!important;
   min-width:0!important;
   min-height:53px!important;
   margin:0!important;
-  padding:4px 0 8px!important;
+  padding:0!important;
   overflow-x:auto!important;
   overflow-y:hidden!important;
   border:0!important;
@@ -54,7 +53,23 @@
   display:none!important;
 }
 
-/* Swipe hint lives in the rail immediately after Plage.
+/* Single immutable row. min-width:max-content prevents any category from
+   collapsing or disappearing when the viewport becomes narrow. */
+.b225-home .b225-categories-track{
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-flow:row nowrap!important;
+  align-items:center!important;
+  gap:9px!important;
+  width:max-content!important;
+  min-width:100%!important;
+  min-height:53px!important;
+  margin:0!important;
+  padding:4px 0 8px!important;
+  white-space:nowrap!important;
+}
+
+/* Two line-free chevrons directly after Plage.
    18.75px = 25% smaller than the original 25px hint. */
 .b225-home .b225-category-swipe-hint{
   position:relative!important;
@@ -99,7 +114,7 @@
   62%{opacity:.58;transform:translateX(2px)}
 }
 
-.b225-home .b225-categories button{
+.b225-home .b225-categories-track>button{
   position:relative!important;
   isolation:isolate!important;
   display:flex!important;
@@ -119,6 +134,7 @@
   gap:6.25px!important;
   border-radius:20.25px!important;
   font-size:12.5px!important;
+  line-height:1!important;
   font-weight:560!important;
   letter-spacing:-.07px!important;
   transition:
@@ -142,7 +158,7 @@
   object-fit:contain!important;
 }
 
-.b225-home .b225-categories button:not([data-active='true']){
+.b225-home .b225-categories-track>button:not([data-active='true']){
   color:#30312e!important;
   border:1px solid rgba(112,112,107,.15)!important;
   background:linear-gradient(
@@ -164,7 +180,7 @@
   transform:translateY(-.5px)!important;
 }
 
-.b225-home .b225-categories button:not([data-active='true'])::before{
+.b225-home .b225-categories-track>button:not([data-active='true'])::before{
   content:""!important;
   position:absolute!important;
   z-index:0!important;
@@ -183,7 +199,7 @@
   opacity:.62!important;
 }
 
-.b225-home .b225-categories button:not([data-active='true'])::after{
+.b225-home .b225-categories-track>button:not([data-active='true'])::after{
   content:""!important;
   position:absolute!important;
   z-index:0!important;
@@ -202,9 +218,9 @@
   opacity:.76!important;
 }
 
-.b225-home .b225-categories button[data-active='true']{
+.b225-home .b225-categories-track>button[data-active='true']{
   color:#2e2f2c!important;
-  border-color:rgba(99,99,94,.22)!important;
+  border:1px solid rgba(99,99,94,.22)!important;
   background:linear-gradient(
     180deg,
     #d8d8d4 0%,
@@ -221,7 +237,7 @@
   transform:translateY(1.5px)!important;
 }
 
-.b225-home .b225-categories button[data-active='true']::before{
+.b225-home .b225-categories-track>button[data-active='true']::before{
   content:""!important;
   position:absolute!important;
   z-index:0!important;
@@ -240,7 +256,7 @@
   opacity:.48!important;
 }
 
-.b225-home .b225-categories button[data-active='true']::after{
+.b225-home .b225-categories-track>button[data-active='true']::after{
   content:""!important;
   position:absolute!important;
   z-index:0!important;
@@ -251,7 +267,7 @@
   box-shadow:inset 0 1px 2px rgba(34,34,31,.065)!important;
 }
 
-.b225-home .b225-categories button:active{
+.b225-home .b225-categories-track>button:active{
   transform:translateY(2px) scale(.987)!important;
   box-shadow:
     inset 0 4px 6px rgba(40,40,37,.17),
@@ -265,19 +281,27 @@
     border-radius:22px!important;
     padding:12px 14px 8px!important;
   }
-  .b225-home .b225-categories{
+
+  .b225-home .b225-categories,
+  .b225-home .b225-categories-track{
     min-height:51px!important;
+  }
+
+  .b225-home .b225-categories-track{
     padding-block:4px 8px!important;
   }
+
   .b225-home .b225-category-swipe-hint{
     flex-basis:17px!important;
     width:17px!important;
     font-size:17.25px!important;
   }
+
   .b225-home .b225-category-swipe-hint>span{
     width:8px!important;
   }
-  .b225-home .b225-categories button{
+
+  .b225-home .b225-categories-track>button{
     height:38.5px!important;
     min-height:38.5px!important;
     max-height:38.5px!important;
@@ -285,6 +309,7 @@
     border-radius:19.25px!important;
     font-size:12px!important;
   }
+
   .b225-home .b225-category-icon{
     width:19.25px!important;
     height:19.25px!important;
@@ -295,7 +320,7 @@
 }
 
 @media(prefers-reduced-motion:reduce){
-  .b225-home .b225-categories button{transition:none!important}
+  .b225-home .b225-categories-track>button{transition:none!important}
   .b225-home .b225-category-swipe-hint>span{
     animation:none!important;
     opacity:.72!important;
