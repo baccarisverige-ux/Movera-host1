@@ -16,6 +16,35 @@
   -webkit-overflow-scrolling:touch!important;
   overscroll-behavior-x:contain!important;
   scroll-behavior:auto!important;
+}
+
+/* Categories must claim the horizontal gesture immediately. Without an
+   explicit pan-x contract Safari first waits to distinguish a button tap,
+   vertical page pan and horizontal rail swipe, which feels like a dead first
+   movement. Keep this rule limited to the category rail. */
+.b225-home .b225-categories{
+  touch-action:pan-x!important;
+  scroll-snap-type:none!important;
+}
+
+.b225-home .b225-categories-track,
+.b225-home .b225-categories-track>button,
+.b225-home .b225-category-swipe-hint{
+  touch-action:pan-x!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+}
+
+.b225-home .b225-category-icon{
+  pointer-events:none!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-user-drag:none!important;
+}
+
+/* Offer rails remain normal native two-axis gesture participants so a vertical
+   page scroll can still begin naturally over an offer card. */
+.b225-home .b225-offer-scroll{
   touch-action:auto!important;
 }
 
