@@ -24,19 +24,22 @@
     0 2px 4px rgba(75,67,58,.045)!important;
 }
 
+/* Stable single-row category rail. */
 .b225-home .b225-categories{
   box-sizing:border-box!important;
   position:relative!important;
   z-index:1!important;
   display:flex!important;
+  flex-flow:row nowrap!important;
   align-items:center!important;
   gap:9px!important;
   width:100%!important;
-  min-height:42px!important;
+  min-width:0!important;
+  min-height:44px!important;
   margin:0!important;
-  padding:0 34px 0 0!important;
+  padding:1px 0 3px!important;
   overflow-x:auto!important;
-  overflow-y:visible!important;
+  overflow-y:hidden!important;
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
@@ -46,38 +49,44 @@
   transform:none!important;
   scrollbar-width:none!important;
   -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-x!important;
 }
 
 .b225-home .b225-categories::-webkit-scrollbar{
   display:none!important;
 }
 
-/* Two line-free chevrons inside the category shell. They flash in sequence
-   to hint that more categories continue horizontally. */
+/* Two line-free chevrons directly after Plage, before the remaining categories.
+   18.75px = 25% smaller than the previous 25px size. */
 .b225-home .b225-category-swipe-hint{
-  position:absolute!important;
+  position:relative!important;
   z-index:9!important;
-  top:50%!important;
-  right:8px!important;
+  flex:0 0 18px!important;
+  align-self:center!important;
   display:flex!important;
   align-items:center!important;
+  justify-content:center!important;
   gap:0!important;
-  transform:translateY(-50%)!important;
+  width:18px!important;
+  height:30px!important;
+  margin-left:-4px!important;
+  margin-right:-2px!important;
+  transform:translateY(-1px)!important;
   pointer-events:none!important;
   user-select:none!important;
   color:rgba(71,72,68,.78)!important;
   font-family:Arial,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
-  font-size:25px!important;
+  font-size:18.75px!important;
   line-height:1!important;
   font-weight:300!important;
-  letter-spacing:-7px!important;
+  letter-spacing:-5px!important;
   text-shadow:0 1px 0 rgba(255,255,255,.94)!important;
-  filter:drop-shadow(0 2px 3px rgba(48,48,44,.10))!important;
+  filter:drop-shadow(0 1.5px 2px rgba(48,48,44,.09))!important;
 }
 
 .b225-home .b225-category-swipe-hint>span{
   display:block!important;
-  width:13px!important;
+  width:9px!important;
   animation:b225-category-chevron-flash 1.28s cubic-bezier(.4,0,.2,1) infinite!important;
   will-change:transform,opacity!important;
 }
@@ -87,9 +96,9 @@
 }
 
 @keyframes b225-category-chevron-flash{
-  0%,100%{opacity:.22;transform:translateX(-2px)}
-  38%{opacity:.96;transform:translateX(1px)}
-  62%{opacity:.58;transform:translateX(3px)}
+  0%,100%{opacity:.22;transform:translateX(-1.5px)}
+  38%{opacity:.96;transform:translateX(.75px)}
+  62%{opacity:.58;transform:translateX(2px)}
 }
 
 .b225-home .b225-categories button{
@@ -99,9 +108,12 @@
   align-items:center!important;
   justify-content:center!important;
   flex:0 0 auto!important;
+  width:auto!important;
+  min-width:max-content!important;
   overflow:hidden!important;
   opacity:1!important;
   visibility:visible!important;
+  white-space:nowrap!important;
   height:40.5px!important;
   min-height:40.5px!important;
   max-height:40.5px!important;
@@ -119,6 +131,7 @@
 }
 
 .b225-home .b225-category-icon{
+  display:block!important;
   width:19.75px!important;
   height:19.75px!important;
   max-width:19.75px!important;
@@ -126,6 +139,8 @@
   flex:0 0 19.75px!important;
   position:relative!important;
   z-index:2!important;
+  opacity:1!important;
+  visibility:visible!important;
 }
 
 /* UNSELECTED: thinner, cleaner vertical curvature with restrained physical depth. */
@@ -151,7 +166,6 @@
   transform:translateY(-.5px)!important;
 }
 
-/* Fine upper sheen: polished, not glossy or plastic. */
 .b225-home .b225-categories button:not([data-active='true'])::before{
   content:""!important;
   position:absolute!important;
@@ -171,7 +185,6 @@
   opacity:.62!important;
 }
 
-/* Very slim lower edge: just enough to read as a premium physical button. */
 .b225-home .b225-categories button:not([data-active='true'])::after{
   content:""!important;
   position:absolute!important;
@@ -191,7 +204,6 @@
   opacity:.76!important;
 }
 
-/* SELECTED: same material, a little darker and physically pressed. */
 .b225-home .b225-categories button[data-active='true']{
   color:#2e2f2c!important;
   border-color:rgba(99,99,94,.22)!important;
@@ -255,12 +267,13 @@
     border-radius:22px!important;
     padding-inline:14px!important;
   }
-  .b225-home .b225-categories{
-    padding-right:30px!important;
-  }
   .b225-home .b225-category-swipe-hint{
-    right:6px!important;
-    font-size:23px!important;
+    flex-basis:17px!important;
+    width:17px!important;
+    font-size:17.25px!important;
+  }
+  .b225-home .b225-category-swipe-hint>span{
+    width:8px!important;
   }
   .b225-home .b225-categories button{
     height:38.5px!important;
