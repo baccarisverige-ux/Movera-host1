@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { homeCategories, homeCategoryOffers } from './data/homeData.js'
 import { getCollectionRouteForCategory } from '../../shared/navigation/guestCollectionRoutes.js'
 import '../../styles/home-b225.css'
@@ -45,9 +45,14 @@ const WELCOME_CITIES = [
 ]
 
 function SearchIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>}
+function ScrollArrowIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 7l5 5-5 5"/></svg>}
 function CategoryArtwork({id}){const src=CATEGORY_ARTWORK[id];return src?<img className="b225-category-icon" data-category-icon={id} src={src} alt="" aria-hidden="true" decoding="async"/>:null}
 function ListingCard({item,sectionId}){return <article className="b225-offer-card" data-testid={`home-card-${sectionId}-${item.id}`} aria-label={`${item.title}, ${item.priceTotal}, note ${item.rating}`}><div className="b225-offer-card__image"><img src={item.image} alt={item.title} loading="lazy" decoding="async"/>{item.badge?<span className="b225-offer-card__badge">{item.badge}</span>:null}<span className="b225-offer-card__heart" aria-hidden="true">♡</span></div><div className="b225-offer-card__body"><h3 className="b225-offer-card__title">{item.title}</h3><p className="b225-offer-card__meta"><strong>{item.priceTotal}</strong><span className="b225-offer-card__dot">·</span><span>★ {item.rating}</span></p></div></article>}
-function CategorySelection({id,title,items}){return <section className="b225-section b225-category-selection" data-category-selection={id} data-testid={`home-selection-${id}`}><div className="b225-section__title"><h2>{title}</h2></div>{items.length?<div className="b225-offer-scroll">{items.map(item=><ListingCard key={`${id}-${item.id}`} item={item} sectionId={id}/>)}</div>:<p className="b225-empty">Sélection à venir.</p>}</section>}
+function CategorySelection({id,title,items}){
+ const railRef=useRef(null)
+ const scrollForward=()=>railRef.current?.scrollBy({left:Math.max(railRef.current.clientWidth*.72,150),behavior:'smooth'})
+ return <section className="b225-section b225-category-selection" data-category-selection={id} data-testid={`home-selection-${id}`}><div className="b225-section__title b225-category-selection__title"><h2>{title}</h2>{items.length>1?<button type="button" className="b225-section-scroll-hint" onClick={scrollForward} aria-label={`Faire défiler ${title}`}><ScrollArrowIcon/></button>:null}</div>{items.length?<div ref={railRef} className="b225-offer-scroll">{items.map(item=><ListingCard key={`${id}-${item.id}`} item={item} sectionId={id}/>)}</div>:<p className="b225-empty">Sélection à venir.</p>}</section>
+}
 
 export function HomePage({onNavigate}){
  const [category,setCategory]=useState(getSelectedHomeCategory); const [query,setQuery]=useState('');
