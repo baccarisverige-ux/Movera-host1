@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import './collection-page.css'
 import './collection-page-scale.css'
+import './collection-premium-architecture.css'
 
 const QUICK_CITIES = ['Toutes', 'Gammarth', 'La Marsa', 'Hammamet', 'Sousse', 'Djerba', 'Bizerte', 'Nabeul']
 
@@ -89,9 +90,24 @@ export function CollectionPage({
 
   return (
     <div className={`beach-page${pageClassName ? ` ${pageClassName}` : ''}`} data-testid={hero.testId}>
-      <section className="beach-hero" aria-label={collectionLabel}>
-        <img className={`beach-hero__image${hero.className ? ` ${hero.className}` : ''}`} src={hero.src} alt={hero.alt} loading="eager" decoding="sync" fetchPriority="high" />
-        <div className="beach-hero__copy">
+      <section className="beach-hero collection-hero" aria-label={collectionLabel}>
+        <div className="collection-hero__stage">
+          <div className="collection-hero__media">
+            <img
+              className={`beach-hero__image${hero.className ? ` ${hero.className}` : ''}`}
+              src={hero.src}
+              alt={hero.alt}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
+          </div>
+          <div className="collection-hero__badge" aria-label={`Catégorie ${badgeLabel}`}>
+            <span>{badgeLabel}</span>
+            <small>Movera</small>
+          </div>
+        </div>
+        <div className="beach-hero__copy collection-hero__copy">
           <span>{collectionLabel}</span>
           <h1>{title}</h1>
           <p>{description}</p>
