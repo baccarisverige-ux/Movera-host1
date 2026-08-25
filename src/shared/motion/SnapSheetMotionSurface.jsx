@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { animate } from 'motion'
-import { motion, useDragControls, useMotionValue, useMotionValueEvent, useReducedMotion } from 'motion/react'
+import { animate, motion, useDragControls, useMotionValue, useMotionValueEvent, useReducedMotion } from './runtime.js'
 
 const DEFAULT_SPRING = Object.freeze({
   stiffness: 430,
@@ -27,14 +26,7 @@ function nearestIndex(values, value) {
   return bestIndex
 }
 
-function resolveSnapTarget({
-  distance,
-  currentY,
-  fastSwipeVelocity,
-  snapRatios,
-  velocityProjectionSeconds,
-  velocityY,
-}) {
+function resolveSnapTarget({ distance, currentY, fastSwipeVelocity, snapRatios, velocityProjectionSeconds, velocityY }) {
   const points = snapRatios.map((ratio) => distance * ratio)
   const projected = clamp(currentY + velocityY * velocityProjectionSeconds, 0, distance)
   let index = nearestIndex(points, projected)
