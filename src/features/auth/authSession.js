@@ -12,6 +12,9 @@ function normalizeSession(value) {
     authenticated: true,
     userId: value.userId.trim(),
     displayName: typeof value.displayName === 'string' ? value.displayName.trim() : '',
+    provider: typeof value.provider === 'string' ? value.provider.trim() : '',
+    email: typeof value.email === 'string' ? value.email.trim() : '',
+    phone: typeof value.phone === 'string' ? value.phone.trim() : '',
   }
 }
 
