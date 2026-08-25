@@ -5,6 +5,7 @@ const collections = [
   { route: '/maison-d-hote', testId: 'page-guesthouse', badge: "Maison d’hôte", collectionLabel: "Collection Maison d’hôte" },
   { route: '/hotel', testId: 'page-hotel', badge: 'Hôtel', collectionLabel: 'Collection Hôtel' },
   { route: '/appartement', testId: 'page-apartment', badge: 'Appartement', collectionLabel: 'Collection Appartement' },
+  { route: '/villa', testId: 'page-villa', badge: 'Villa', collectionLabel: 'Collection Villa' },
 ]
 
 for (const collection of collections) {
