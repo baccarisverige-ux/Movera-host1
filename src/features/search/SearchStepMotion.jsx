@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from '../../shared/motion/runtime.js'
 
 const STEP_ORDER = Object.freeze({ destination: 0, dates: 1, guests: 2 })
 
