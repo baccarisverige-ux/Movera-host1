@@ -3,7 +3,7 @@
 
 .portrait-collection-page.collection-page,
 .portrait-collection-page{
-  --collection-edge:14px;
+  --collection-edge:0px;
   --collection-surface:#f7f7f5;
   --collection-card:#fcfcfb;
   --collection-line:rgba(79,77,72,.075);
@@ -50,25 +50,26 @@
   text-overflow:ellipsis;
 }
 
+/* Full-width double frame: both the outer stage and inner frame now run
+   from the left edge to the right edge of every category page. */
 .portrait-collection-page .collection-hero{
+  position:relative!important;
   box-sizing:border-box!important;
+  width:100%!important;
   height:auto!important;
-  padding:12px var(--collection-edge) 0!important;
+  padding:12px 0 0!important;
   overflow:visible!important;
   background:var(--collection-surface)!important;
   border-radius:0!important;
 }
 
-/* The back frame now wraps the image with equal left/right breathing room.
-   Its width preserves the previous image position; the Movera badge floats
-   beside it instead of making the right side of the frame visually thicker. */
 .portrait-collection-page .collection-hero__stage{
   position:relative;
   display:block;
-  width:calc(100% - 82px);
-  min-height:238px;
+  width:100%;
+  min-height:270px;
   margin:0;
-  padding:12px 14px;
+  padding:11px;
   box-sizing:border-box;
   overflow:visible;
   border:1px solid rgba(255,255,255,.96);
@@ -83,12 +84,15 @@
 
 .portrait-collection-page .collection-hero__media{
   position:relative;
-  display:grid;
-  place-items:center;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
   width:100%;
   min-width:0;
-  min-height:212px;
+  min-height:246px;
+  box-sizing:border-box;
   overflow:hidden;
+  padding-left:4px;
   border:1px solid rgba(108,105,98,.07);
   border-radius:23px;
   background:#fff;
@@ -107,16 +111,18 @@
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.34);
 }
 
+/* The visual stays on the left so the right-hand part of the double frame
+   becomes the editorial zone for the Movera badge and category headline. */
 .portrait-collection-page .collection-hero__media .portrait-collection-hero__image,
 .portrait-collection-page .collection-hero__media .beach-hero__image{
   position:relative!important;
   inset:auto!important;
   display:block!important;
-  width:min(70vw,258px)!important;
-  max-width:100%!important;
+  width:62%!important;
+  max-width:252px!important;
   height:auto!important;
-  max-height:252px!important;
-  margin:0 auto!important;
+  max-height:244px!important;
+  margin:0 auto 0 0!important;
   object-fit:contain!important;
   object-position:center!important;
   background:#fff!important;
@@ -128,14 +134,14 @@
   image-rendering:auto!important;
 }
 
-/* Plage / Movera (and the equivalent badge on the other collections) stays
-   beside the image exactly as requested; it no longer participates in frame width. */
+/* Keep the category/Movera badge, now safely inside the right side of the frame. */
 .portrait-collection-page .collection-hero__badge{
   position:absolute;
-  z-index:3;
-  left:calc(100% - 6px);
-  top:50%;
-  width:76px;
+  z-index:4;
+  left:auto;
+  right:22px;
+  top:30px;
+  width:82px;
   min-height:74px;
   padding:11px 7px 10px;
   box-sizing:border-box;
@@ -153,7 +159,7 @@
     inset 0 -1px 0 rgba(68,67,63,.055),
     0 2px 0 rgba(196,194,188,.25),
     0 8px 18px rgba(43,42,39,.065);
-  transform:translateY(calc(-50% - 5px));
+  transform:none;
 }
 
 .portrait-collection-page .collection-hero__badge::before{
@@ -167,7 +173,7 @@
 
 .portrait-collection-page .collection-hero__badge>span{
   display:block;
-  max-width:64px;
+  max-width:68px;
   color:#343633;
   font-size:9.2px;
   line-height:1.12;
@@ -185,37 +191,41 @@
   text-transform:uppercase;
 }
 
+/* The category headline and description now live visually inside the right
+   half of the same double frame on every collection page. */
 .portrait-collection-page .collection-hero__copy,
 .portrait-collection-page .beach-hero__copy.collection-hero__copy{
-  position:relative!important;
+  position:absolute!important;
   left:auto!important;
-  right:auto!important;
+  right:18px!important;
+  top:122px!important;
   bottom:auto!important;
-  z-index:1!important;
-  width:100%;
-  padding:14px 3px 13px!important;
+  z-index:3!important;
+  width:32%!important;
+  box-sizing:border-box;
+  padding:0!important;
   background:transparent!important;
   color:var(--collection-text)!important;
 }
 
-/* Editorial title: same size/hierarchy, finer stroke and less visual weight. */
 .portrait-collection-page .collection-hero__copy h1{
   margin:0!important;
-  max-width:330px;
+  max-width:none!important;
   color:#20211f!important;
-  font-size:clamp(24px,7vw,30px)!important;
-  line-height:1!important;
+  font-size:clamp(17px,4.8vw,20.5px)!important;
+  line-height:.98!important;
   font-weight:520!important;
-  letter-spacing:-.036em!important;
+  letter-spacing:-.04em!important;
   text-shadow:none!important;
+  overflow-wrap:break-word;
 }
 
 .portrait-collection-page .collection-hero__copy p{
-  max-width:300px!important;
+  max-width:none!important;
   margin:8px 0 0!important;
   color:#747772!important;
-  font-size:10.2px!important;
-  line-height:1.45!important;
+  font-size:9.2px!important;
+  line-height:1.38!important;
 }
 
 /* Search/discovery stays visually separate from the hero. */
@@ -239,41 +249,59 @@
   }
 
   .portrait-collection-page .collection-hero{
-    --collection-edge:11px;
     padding-top:10px!important;
   }
 
   .portrait-collection-page .collection-hero__stage{
-    width:calc(100% - 74px);
-    min-height:218px;
-    padding:10px;
+    width:100%;
+    min-height:248px;
+    padding:9px;
     border-radius:25px;
   }
 
   .portrait-collection-page .collection-hero__media{
-    min-height:194px;
+    min-height:228px;
+    padding-left:2px;
     border-radius:21px;
   }
 
   .portrait-collection-page .collection-hero__media .portrait-collection-hero__image,
   .portrait-collection-page .collection-hero__media .beach-hero__image{
-    width:min(66vw,232px)!important;
-    max-height:230px!important;
+    width:60%!important;
+    max-width:215px!important;
+    max-height:222px!important;
   }
 
   .portrait-collection-page .collection-hero__badge{
-    left:calc(100% - 4px);
+    right:14px;
+    top:24px;
     width:68px;
     min-height:67px;
     padding-inline:6px;
     border-radius:18px;
-    transform:translateY(calc(-50% - 4px));
   }
 
   .portrait-collection-page .collection-hero__badge>span{font-size:8.5px}
-  .portrait-collection-page .collection-hero__copy h1{font-size:clamp(22px,7vw,27px)!important}
+
+  .portrait-collection-page .collection-hero__copy,
+  .portrait-collection-page .beach-hero__copy.collection-hero__copy{
+    right:13px!important;
+    top:104px!important;
+    width:34%!important;
+  }
+
+  .portrait-collection-page .collection-hero__copy h1{
+    font-size:clamp(15.8px,5vw,18px)!important;
+    line-height:1!important;
+  }
+
+  .portrait-collection-page .collection-hero__copy p{
+    margin-top:6px!important;
+    font-size:8.5px!important;
+    line-height:1.34!important;
+  }
 }
 
 @media(prefers-reduced-motion:reduce){
-  .portrait-collection-page .collection-hero__badge{transform:translateY(-50%)}
+  .portrait-collection-page .collection-hero__badge{transform:none}
 }
