@@ -6,7 +6,9 @@ import '../../styles/map-return-offers.css'
 import { INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
 import { announceMapReady } from '../search/mapHandoff.js'
 import { DESTINATION_VIEWPORTS } from './constants/map.constants.js'
+import { listingMatchesMapFilters } from './mapListingFilters.js'
 import { MapOfferSheet } from './MapOfferSheet.jsx'
+import { MapSearchFilters } from './MapSearchFilters.jsx'
 
 const LISTING_MARKERS = Object.freeze(
   listingCatalog
@@ -47,14 +49,6 @@ const DESTINATION_LABELS = Object.freeze({
   nabeul: 'Nabeul',
   bizerte: 'Bizerte',
 })
-
-function SearchIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-}
-
-function HomeIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 10.5 8.5-7 8.5 7"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
-}
 
 function BackIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
@@ -113,6 +107,8 @@ export function MapPage({ onNavigate }) {
 
   const [selectionState, setSelectionState] = useState(() => ({ contextKey: mapContextKey, id: selectedMarker?.id || null }))
   const [viewportState, setViewportState] = useState(() => ({ contextKey: mapContextKey, command: null }))
+  const [propertyFilter, setPropertyFilter] = useState(null)
+  const [amenityFilters, setAmenityFilters] = useState(() => new Set())
   const selectedListingId = selectionState.contextKey === mapContextKey ? selectionState.id : selectedMarker?.id || null
   const viewportCommand = viewportState.contextKey === mapContextKey ? viewportState.command : null
 
@@ -127,9 +123,14 @@ export function MapPage({ onNavigate }) {
     })
   }, [mapContextKey])
 
-  const cityListings = useMemo(
+  const contextListings = useMemo(
     () => listingsForMapContext(requestedDestination, requestedListing),
     [requestedDestination, requestedListing],
+  )
+
+  const cityListings = useMemo(
+    () => contextListings.filter((listing) => listingMatchesMapFilters(listing, propertyFilter, amenityFilters)),
+    [contextListings, propertyFilter, amenityFilters],
   )
 
   const visibleMarkers = useMemo(() => {
@@ -142,6 +143,26 @@ export function MapPage({ onNavigate }) {
     : requestedListing
       ? listingCatalog.find((listing) => listing.id === requestedListing)?.location || 'Cette ville'
       : 'Grand Tunis'
+
+  const toggleAmenityFilter = useCallback((amenityId) => {
+    setAmenityFilters((current) => {
+      const next = new Set(current)
+      if (next.has(amenityId)) next.delete(amenityId)
+      else next.add(amenityId)
+      return next
+    })
+  }, [])
+
+  const resetFilters = useCallback(() => {
+    setPropertyFilter(null)
+    setAmenityFilters(new Set())
+  }, [])
+
+  useEffect(() => {
+    if (!selectedListingId) return
+    if (cityListings.some((listing) => listing.id === selectedListingId)) return
+    setSelectedListingId(null)
+  }, [cityListings, selectedListingId, setSelectedListingId])
 
   const returnToOffers = () => {
     if (!requestedListing) return
@@ -231,17 +252,21 @@ export function MapPage({ onNavigate }) {
       data-listing={selectedMarker?.id || ''}
       data-handoff-viewport={handoffViewport ? 'true' : 'false'}
       data-city-offer-count={cityListings.length}
+      data-context-offer-count={contextListings.length}
+      data-property-filter={propertyFilter || ''}
+      data-amenity-filter-count={amenityFilters.size}
     >
       <div className="b225-map-top">
-        <div className="b225-map-search">
-          <button type="button" className="b225-map-search__main" onClick={() => onNavigate('/')} aria-label="Modifier la recherche">
-            <SearchIcon />
-            <span className="b225-map-search__copy"><strong>Explorer la carte</strong><span>{cityLabel} · Dates · Voyageurs</span></span>
-          </button>
-          <button type="button" className="b225-map-home-button" onClick={() => onNavigate('/')} aria-label="Retour à l’accueil">
-            <HomeIcon />
-          </button>
-        </div>
+        <MapSearchFilters
+          cityLabel={cityLabel}
+          propertyFilter={propertyFilter}
+          amenityFilters={amenityFilters}
+          resultCount={cityListings.length}
+          onHome={() => onNavigate('/')}
+          onPropertyFilterChange={setPropertyFilter}
+          onAmenityFilterToggle={toggleAmenityFilter}
+          onResetFilters={resetFilters}
+        />
       </div>
 
       {requestedListing ? (
