@@ -3,6 +3,7 @@ import './map-offer-sheet.css'
 
 const COLLAPSED_TRANSLATE_PERCENT = 76
 const DRAG_DISTANCE_PX = 420
+const DRAG_CLICK_SUPPRESS_PX = 8
 const SNAP_POINTS = [0, 0.56, 1]
 
 function clamp(value, min = 0, max = 1) {
@@ -31,6 +32,7 @@ export function MapOfferSheet({
   const [progress, setProgress] = useState(0)
   const progressRef = useRef(0)
   const dragRef = useRef(null)
+  const suppressClickRef = useRef(false)
   const listRef = useRef(null)
   const scrollFrameRef = useRef(0)
   const lastActiveRef = useRef(selectedListingId || null)
@@ -59,7 +61,13 @@ export function MapOfferSheet({
 
   const startDrag = (event) => {
     if (event.button !== undefined && event.button !== 0) return
-    dragRef.current = { pointerId: event.pointerId, startY: event.clientY, startProgress: progressRef.current }
+    suppressClickRef.current = false
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startProgress: progressRef.current,
+      maxDistance: 0,
+    }
     try { event.currentTarget.setPointerCapture(event.pointerId) } catch { /* synthetic pointer */ }
   }
 
@@ -68,18 +76,28 @@ export function MapOfferSheet({
     if (!drag || drag.pointerId !== event.pointerId) return
     event.preventDefault()
     const deltaUp = drag.startY - event.clientY
+    drag.maxDistance = Math.max(drag.maxDistance, Math.abs(deltaUp))
+    if (drag.maxDistance >= DRAG_CLICK_SUPPRESS_PX) suppressClickRef.current = true
     commitProgress(drag.startProgress + deltaUp / DRAG_DISTANCE_PX)
   }
 
   const endDrag = (event) => {
     const drag = dragRef.current
     if (!drag || drag.pointerId !== event.pointerId) return
+    if (drag.maxDistance >= DRAG_CLICK_SUPPRESS_PX) suppressClickRef.current = true
     dragRef.current = null
     try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId) } catch { /* synthetic pointer */ }
     commitProgress(nearestSnap(progressRef.current))
   }
 
-  const toggleExpanded = () => commitProgress(progressRef.current > 0.72 ? 0 : 1)
+  const toggleExpanded = (event) => {
+    if (suppressClickRef.current) {
+      event.preventDefault()
+      suppressClickRef.current = false
+      return
+    }
+    commitProgress(progressRef.current > 0.72 ? 0 : 1)
+  }
 
   const selectListing = (listingId) => {
     lastActiveRef.current = listingId
