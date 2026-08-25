@@ -107,7 +107,6 @@ export function MapPage({ onNavigate }) {
 
   const [selectionState, setSelectionState] = useState(() => ({ contextKey: mapContextKey, id: selectedMarker?.id || null }))
   const [viewportState, setViewportState] = useState(() => ({ contextKey: mapContextKey, command: null }))
-  const [propertyFilter, setPropertyFilter] = useState(null)
   const [amenityFilters, setAmenityFilters] = useState(() => new Set())
   const selectedListingId = selectionState.contextKey === mapContextKey ? selectionState.id : selectedMarker?.id || null
   const viewportCommand = viewportState.contextKey === mapContextKey ? viewportState.command : null
@@ -129,8 +128,8 @@ export function MapPage({ onNavigate }) {
   )
 
   const cityListings = useMemo(
-    () => contextListings.filter((listing) => listingMatchesMapFilters(listing, propertyFilter, amenityFilters)),
-    [contextListings, propertyFilter, amenityFilters],
+    () => contextListings.filter((listing) => listingMatchesMapFilters(listing, null, amenityFilters)),
+    [contextListings, amenityFilters],
   )
 
   const visibleMarkers = useMemo(() => {
@@ -154,7 +153,6 @@ export function MapPage({ onNavigate }) {
   }, [])
 
   const resetFilters = useCallback(() => {
-    setPropertyFilter(null)
     setAmenityFilters(new Set())
   }, [])
 
@@ -253,17 +251,13 @@ export function MapPage({ onNavigate }) {
       data-handoff-viewport={handoffViewport ? 'true' : 'false'}
       data-city-offer-count={cityListings.length}
       data-context-offer-count={contextListings.length}
-      data-property-filter={propertyFilter || ''}
       data-amenity-filter-count={amenityFilters.size}
     >
       <div className="b225-map-top">
         <MapSearchFilters
           cityLabel={cityLabel}
-          propertyFilter={propertyFilter}
           amenityFilters={amenityFilters}
-          resultCount={cityListings.length}
           onHome={() => onNavigate('/')}
-          onPropertyFilterChange={setPropertyFilter}
           onAmenityFilterToggle={toggleAmenityFilter}
           onResetFilters={resetFilters}
         />
