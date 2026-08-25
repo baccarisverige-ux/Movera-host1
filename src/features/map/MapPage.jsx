@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { listingCatalog } from '../../entities/listing/listingCatalog.js'
 import { getListingMapPosition } from '../../entities/listing/listingMapPositions.js'
 import '../../styles/map-b225.css'
@@ -36,10 +36,15 @@ export function MapPage({ onNavigate }) {
   const requestedDestination = searchParams.get('destination')
   const requestedListing = searchParams.get('listing')
   const selectedMarker = requestedListing ? LISTING_MARKERS.find((marker) => marker.id === requestedListing) || null : null
+  const [selectedListingId, setSelectedListingId] = useState(selectedMarker?.id || null)
   const handoffViewport = viewportFromSearch(searchParams)
   const destinationViewport = requestedDestination ? DESTINATION_VIEWPORTS[requestedDestination] || null : null
   const listingViewport = selectedMarker ? { lat: selectedMarker.lat, lng: selectedMarker.lng, zoom: 13.5 } : null
   const initialViewport = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
+
+  useEffect(() => {
+    setSelectedListingId(selectedMarker?.id || null)
+  }, [selectedMarker?.id])
 
   // Handoff readiness is layout-based only; tile-network timing never blocks route release.
   useEffect(() => {
@@ -105,7 +110,8 @@ export function MapPage({ onNavigate }) {
 
       <MapContainer
         markers={LISTING_MARKERS}
-        selectedListingId={selectedMarker?.id || null}
+        selectedListingId={selectedListingId}
+        onSelectedListingChange={setSelectedListingId}
         initialViewport={initialViewport}
       />
     </section>
