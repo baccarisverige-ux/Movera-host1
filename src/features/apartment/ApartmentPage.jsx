@@ -5,10 +5,11 @@ import HERO_IMAGE from './assets/hero.jpg'
 
 const APARTMENT_OFFERS = listingCatalog.filter((item) => item.category.split(' ').includes('family'))
 
-export function ApartmentPage() {
+export function ApartmentPage({ onNavigate }) {
   return (
     <CollectionPage
       offers={APARTMENT_OFFERS}
+      onNavigate={onNavigate}
       pageClassName="portrait-collection-page"
       hero={{
         src: HERO_IMAGE,
