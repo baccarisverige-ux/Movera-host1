@@ -1,6 +1,7 @@
 import { MotionList, MotionListItem } from '../../shared/motion/MotionList.jsx'
 import { MapOfferSheetMotionSurface } from './motion/MapOfferSheetMotionSurface.jsx'
 import { MAP_OFFER_ITEM_MOTION } from './motion/mapOfferSheetMotion.config.js'
+import { useMapOfferScrollEdgeGuard } from './motion/useMapOfferScrollEdgeGuard.js'
 import './map-offer-sheet.css'
 
 function ChevronIcon() {
@@ -20,6 +21,8 @@ function MapOfferSheetContent({
   startDrag,
   toggleExpanded,
 }) {
+  const scrollEdgeGuard = useMapOfferScrollEdgeGuard()
+
   const selectListing = (listingId) => {
     onSelectedListingChange?.(listingId)
   }
@@ -47,6 +50,8 @@ function MapOfferSheetContent({
           data-scroll-enabled={progress > 0.86 ? 'true' : 'false'}
           data-motion-list="map-offers"
           data-map-scroll="independent"
+          data-overscroll-guard="edge"
+          {...scrollEdgeGuard}
         >
           {listings.map((listing, index) => {
             const selected = listing.id === selectedListingId || (!selectedListingId && index === 0 && progress > 0.12)
