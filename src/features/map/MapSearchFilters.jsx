@@ -1,13 +1,22 @@
+import {
+  ArrowLeftIcon,
+  ParkingIcon,
+  PawPrintIcon,
+  SlidersHorizontalIcon,
+  SnowflakeIcon,
+  WavesIcon,
+  WifiIcon,
+} from '../../shared/icons/AppIcons.jsx'
 import { MAP_AMENITY_FILTERS } from './mapListingFilters.js'
 import './map-search-filters.css'
 
-function BackIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
-}
-
-function TuneIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></svg>
-}
+const AMENITY_ICON_BY_ID = Object.freeze({
+  wifi: WifiIcon,
+  pool: WavesIcon,
+  parking: ParkingIcon,
+  ac: SnowflakeIcon,
+  pet: PawPrintIcon,
+})
 
 export function MapSearchFilters({
   cityLabel,
@@ -27,7 +36,7 @@ export function MapSearchFilters({
           onClick={onHome}
           aria-label="Retour à l’accueil"
         >
-          <BackIcon />
+          <ArrowLeftIcon />
         </button>
 
         <button
@@ -42,10 +51,10 @@ export function MapSearchFilters({
         <button
           type="button"
           className="map-search-filter-stack__side-button map-search-filter-stack__filter-button"
-          onClick={onResetFilters}
+          onClick={activeFilterCount ? onResetFilters : undefined}
           aria-label={activeFilterCount ? 'Réinitialiser les filtres' : 'Filtres'}
         >
-          <TuneIcon />
+          <SlidersHorizontalIcon />
           {activeFilterCount ? <span className="map-search-filter-stack__filter-count">{activeFilterCount}</span> : null}
         </button>
       </div>
@@ -53,6 +62,7 @@ export function MapSearchFilters({
       <div className="map-filter-rail map-filter-rail--amenities" data-testid="map-amenity-filters" aria-label="Équipements">
         {MAP_AMENITY_FILTERS.map((filter) => {
           const active = amenityFilters.has(filter.id)
+          const AmenityIcon = AMENITY_ICON_BY_ID[filter.id]
           return (
             <button
               key={filter.id}
@@ -63,7 +73,8 @@ export function MapSearchFilters({
               aria-pressed={active}
               onClick={() => onAmenityFilterToggle(filter.id)}
             >
-              {filter.label}
+              {AmenityIcon ? <AmenityIcon className="map-filter-chip__icon" /> : null}
+              <span>{filter.label}</span>
             </button>
           )
         })}
