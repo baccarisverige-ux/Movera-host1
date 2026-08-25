@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 const EDGE_EPSILON_PX = 1
 
@@ -16,48 +16,62 @@ function edgeState(node) {
  * whole sheet. It never changes scrollTop and never talks to the map engine.
  */
 export function useMapOfferScrollEdgeGuard() {
+  const nodeRef = useRef(null)
   const lastTouchYRef = useRef(null)
 
-  const onTouchStart = (event) => {
-    lastTouchYRef.current = event.touches?.[0]?.clientY ?? null
-  }
+  useEffect(() => {
+    const node = nodeRef.current
+    if (!node) return undefined
 
-  const onTouchMove = (event) => {
-    const currentY = event.touches?.[0]?.clientY
-    const previousY = lastTouchYRef.current
-    lastTouchYRef.current = currentY ?? previousY
+    const onTouchStart = (event) => {
+      lastTouchYRef.current = event.touches?.[0]?.clientY ?? null
+    }
 
-    if (!Number.isFinite(currentY) || !Number.isFinite(previousY)) return
+    const onTouchMove = (event) => {
+      const currentY = event.touches?.[0]?.clientY
+      const previousY = lastTouchYRef.current
+      lastTouchYRef.current = currentY ?? previousY
 
-    const { atTop, atBottom } = edgeState(event.currentTarget)
-    const fingerDeltaY = currentY - previousY
-    const pullingPastTop = atTop && fingerDeltaY > 0
-    const pullingPastBottom = atBottom && fingerDeltaY < 0
+      if (!Number.isFinite(currentY) || !Number.isFinite(previousY)) return
 
-    if (!pullingPastTop && !pullingPastBottom) return
-    if (event.cancelable) event.preventDefault()
-    event.stopPropagation()
-  }
+      const { atTop, atBottom } = edgeState(node)
+      const fingerDeltaY = currentY - previousY
+      const pullingPastTop = atTop && fingerDeltaY > 0
+      const pullingPastBottom = atBottom && fingerDeltaY < 0
 
-  const onTouchEnd = () => {
-    lastTouchYRef.current = null
-  }
+      if (!pullingPastTop && !pullingPastBottom) return
+      event.preventDefault()
+      event.stopPropagation()
+    }
 
-  const onWheel = (event) => {
-    const { atTop, atBottom } = edgeState(event.currentTarget)
-    const pushingPastTop = atTop && event.deltaY < 0
-    const pushingPastBottom = atBottom && event.deltaY > 0
+    const resetTouch = () => {
+      lastTouchYRef.current = null
+    }
 
-    if (!pushingPastTop && !pushingPastBottom) return
-    if (event.cancelable) event.preventDefault()
-    event.stopPropagation()
-  }
+    const onWheel = (event) => {
+      const { atTop, atBottom } = edgeState(node)
+      const pushingPastTop = atTop && event.deltaY < 0
+      const pushingPastBottom = atBottom && event.deltaY > 0
 
-  return {
-    onTouchStart,
-    onTouchMove,
-    onTouchEnd,
-    onTouchCancel: onTouchEnd,
-    onWheel,
-  }
+      if (!pushingPastTop && !pushingPastBottom) return
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
+    node.addEventListener('touchstart', onTouchStart, { passive: true })
+    node.addEventListener('touchmove', onTouchMove, { passive: false })
+    node.addEventListener('touchend', resetTouch, { passive: true })
+    node.addEventListener('touchcancel', resetTouch, { passive: true })
+    node.addEventListener('wheel', onWheel, { passive: false })
+
+    return () => {
+      node.removeEventListener('touchstart', onTouchStart)
+      node.removeEventListener('touchmove', onTouchMove)
+      node.removeEventListener('touchend', resetTouch)
+      node.removeEventListener('touchcancel', resetTouch)
+      node.removeEventListener('wheel', onWheel)
+    }
+  }, [])
+
+  return nodeRef
 }
