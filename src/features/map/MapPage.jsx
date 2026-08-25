@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { listingCatalog } from '../../entities/listing/listingCatalog.js'
 import { getListingMapPosition } from '../../entities/listing/listingMapPositions.js'
 import '../../styles/map-b225.css'
@@ -6,6 +6,7 @@ import '../../styles/map-return-offers.css'
 import { INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
 import { announceMapReady } from '../search/mapHandoff.js'
 import { DESTINATION_VIEWPORTS } from './constants/map.constants.js'
+import { MapOfferSheet } from './MapOfferSheet.jsx'
 
 const LISTING_MARKERS = Object.freeze(
   listingCatalog
@@ -22,6 +23,29 @@ const COLLECTION_ROUTE_BY_CATEGORY = Object.freeze({
   hotel: '/hotel',
   family: '/appartement',
   prestige: '/villa',
+})
+
+const DESTINATION_LISTING_LOCATIONS = Object.freeze({
+  'la-marsa': ['La Marsa'],
+  'sidi-bou-said': ['Sidi Bou Saïd'],
+  gammarth: ['Gammarth'],
+  carthage: ['Carthage'],
+  tunis: ['La Marsa', 'Sidi Bou Saïd', 'Gammarth', 'Carthage'],
+})
+
+const DESTINATION_LABELS = Object.freeze({
+  'la-marsa': 'La Marsa',
+  'sidi-bou-said': 'Sidi Bou Saïd',
+  gammarth: 'Gammarth',
+  carthage: 'Carthage',
+  hammamet: 'Hammamet',
+  tunis: 'Tunis',
+  sousse: 'Sousse',
+  djerba: 'Djerba',
+  tozeur: 'Tozeur',
+  tabarka: 'Tabarka',
+  nabeul: 'Nabeul',
+  bizerte: 'Bizerte',
 })
 
 function SearchIcon() {
@@ -52,20 +76,54 @@ function collectionFallbackPath(listingId) {
   return category ? COLLECTION_ROUTE_BY_CATEGORY[category] : '/'
 }
 
+function listingsForMapContext(requestedDestination, requestedListing) {
+  if (requestedDestination) {
+    const locations = DESTINATION_LISTING_LOCATIONS[requestedDestination]
+    if (!locations) return []
+    return listingCatalog.filter((listing) => locations.includes(listing.location))
+  }
+
+  if (requestedListing) {
+    const selected = listingCatalog.find((listing) => listing.id === requestedListing)
+    if (!selected) return []
+    return listingCatalog.filter((listing) => listing.location === selected.location)
+  }
+
+  return listingCatalog
+}
+
 export function MapPage({ onNavigate }) {
   const searchParams = new URLSearchParams(window.location.search)
   const requestedDestination = searchParams.get('destination')
   const requestedListing = searchParams.get('listing')
   const selectedMarker = requestedListing ? LISTING_MARKERS.find((marker) => marker.id === requestedListing) || null : null
   const [selectedListingId, setSelectedListingId] = useState(selectedMarker?.id || null)
+  const [viewportCommand, setViewportCommand] = useState(null)
   const handoffViewport = viewportFromSearch(searchParams)
   const destinationViewport = requestedDestination ? DESTINATION_VIEWPORTS[requestedDestination] || null : null
   const listingViewport = selectedMarker ? { lat: selectedMarker.lat, lng: selectedMarker.lng, zoom: 13.5 } : null
   const initialViewport = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
 
+  const cityListings = useMemo(
+    () => listingsForMapContext(requestedDestination, requestedListing),
+    [requestedDestination, requestedListing],
+  )
+
+  const visibleMarkers = useMemo(() => {
+    const ids = new Set(cityListings.map((listing) => listing.id))
+    return LISTING_MARKERS.filter((marker) => ids.has(marker.id))
+  }, [cityListings])
+
+  const cityLabel = requestedDestination
+    ? DESTINATION_LABELS[requestedDestination] || 'Cette destination'
+    : requestedListing
+      ? listingCatalog.find((listing) => listing.id === requestedListing)?.location || 'Cette ville'
+      : 'Grand Tunis'
+
   useEffect(() => {
     setSelectedListingId(selectedMarker?.id || null)
-  }, [selectedMarker?.id])
+    setViewportCommand(null)
+  }, [selectedMarker?.id, requestedDestination])
 
   const returnToOffers = () => {
     if (!requestedListing) return
@@ -75,6 +133,33 @@ export function MapPage({ onNavigate }) {
     }
     onNavigate(collectionFallbackPath(requestedListing))
   }
+
+  const handleSheetProgress = useCallback((progress) => {
+    const base = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
+    const activeId = selectedListingId || cityListings[0]?.id
+    const activeMarker = activeId ? visibleMarkers.find((marker) => marker.id === activeId) : null
+    const blend = activeMarker ? Math.max(0, Math.min(1, (progress - 0.08) / 0.92)) : 0
+    const focusStrength = blend * 0.72
+    const lat = activeMarker ? base.lat + (activeMarker.lat - base.lat) * focusStrength : base.lat
+    const lng = activeMarker ? base.lng + (activeMarker.lng - base.lng) * focusStrength : base.lng
+    const zoom = Math.min(17, base.zoom + progress * 1.45)
+
+    if (progress > 0.14 && !selectedListingId && cityListings[0]) setSelectedListingId(cityListings[0].id)
+    setViewportCommand({ lat, lng, zoom, revision: performance.now() })
+  }, [handoffViewport, listingViewport, destinationViewport, selectedListingId, cityListings, visibleMarkers])
+
+  const handleSheetSelectedListingChange = useCallback((listingId) => {
+    setSelectedListingId(listingId)
+    const marker = visibleMarkers.find((item) => item.id === listingId)
+    const base = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
+    if (!marker) return
+    setViewportCommand({
+      lat: marker.lat,
+      lng: marker.lng,
+      zoom: Math.min(17, Math.max(13.6, base.zoom + 1.65)),
+      revision: performance.now(),
+    })
+  }, [visibleMarkers, handoffViewport, listingViewport, destinationViewport])
 
   // Handoff readiness is layout-based only; tile-network timing never blocks route release.
   useEffect(() => {
@@ -129,11 +214,12 @@ export function MapPage({ onNavigate }) {
       data-destination={requestedDestination || ''}
       data-listing={selectedMarker?.id || ''}
       data-handoff-viewport={handoffViewport ? 'true' : 'false'}
+      data-city-offer-count={cityListings.length}
     >
       <div className="b225-map-top">
         <button type="button" className="b225-map-search" onClick={() => onNavigate('/')} aria-label="Modifier la recherche">
           <SearchIcon />
-          <span className="b225-map-search__copy"><strong>Explorer la carte</strong><span>Grand Tunis · Dates · Voyageurs</span></span>
+          <span className="b225-map-search__copy"><strong>Explorer la carte</strong><span>{cityLabel} · Dates · Voyageurs</span></span>
           <span className="b225-map-filter-button" aria-hidden="true">≡</span>
         </button>
       </div>
@@ -146,10 +232,19 @@ export function MapPage({ onNavigate }) {
       ) : null}
 
       <MapContainer
-        markers={LISTING_MARKERS}
+        markers={visibleMarkers}
         selectedListingId={selectedListingId}
         onSelectedListingChange={setSelectedListingId}
         initialViewport={initialViewport}
+        viewportCommand={viewportCommand}
+      />
+
+      <MapOfferSheet
+        listings={cityListings}
+        cityLabel={cityLabel}
+        selectedListingId={selectedListingId}
+        onSelectedListingChange={handleSheetSelectedListingChange}
+        onProgressChange={handleSheetProgress}
       />
     </section>
   )
