@@ -15,6 +15,7 @@ test('La Marsa map exposes only its mapped offers in the full-width Motion botto
   await expect(sheet).toBeVisible()
   await expect(sheet).toHaveAttribute('data-motion-engine', 'motion')
   await expect(sheet).toHaveAttribute('data-motion-boundary', 'shared')
+  await expect(sheet).toHaveAttribute('data-snap-state', 'collapsed')
   await expect(sheet.locator('[data-motion-list="map-offers"]')).toBeVisible()
   await expect(sheet.locator('[data-listing-id]')).toHaveCount(2)
   await expect(sheet.locator('[data-listing-id="loft-cote"]')).toHaveCount(1)
@@ -33,7 +34,7 @@ test('La Marsa map exposes only its mapped offers in the full-width Motion botto
   expect(visibleCollapsedHeight).toBeLessThanOrEqual(85)
 })
 
-test('Motion drag progressively zooms the map and springs to a snap point', async ({ page }) => {
+test('Motion drag progressively zooms the map and keeps the sheet visually joined until its final snap', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=la-marsa')
 
@@ -41,6 +42,7 @@ test('Motion drag progressively zooms the map and springs to a snap point', asyn
   const sheet = page.getByTestId('map-offer-sheet')
   const handle = page.getByTestId('map-offer-sheet-handle')
   await expect(sheet).toHaveAttribute('data-progress', '0')
+  await expect(sheet).toHaveAttribute('data-snap-state', 'collapsed')
 
   const zoomBefore = await numberAttribute(surface, 'data-zoom')
   const box = await handle.boundingBox()
@@ -53,6 +55,7 @@ test('Motion drag progressively zooms the map and springs to a snap point', asyn
   await page.mouse.move(x, y - 120, { steps: 8 })
 
   await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.15)
+  await expect(sheet).toHaveAttribute('data-snap-state', 'moving')
   await expect.poll(() => numberAttribute(surface, 'data-zoom')).toBeGreaterThan(zoomBefore)
 
   await page.mouse.move(x, y - 280, { steps: 10 })
@@ -60,7 +63,7 @@ test('Motion drag progressively zooms the map and springs to a snap point', asyn
   await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThanOrEqual(0.48)
 })
 
-test('expanded list scrolls freely without moving or reselecting the map', async ({ page }) => {
+test('expanded list separates from the header and scrolls freely without moving or reselecting the map', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=gammarth')
 
@@ -68,10 +71,14 @@ test('expanded list scrolls freely without moving or reselecting the map', async
   const surface = page.getByTestId('map-surface')
   const engine = page.getByTestId('map-engine')
   const topPanel = page.locator('.b225-map-top')
+  const connectedShadow = await sheet.evaluate((node) => getComputedStyle(node).boxShadow)
 
   await page.getByRole('button', { name: 'Afficher la liste des offres' }).click()
   await expect(sheet).toHaveAttribute('data-expanded', 'true')
+  await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
   await expect(sheet.locator('[data-listing-id]')).toHaveCount(2)
+  const separatedShadow = await sheet.evaluate((node) => getComputedStyle(node).boxShadow)
+  expect(separatedShadow).not.toBe(connectedShadow)
 
   const list = sheet.locator('.map-offer-sheet__list')
   await expect(list).toHaveCSS('scroll-snap-type', 'none')
@@ -118,6 +125,7 @@ test('downward swipe starting on an offer can close the fully open sheet', async
 
   await page.getByRole('button', { name: 'Afficher la liste des offres' }).click()
   await expect(sheet).toHaveAttribute('data-expanded', 'true')
+  await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
   await list.evaluate((node) => { node.scrollTop = 0 })
   await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.95)
 
@@ -139,6 +147,7 @@ test('downward swipe starting on an offer can close the fully open sheet', async
 
   await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeLessThan(0.86)
   await expect(sheet).toHaveAttribute('data-expanded', 'false')
+  await expect(sheet).not.toHaveAttribute('data-snap-state', 'expanded')
 })
 
 test('a destination with no mapped offers shows an honest empty state', async ({ page }) => {
