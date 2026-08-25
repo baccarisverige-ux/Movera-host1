@@ -5,6 +5,7 @@ const collections = [
   { categoryId: 'guesthouse', route: '/maison-d-hote', pageTestId: 'page-guesthouse' },
   { categoryId: 'hotel', route: '/hotel', pageTestId: 'page-hotel' },
   { categoryId: 'family', route: '/appartement', pageTestId: 'page-apartment' },
+  { categoryId: 'prestige', route: '/villa', pageTestId: 'page-villa' },
 ]
 
 for (const collection of collections) {
