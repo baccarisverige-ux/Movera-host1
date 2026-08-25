@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { listingCatalog } from '../../entities/listing/listingCatalog.js'
 import { getListingMapPosition } from '../../entities/listing/listingMapPositions.js'
+import { ArrowLeftIcon } from '../../shared/icons/AppIcons.jsx'
 import '../../styles/map-b225.css'
 import '../../styles/map-return-offers.css'
 import { INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
@@ -49,10 +50,6 @@ const DESTINATION_LABELS = Object.freeze({
   nabeul: 'Nabeul',
   bizerte: 'Bizerte',
 })
-
-function BackIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-}
 
 function boundedNumber(searchParams, key, min, max) {
   const value = Number(searchParams.get(key))
@@ -128,7 +125,7 @@ export function MapPage({ onNavigate }) {
   )
 
   const cityListings = useMemo(
-    () => contextListings.filter((listing) => listingMatchesMapFilters(listing, null, amenityFilters)),
+    () => contextListings.filter((listing) => listingMatchesMapFilters(listing, amenityFilters)),
     [contextListings, amenityFilters],
   )
 
@@ -263,30 +260,32 @@ export function MapPage({ onNavigate }) {
         />
       </div>
 
-      {requestedListing ? (
-        <button type="button" className="b225-map-return b225-map-return--floating" onClick={returnToOffers} aria-label="Retour aux offres">
-          <span className="b225-map-return__icon"><BackIcon /></span>
-          <span>Retour aux offres</span>
-        </button>
-      ) : null}
+      <div className="b225-map-stage">
+        {requestedListing ? (
+          <button type="button" className="b225-map-return b225-map-return--floating" onClick={returnToOffers} aria-label="Retour aux offres">
+            <span className="b225-map-return__icon"><ArrowLeftIcon /></span>
+            <span>Retour aux offres</span>
+          </button>
+        ) : null}
 
-      <MapContainer
-        key={`map-${mapContextKey}`}
-        markers={visibleMarkers}
-        selectedListingId={selectedListingId}
-        onSelectedListingChange={setSelectedListingId}
-        initialViewport={initialViewport}
-        viewportCommand={viewportCommand}
-      />
+        <MapContainer
+          key={`map-${mapContextKey}`}
+          markers={visibleMarkers}
+          selectedListingId={selectedListingId}
+          onSelectedListingChange={setSelectedListingId}
+          initialViewport={initialViewport}
+          viewportCommand={viewportCommand}
+        />
 
-      <MapOfferSheet
-        key={`sheet-${mapContextKey}`}
-        listings={cityListings}
-        cityLabel={cityLabel}
-        selectedListingId={selectedListingId}
-        onSelectedListingChange={handleSheetSelectedListingChange}
-        onProgressChange={handleSheetProgress}
-      />
+        <MapOfferSheet
+          key={`sheet-${mapContextKey}`}
+          listings={cityListings}
+          cityLabel={cityLabel}
+          selectedListingId={selectedListingId}
+          onSelectedListingChange={handleSheetSelectedListingChange}
+          onProgressChange={handleSheetProgress}
+        />
+      </div>
     </section>
   )
 }
