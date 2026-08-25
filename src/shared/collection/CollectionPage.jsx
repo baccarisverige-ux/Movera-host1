@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useFavorites } from '../../entities/favorite/favoritesStore.js'
+import { MotionList, MotionListItem } from '../motion/MotionList.jsx'
 import './collection-page.css'
 import './collection-page-scale.css'
 import './collection-premium-architecture.css'
@@ -17,6 +18,18 @@ const TUNISIA_CITIES = [
   'Sfax', 'Sidi Bou Saïd', 'Sidi Bouzid', 'Siliana', 'Soliman', 'Sousse',
   'Tabarka', 'Tataouine', 'Tozeur', 'Tunis', 'Yasmine Hammamet', 'Zaghouan', 'Zarzis'
 ]
+
+const COLLECTION_OFFER_MOTION = Object.freeze({
+  enterScale: 0.992,
+  enterY: 12,
+  exitScale: 0.994,
+  exitY: -6,
+  initialOpacity: 0.7,
+  layout: true,
+  stagger: 0.022,
+  tapScale: 1,
+  spring: Object.freeze({ stiffness: 360, damping: 32, mass: 0.8 }),
+})
 
 const normalize = (value = '') => value
   .normalize('NFD')
@@ -183,11 +196,18 @@ export function CollectionPage({
           <span className="beach-results__count">{visibleOffers.length}</span>
         </header>
 
-        <div className="beach-offer-list">
-          {visibleOffers.map((item) => {
+        <MotionList className="beach-offer-list" data-motion-list="collection-offers">
+          {visibleOffers.map((item, index) => {
             const favorite = favoriteIdSet.has(item.id)
             return (
-              <article className="beach-offer" key={item.id} data-offer-id={item.id}>
+              <MotionListItem
+                as="article"
+                className="beach-offer"
+                key={item.id}
+                index={index}
+                config={COLLECTION_OFFER_MOTION}
+                data-offer-id={item.id}
+              >
                 <div className="beach-offer__media">
                   <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
                   <span className="beach-offer__badge">{item.badge || badgeLabel}</span>
@@ -218,10 +238,10 @@ export function CollectionPage({
                     <span className="beach-offer__map-arrow" aria-hidden="true">›</span>
                   </button>
                 </div>
-              </article>
+              </MotionListItem>
             )
           })}
-        </div>
+        </MotionList>
 
         {!visibleOffers.length ? (
           <div className="beach-empty">
