@@ -60,7 +60,7 @@ test('Motion drag progressively zooms the map and springs to a snap point', asyn
   await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThanOrEqual(0.48)
 })
 
-test('expanded Motion list sticks below the map top bar and shows large one-by-one offers', async ({ page }) => {
+test('expanded list scrolls freely without moving or reselecting the map', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=gammarth')
 
@@ -74,9 +74,9 @@ test('expanded Motion list sticks below the map top bar and shows large one-by-o
   await expect(sheet.locator('[data-listing-id]')).toHaveCount(2)
 
   const list = sheet.locator('.map-offer-sheet__list')
-  await expect(list).toHaveCSS('scroll-snap-type', /y/)
+  await expect(list).toHaveCSS('scroll-snap-type', 'none')
   await expect(list).toHaveAttribute('data-motion-list', 'map-offers')
-  await expect(sheet.locator('[data-listing-id="villa-perle"]')).toHaveCSS('scroll-snap-align', 'start')
+  await expect(list).toHaveAttribute('data-map-scroll', 'independent')
 
   const sheetBox = await sheet.boundingBox()
   const searchBox = await searchBar.boundingBox()
@@ -90,6 +90,18 @@ test('expanded Motion list sticks below the map top bar and shows large one-by-o
   expect(mediaBox).not.toBeNull()
   expect(mediaBox.width).toBeGreaterThan(340)
   expect(mediaBox.height).toBeGreaterThan(240)
+
+  await page.waitForTimeout(500)
+  const zoomBeforeScroll = await numberAttribute(surface, 'data-zoom')
+  const selectedBeforeScroll = await engine.getAttribute('data-selected-listing-id')
+  const scrollBefore = await list.evaluate((node) => node.scrollTop)
+
+  await list.evaluate((node) => node.scrollBy({ top: 360, behavior: 'instant' }))
+  await expect.poll(() => list.evaluate((node) => node.scrollTop)).toBeGreaterThan(scrollBefore)
+  await page.waitForTimeout(250)
+
+  expect(await numberAttribute(surface, 'data-zoom')).toBeCloseTo(zoomBeforeScroll, 4)
+  expect(await engine.getAttribute('data-selected-listing-id')).toBe(selectedBeforeScroll)
 
   await sheet.locator('[data-listing-id="villa-emeraude"]').click()
   await expect(engine).toHaveAttribute('data-selected-listing-id', 'villa-emeraude')
