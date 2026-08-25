@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { listingCatalog } from '../../entities/listing/listingCatalog.js'
 import { getListingMapPosition } from '../../entities/listing/listingMapPositions.js'
 import '../../styles/map-b225.css'
+import '../../styles/map-return-offers.css'
 import { INITIAL_VIEWPORT, MapContainer } from '../map-engine/MapContainer.jsx'
 import { announceMapReady } from '../search/mapHandoff.js'
 import { DESTINATION_VIEWPORTS } from './constants/map.constants.js'
@@ -15,8 +16,20 @@ const LISTING_MARKERS = Object.freeze(
     .filter(Boolean),
 )
 
+const COLLECTION_ROUTE_BY_CATEGORY = Object.freeze({
+  beach: '/plage',
+  guesthouse: '/maison-d-hote',
+  hotel: '/hotel',
+  family: '/appartement',
+  prestige: '/villa',
+})
+
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+}
+
+function BackIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
 }
 
 function boundedNumber(searchParams, key, min, max) {
@@ -29,6 +42,14 @@ function viewportFromSearch(searchParams) {
   const lng = boundedNumber(searchParams, 'lng', -180, 180)
   const zoom = boundedNumber(searchParams, 'zoom', 1, 20)
   return lat === null || lng === null || zoom === null ? null : { lat, lng, zoom }
+}
+
+function collectionFallbackPath(listingId) {
+  const listing = listingCatalog.find((item) => item.id === listingId)
+  if (!listing) return '/'
+  const categories = listing.category.split(' ')
+  const category = categories.find((item) => COLLECTION_ROUTE_BY_CATEGORY[item])
+  return category ? COLLECTION_ROUTE_BY_CATEGORY[category] : '/'
 }
 
 export function MapPage({ onNavigate }) {
@@ -45,6 +66,15 @@ export function MapPage({ onNavigate }) {
   useEffect(() => {
     setSelectedListingId(selectedMarker?.id || null)
   }, [selectedMarker?.id])
+
+  const returnToOffers = () => {
+    if (!requestedListing) return
+    if (window.history.length > 1) {
+      window.history.back()
+      return
+    }
+    onNavigate(collectionFallbackPath(requestedListing))
+  }
 
   // Handoff readiness is layout-based only; tile-network timing never blocks route release.
   useEffect(() => {
@@ -101,6 +131,14 @@ export function MapPage({ onNavigate }) {
       data-handoff-viewport={handoffViewport ? 'true' : 'false'}
     >
       <div className="b225-map-top">
+        {requestedListing ? (
+          <div className="b225-map-return-row">
+            <button type="button" className="b225-map-return" onClick={returnToOffers} aria-label="Retour aux offres">
+              <span className="b225-map-return__icon"><BackIcon /></span>
+              <span>Retour aux offres</span>
+            </button>
+          </div>
+        ) : null}
         <button type="button" className="b225-map-search" onClick={() => onNavigate('/')} aria-label="Modifier la recherche">
           <SearchIcon />
           <span className="b225-map-search__copy"><strong>Explorer la carte</strong><span>{selectedMarker ? selectedMarker.label : 'Grand Tunis · Dates · Voyageurs'}</span></span>
