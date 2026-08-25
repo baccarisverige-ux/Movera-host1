@@ -6,6 +6,7 @@ export const DESTINATION_VIEWPORTS = Object.freeze({
   hammamet: { lat: 36.4, lng: 10.6167, zoom: 12 },
   tunis: { lat: 36.8065, lng: 10.1815, zoom: 12 },
   sousse: { lat: 35.8256, lng: 10.6369, zoom: 12 },
+  mehdia: { lat: 35.5047, lng: 11.0622, zoom: 12 },
   djerba: { lat: 33.8076, lng: 10.8451, zoom: 11 },
   tozeur: { lat: 33.9197, lng: 8.1335, zoom: 12 },
   tabarka: { lat: 36.9544, lng: 8.758, zoom: 12 },
