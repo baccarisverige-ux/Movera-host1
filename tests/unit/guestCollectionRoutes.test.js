@@ -10,11 +10,12 @@ describe('guest collection route contract', () => {
     expect(getCollectionRouteForCategory('beach')).toBe('/plage')
     expect(getCollectionRouteForCategory('guesthouse')).toBe('/maison-d-hote')
     expect(getCollectionRouteForCategory('hotel')).toBe('/hotel')
+    expect(getCollectionRouteForCategory('family')).toBe('/appartement')
     expect(getCollectionRouteForCategory('all')).toBeNull()
   })
 
   it('keeps every collection page under the Accueil navigation context', () => {
-    for (const path of ['/plage', '/maison-d-hote', '/hotel']) {
+    for (const path of ['/plage', '/maison-d-hote', '/hotel', '/appartement']) {
       expect(isGuestCollectionRoute(path)).toBe(true)
       expect(getGuestNavigationPath(path)).toBe('/')
     }
