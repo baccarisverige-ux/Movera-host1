@@ -1,7 +1,20 @@
 import { useMemo, useState } from 'react'
 import { getListingSummary } from '../../entities/listing/listingCatalog.js'
+import { MotionList, MotionListItem } from '../../shared/motion/MotionList.jsx'
 import { messageThreads } from './messagesData.js'
 import './messages-page.css'
+
+const MESSAGE_ITEM_MOTION = Object.freeze({
+  enterScale: 0.995,
+  enterY: 7,
+  exitScale: 0.992,
+  exitY: -5,
+  initialOpacity: 0.76,
+  layout: true,
+  stagger: 0.018,
+  tapScale: 0.987,
+  spring: Object.freeze({ stiffness: 420, damping: 35, mass: 0.72 }),
+})
 
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
@@ -53,12 +66,15 @@ export function MessagesPage({ onNavigate }) {
         </header>
 
         {visibleThreads.length ? (
-          <div className="messages-thread-list">
-            {visibleThreads.map((thread) => {
+          <MotionList className="messages-thread-list" data-motion-list="messages">
+            {visibleThreads.map((thread, index) => {
               const listing = thread.listingId ? getListingSummary(thread.listingId) : null
               return (
-                <button
+                <MotionListItem
+                  as="button"
                   key={thread.id}
+                  index={index}
+                  config={MESSAGE_ITEM_MOTION}
                   type="button"
                   className={`message-thread-card${thread.unread ? ' is-unread' : ''}`}
                   onClick={() => onNavigate(`/messages/${thread.id}`)}
@@ -81,10 +97,10 @@ export function MessagesPage({ onNavigate }) {
                     {thread.unread ? <span className="message-thread-card__badge">{thread.unread}</span> : null}
                     <ChevronIcon />
                   </span>
-                </button>
+                </MotionListItem>
               )
             })}
-          </div>
+          </MotionList>
         ) : (
           <div className="messages-empty">
             <span>◌</span>
