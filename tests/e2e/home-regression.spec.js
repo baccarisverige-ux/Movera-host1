@@ -47,11 +47,13 @@ test('home keeps its current category structure, media and approved navigation s
   const nav = page.locator('.app-shell--guest > .app-shell__nav')
   await expect(nav).toBeVisible()
   await expect(nav.locator('.app-shell__nav-item')).toHaveCount(5)
-  for (const label of ['Accueil', 'Carte', 'Favoris', 'Messages']) {
+  for (const label of ['Accueil', 'Carte', 'Favoris']) {
     if (label !== 'Accueil') await nav.locator('.app-shell__nav-item', { hasText: label }).click()
     await expect(page.locator('.app-shell--guest > .app-shell__nav .app-shell__nav-item[data-active="true"] span')).toHaveText(label)
   }
-  await expect(nav.locator('.app-shell__nav-item', { hasText: 'Profil' })).toHaveAttribute('aria-disabled', 'true')
+  for (const label of ['Messages', 'Profil']) {
+    await expect(nav.locator('.app-shell__nav-item', { hasText: label })).toHaveAttribute('aria-disabled', 'true')
+  }
   expect(errors).toEqual([])
 })
 
