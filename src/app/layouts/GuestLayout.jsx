@@ -14,6 +14,7 @@ const COLLECTION_HEADER_LABELS = Object.freeze({
   '/maison-d-hote': "Collection Maison d’hôte",
   '/hotel': 'Collection Hôtel',
   '/appartement': 'Collection Appartement',
+  '/villa': 'Collection Villa',
 })
 
 const mapShellStyle = { maxWidth: 430, margin: '0 auto', background: '#eff1ef' }
