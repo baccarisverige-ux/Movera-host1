@@ -50,12 +50,6 @@ export function MapOfferSheet({
     card?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
   }, [selectedIndex, selectedListingId, progress])
 
-  useEffect(() => {
-    progressRef.current = 0
-    setProgress(0)
-    progressChangeRef.current?.(0)
-  }, [cityLabel])
-
   const commitProgress = (nextValue) => {
     const next = clamp(nextValue)
     progressRef.current = next
