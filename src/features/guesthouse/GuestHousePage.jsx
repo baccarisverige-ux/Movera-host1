@@ -5,10 +5,11 @@ import HERO_IMAGE from './assets/hero.webp'
 
 const GUESTHOUSE_OFFERS = listingCatalog.filter((item) => item.category.split(' ').includes('guesthouse'))
 
-export function GuestHousePage() {
+export function GuestHousePage({ onNavigate }) {
   return (
     <CollectionPage
       offers={GUESTHOUSE_OFFERS}
+      onNavigate={onNavigate}
       pageClassName="portrait-collection-page"
       hero={{
         src: HERO_IMAGE,
