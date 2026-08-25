@@ -30,7 +30,7 @@ export function MotionList({
   children,
   className,
   nodeRef,
-  presenceMode = 'popLayout',
+  presenceMode = 'sync',
   ...props
 }) {
   const Component = resolveMotionTag(as)
