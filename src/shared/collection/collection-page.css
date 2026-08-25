@@ -49,13 +49,22 @@
 .beach-offer__heart[data-active=true]{background:rgba(255,255,255,.94);color:#252926;box-shadow:0 5px 16px rgba(28,34,30,.08)}
 .beach-offer__heart[data-active=true] svg{fill:currentColor}
 .beach-offer__heart:active{transform:scale(.93)}
-.beach-offer__body{display:grid;grid-template-columns:1fr auto;align-items:end;gap:12px;padding:15px 15px 16px}
+.beach-offer__body{display:grid;grid-template-columns:1fr auto;align-items:end;gap:12px;padding:15px 15px 10px}
 .beach-offer__location{display:flex;align-items:center;gap:4px;margin-bottom:5px;color:#838884;font-size:9px;font-weight:650}
 .beach-offer__location svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.8}
 .beach-offer h3{margin:0;max-width:250px;font-size:14px;line-height:1.22;letter-spacing:-.018em;font-weight:720}
 .beach-offer__price{text-align:right;white-space:nowrap}
 .beach-offer__price strong{display:block;font-size:13px;font-weight:780}
 .beach-offer__price span{font-size:9px;color:#909591}
+.beach-offer__actions{padding:0 12px 12px}
+.beach-offer__map-button{width:100%;min-height:48px;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:9px;padding:5px 11px 5px 8px;border:1px solid rgba(59,64,60,.09);border-radius:16px;background:linear-gradient(180deg,rgba(250,251,250,.98),rgba(239,241,239,.96));color:#343936;text-align:left;box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 5px 16px rgba(28,34,30,.045);transition:transform .16s ease,box-shadow .16s ease,background .16s ease;-webkit-tap-highlight-color:transparent}
+.beach-offer__map-icon{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;background:rgba(255,255,255,.88);border:1px solid rgba(46,51,47,.08);box-shadow:0 2px 7px rgba(28,34,30,.045)}
+.beach-offer__map-icon svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+.beach-offer__map-copy{display:grid;gap:2px;min-width:0}
+.beach-offer__map-copy strong{font-size:10.5px;line-height:1;font-weight:780;letter-spacing:-.01em}
+.beach-offer__map-copy small{font-size:8.5px;line-height:1.1;color:#8b908c;font-weight:560}
+.beach-offer__map-arrow{justify-self:end;font-size:20px;line-height:1;color:#7b807c;transform:translateY(-1px)}
+.beach-offer__map-button:active{transform:translateY(1px) scale(.992);background:linear-gradient(180deg,#eef0ee,#e7e9e7);box-shadow:inset 0 2px 4px rgba(32,37,33,.065)}
 .beach-empty{margin-top:5px;border:1px dashed #d9dcda;border-radius:24px;padding:34px 22px;text-align:center;background:rgba(255,255,255,.62)}
 .beach-empty>span{width:42px;height:42px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:#eceeec;font-size:22px;color:#727773}
 .beach-empty h3{margin:0;font-size:16px}
@@ -63,7 +72,7 @@
 .beach-empty button{min-height:38px;border:0;border-radius:999px;padding:0 15px;background:#2a2d2b;color:#fff;font:700 10px/1 Inter,sans-serif}
 
 @media(min-width:431px){.beach-page{margin-top:12px;border-radius:30px 30px 0 0;overflow:hidden;box-shadow:0 18px 70px rgba(23,29,25,.065)}}
-@media(prefers-reduced-motion:reduce){.beach-offer__media img,.beach-offer__heart{transition:none}.beach-offer__heart:active{transform:none}}
+@media(prefers-reduced-motion:reduce){.beach-offer__media img,.beach-offer__heart,.beach-offer__map-button{transition:none}.beach-offer__heart:active,.beach-offer__map-button:active{transform:none}}
 
 .beach-hero{height:auto;overflow:visible;background:#fff;border-radius:0;isolation:auto}
 .beach-hero__image{position:relative;inset:auto;width:100%;height:clamp(205px,60vw,255px);display:block;object-fit:contain;object-position:center;transform:none;background:#fff;filter:none}
