@@ -1,5 +1,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { GuestLayout } from '../layouts/GuestLayout.jsx'
+import { AuthRequiredPage } from '../../features/auth/AuthRequiredPage.jsx'
+import { useAuthSession } from '../../features/auth/authSession.js'
 import { routeDefinitions, NotFoundPage } from './routes.jsx'
 
 const BASE_PATH = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
@@ -61,6 +63,7 @@ function RouteFallback(){return <section className="route-page" data-testid="rou
 
 export function AppRouter(){
  const [locationKey,setLocationKey]=useState(()=>`${window.location.pathname}${window.location.search}`)
+ const { isAuthenticated } = useAuthSession()
  useEffect(()=>{
   const previousRestoration = 'scrollRestoration' in window.history ? window.history.scrollRestoration : null
   if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
@@ -83,6 +86,9 @@ export function AppRouter(){
  if(new URLSearchParams(window.location.search).get('__testError')==='1')throw new Error('Phase 4 error-boundary verification')
  if(!resolved)return <NotFoundPage onNavigate={navigate}/>
  const {route,params}=resolved
- const Page=route.component
- return <GuestLayout currentPath={internalPath} onNavigate={navigate}><Suspense fallback={<RouteFallback/>}><Page params={params} onNavigate={navigate}/></Suspense></GuestLayout>
+ const Page=route.requiresAuth && !isAuthenticated ? AuthRequiredPage : route.component
+ const pageProps = route.requiresAuth && !isAuthenticated
+   ? { feature: route.authFeature || 'cet espace', onNavigate: navigate }
+   : { params, onNavigate: navigate }
+ return <GuestLayout currentPath={internalPath} onNavigate={navigate}><Suspense fallback={<RouteFallback/>}><Page {...pageProps}/></Suspense></GuestLayout>
 }
