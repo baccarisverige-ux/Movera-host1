@@ -17,6 +17,10 @@ function MailIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>
 }
 
+function BackIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+}
+
 export function ProfileGatewayPage({ onNavigate }) {
   const { isAuthenticated } = useAuthSession()
   const [standardOpen, setStandardOpen] = useState(false)
@@ -42,7 +46,14 @@ export function ProfileGatewayPage({ onNavigate }) {
   if (standardOpen) {
     return (
       <div className="profile-standard-gateway">
-        <button type="button" className="profile-gateway-back" onClick={() => { setStandardOpen(false); setFeedback(null) }}>← Autres options</button>
+        <button
+          type="button"
+          className="profile-gateway-back"
+          aria-label="Retour aux options de connexion"
+          onClick={() => { setStandardOpen(false); setFeedback(null) }}
+        >
+          <BackIcon />
+        </button>
         <ProfilePage onNavigate={onNavigate} />
       </div>
     )
