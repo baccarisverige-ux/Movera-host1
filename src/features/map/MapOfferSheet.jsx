@@ -29,13 +29,19 @@ export function MapOfferSheet({
   onProgressChange,
 }) {
   const [progress, setProgress] = useState(0)
+  const progressRef = useRef(0)
   const dragRef = useRef(null)
   const listRef = useRef(null)
   const scrollFrameRef = useRef(0)
   const lastActiveRef = useRef(selectedListingId || null)
+  const progressChangeRef = useRef(onProgressChange)
+  const selectedChangeRef = useRef(onSelectedListingChange)
 
   const selectedIndex = useMemo(() => listings.findIndex((listing) => listing.id === selectedListingId), [listings, selectedListingId])
 
+  useEffect(() => { progressChangeRef.current = onProgressChange }, [onProgressChange])
+  useEffect(() => { selectedChangeRef.current = onSelectedListingChange }, [onSelectedListingChange])
+  useEffect(() => { lastActiveRef.current = selectedListingId || null }, [selectedListingId])
   useEffect(() => () => cancelAnimationFrame(scrollFrameRef.current), [])
 
   useEffect(() => {
@@ -45,19 +51,21 @@ export function MapOfferSheet({
   }, [selectedIndex, selectedListingId, progress])
 
   useEffect(() => {
+    progressRef.current = 0
     setProgress(0)
-    onProgressChange?.(0)
-  }, [cityLabel, onProgressChange])
+    progressChangeRef.current?.(0)
+  }, [cityLabel])
 
   const commitProgress = (nextValue) => {
     const next = clamp(nextValue)
+    progressRef.current = next
     setProgress(next)
-    onProgressChange?.(next)
+    progressChangeRef.current?.(next)
   }
 
   const startDrag = (event) => {
     if (event.button !== undefined && event.button !== 0) return
-    dragRef.current = { pointerId: event.pointerId, startY: event.clientY, startProgress: progress }
+    dragRef.current = { pointerId: event.pointerId, startY: event.clientY, startProgress: progressRef.current }
     try { event.currentTarget.setPointerCapture(event.pointerId) } catch { /* synthetic pointer */ }
   }
 
@@ -74,18 +82,18 @@ export function MapOfferSheet({
     if (!drag || drag.pointerId !== event.pointerId) return
     dragRef.current = null
     try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId) } catch { /* synthetic pointer */ }
-    commitProgress(nearestSnap(progress))
+    commitProgress(nearestSnap(progressRef.current))
   }
 
-  const toggleExpanded = () => commitProgress(progress > 0.72 ? 0 : 1)
+  const toggleExpanded = () => commitProgress(progressRef.current > 0.72 ? 0 : 1)
 
   const selectListing = (listingId) => {
     lastActiveRef.current = listingId
-    onSelectedListingChange?.(listingId)
+    selectedChangeRef.current?.(listingId)
   }
 
   const handleListScroll = () => {
-    if (progress < 0.86 || !listRef.current) return
+    if (progressRef.current < 0.86 || !listRef.current) return
     cancelAnimationFrame(scrollFrameRef.current)
     scrollFrameRef.current = requestAnimationFrame(() => {
       const cards = [...listRef.current.querySelectorAll('[data-listing-id]')]
