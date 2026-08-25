@@ -7,6 +7,8 @@ import { ApartmentPage } from '../../features/apartment/ApartmentPage.jsx'
 import { VillaPage } from '../../features/villa/VillaPage.jsx'
 import { MapPage } from '../../features/map/MapPage.jsx'
 import { FavoritesPage } from '../../features/favorites/FavoritesPage.jsx'
+import { MessagesPage } from '../../features/messages/MessagesPage.jsx'
+import { MessageThreadPage } from '../../features/messages/MessageThreadPage.jsx'
 
 const lazyNamed = (loader, name) => lazy(() => loader().then(module => ({ default: module[name] })))
 const CarouselLab = lazyNamed(() => import('../../features/carousel/CarouselShell.jsx'), 'CarouselLab')
@@ -23,6 +25,8 @@ export const routeDefinitions = [
   { path: '/villa', area: 'guest', component: VillaPage },
   { path: '/map', area: 'guest', component: MapPage },
   { path: '/favorites', area: 'guest', component: FavoritesPage },
+  { path: '/messages', area: 'guest', component: MessagesPage },
+  { path: '/messages/:threadId', area: 'guest', component: MessageThreadPage },
   { path: '/carousel-lab', area: 'guest', component: CarouselLab },
   { path: '/gesture-lab', area: 'guest', component: GestureLab },
   { path: '/resilience-lab', area: 'guest', component: ResilienceLab },
