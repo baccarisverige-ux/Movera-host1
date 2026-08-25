@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useFavorites } from '../../features/favorites/favoritesStore.js'
 import './collection-page.css'
 import './collection-page-scale.css'
 import './collection-premium-architecture.css'
@@ -49,6 +50,8 @@ export function CollectionPage({
   const [cityQuery, setCityQuery] = useState('')
   const [city, setCity] = useState('')
   const [focused, setFocused] = useState(false)
+  const { favoriteIds, toggleFavorite } = useFavorites()
+  const favoriteIdSet = useMemo(() => new Set(favoriteIds), [favoriteIds])
 
   const suggestions = useMemo(() => {
     const q = normalize(cityQuery)
@@ -171,28 +174,31 @@ export function CollectionPage({
         </header>
 
         <div className="beach-offer-list">
-          {visibleOffers.map((item) => (
-            <article className="beach-offer" key={item.id}>
-              <div className="beach-offer__media">
-                <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
-                <span className="beach-offer__badge">{item.badge || badgeLabel}</span>
-                <button type="button" className="beach-offer__heart" aria-label={`Ajouter ${item.title} aux favoris`} onClick={(event) => event.stopPropagation()}>
-                  <HeartIcon />
-                </button>
-                <span className="beach-offer__rating">★ {item.rating || '4.90'}</span>
-              </div>
-              <div className="beach-offer__body">
-                <div>
-                  <span className="beach-offer__location"><PinIcon />{item.location}, Tunisie</span>
-                  <h3>{item.title}</h3>
+          {visibleOffers.map((item) => {
+            const favorite = favoriteIdSet.has(item.id)
+            return (
+              <article className="beach-offer" key={item.id}>
+                <div className="beach-offer__media">
+                  <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
+                  <span className="beach-offer__badge">{item.badge || badgeLabel}</span>
+                  <button type="button" className="beach-offer__heart" data-active={favorite ? 'true' : 'false'} aria-pressed={favorite} aria-label={`${favorite ? 'Retirer' : 'Ajouter'} ${item.title} ${favorite ? 'des' : 'aux'} favoris`} onClick={(event) => { event.stopPropagation(); toggleFavorite(item.id) }}>
+                    <HeartIcon />
+                  </button>
+                  <span className="beach-offer__rating">★ {item.rating || '4.90'}</span>
                 </div>
-                <div className="beach-offer__price">
-                  <strong>{item.price} {item.currency}</strong>
-                  <span>/ nuit</span>
+                <div className="beach-offer__body">
+                  <div>
+                    <span className="beach-offer__location"><PinIcon />{item.location}, Tunisie</span>
+                    <h3>{item.title}</h3>
+                  </div>
+                  <div className="beach-offer__price">
+                    <strong>{item.price} {item.currency}</strong>
+                    <span>/ nuit</span>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            )
+          })}
         </div>
 
         {!visibleOffers.length ? (
