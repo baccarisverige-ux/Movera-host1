@@ -34,6 +34,7 @@ test('authenticated session unlocks premium inbox and conversation flow', async 
 
   await expect(page.getByTestId('page-messages')).toBeVisible()
   await expect(page.getByRole('heading', { level: 1, name: 'Messages' })).toBeVisible()
+  await expect(page.locator('[data-motion-list="messages"]')).toBeVisible()
   await expect(page.locator('.message-thread-card')).toHaveCount(3)
   await expect(nav.locator('.app-shell__nav-item[data-active="true"] span')).toHaveText('Messages')
 
@@ -49,4 +50,5 @@ test('authenticated session unlocks premium inbox and conversation flow', async 
 
   await page.getByRole('button', { name: 'Retour aux messages' }).click()
   await expect(page.getByTestId('page-messages')).toBeVisible()
+  await expect(page.locator('[data-motion-list="messages"]')).toBeVisible()
 })
