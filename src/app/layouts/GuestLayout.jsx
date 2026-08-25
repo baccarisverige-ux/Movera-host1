@@ -20,7 +20,6 @@ const COLLECTION_HEADER_LABELS = Object.freeze({
 
 const mapShellStyle = { maxWidth: 430, margin: '0 auto', background: '#eff1ef' }
 const mapContentStyle = { padding: 0, overflow: 'hidden' }
-const mapNavStyle = { position: 'fixed', left: '50%', right: 'auto', bottom: 0, width: 'min(100%, 430px)', transform: 'translateX(-50%)', zIndex: 50 }
 const collectionContentStyle = { padding: 0, overflow: 'auto', background: '#f7f7f5' }
 
 function AppLink({ children, className, href, onNavigate, active, disabled = false }) {
@@ -64,24 +63,26 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
       >
         {children}
       </main>
-      <nav className="app-shell__nav" aria-label="Navigation principale" style={isMapRoute ? mapNavStyle : undefined}>
-        {guestNav.map(({ label, path, icon, disabled: permanentlyDisabled, requiresAuth }) => {
-          const disabled = Boolean(permanentlyDisabled || (requiresAuth && !isAuthenticated))
-          return (
-            <AppLink
-              active={activePath === path}
-              className="app-shell__nav-item"
-              href={path}
-              key={path}
-              onNavigate={onNavigate}
-              disabled={disabled}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">{icon}</svg>
-              <span>{label}</span>
-            </AppLink>
-          )
-        })}
-      </nav>
+      {!isMapRoute ? (
+        <nav className="app-shell__nav" aria-label="Navigation principale">
+          {guestNav.map(({ label, path, icon, disabled: permanentlyDisabled, requiresAuth }) => {
+            const disabled = Boolean(permanentlyDisabled || (requiresAuth && !isAuthenticated))
+            return (
+              <AppLink
+                active={activePath === path}
+                className="app-shell__nav-item"
+                href={path}
+                key={path}
+                onNavigate={onNavigate}
+                disabled={disabled}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">{icon}</svg>
+                <span>{label}</span>
+              </AppLink>
+            )
+          })}
+        </nav>
+      ) : null}
     </div>
   )
 }
