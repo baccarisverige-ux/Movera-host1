@@ -49,6 +49,7 @@ const required = [
   'src/shared/collection/CollectionPage.jsx',
   'src/shared/collection/collection-page.css',
   'src/shared/collection/collection-page-scale.css',
+  'src/shared/motion/runtime.js',
   'src/shared/motion/MotionList.jsx',
   'src/shared/motion/SnapSheetMotionSurface.jsx',
   'src/styles/tokens/index.css',
@@ -109,8 +110,8 @@ for (const file of files) {
   }
 
   const importsMotionPackage = /from\s+['"]motion(?:\/react)?['"]/.test(text);
-  if (importsMotionPackage && !repoPath.startsWith('src/shared/motion/')) {
-    violations.push(`${repoPath}: direct Motion package import; use src/shared/motion primitives`);
+  if (importsMotionPackage && repoPath !== 'src/shared/motion/runtime.js') {
+    violations.push(`${repoPath}: direct Motion package import; use src/shared/motion/runtime.js`);
   }
 }
 
@@ -124,4 +125,4 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log(`Architecture guard passed: ${required.length} required boundaries present, page media externalized, retired paths absent, storage centralized, Motion centralized, and lower-level layers independent from features.`);
+console.log(`Architecture guard passed: ${required.length} required boundaries present, page media externalized, retired paths absent, storage centralized, Motion has one runtime entrypoint, and lower-level layers independent from features.`);
