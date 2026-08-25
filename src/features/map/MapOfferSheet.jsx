@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useRef } from 'react'
 import { MotionList, MotionListItem } from '../../shared/motion/MotionList.jsx'
 import { MapOfferSheetMotionSurface } from './motion/MapOfferSheetMotionSurface.jsx'
 import { MAP_OFFER_ITEM_MOTION } from './motion/mapOfferSheetMotion.config.js'
@@ -21,46 +20,8 @@ function MapOfferSheetContent({
   startDrag,
   toggleExpanded,
 }) {
-  const listRef = useRef(null)
-  const scrollFrameRef = useRef(0)
-  const lastActiveRef = useRef(selectedListingId || null)
-  const selectedChangeRef = useRef(onSelectedListingChange)
-  const selectedIndex = useMemo(() => listings.findIndex((listing) => listing.id === selectedListingId), [listings, selectedListingId])
-
-  useEffect(() => { selectedChangeRef.current = onSelectedListingChange }, [onSelectedListingChange])
-  useEffect(() => { lastActiveRef.current = selectedListingId || null }, [selectedListingId])
-  useEffect(() => () => cancelAnimationFrame(scrollFrameRef.current), [])
-
-  useEffect(() => {
-    if (selectedIndex < 0 || progress < 0.86 || !listRef.current) return
-    const card = listRef.current.querySelector(`[data-listing-id="${selectedListingId}"]`)
-    card?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }, [selectedIndex, selectedListingId, progress])
-
   const selectListing = (listingId) => {
-    lastActiveRef.current = listingId
-    selectedChangeRef.current?.(listingId)
-  }
-
-  const handleListScroll = () => {
-    if (progress < 0.86 || !listRef.current) return
-    cancelAnimationFrame(scrollFrameRef.current)
-    scrollFrameRef.current = requestAnimationFrame(() => {
-      const cards = [...listRef.current.querySelectorAll('[data-listing-id]')]
-      if (!cards.length) return
-      const listTop = listRef.current.getBoundingClientRect().top
-      let nearest = cards[0]
-      let nearestDistance = Infinity
-      for (const card of cards) {
-        const distance = Math.abs(card.getBoundingClientRect().top - listTop)
-        if (distance < nearestDistance) {
-          nearest = card
-          nearestDistance = distance
-        }
-      }
-      const nextId = nearest.dataset.listingId
-      if (nextId && nextId !== lastActiveRef.current) selectListing(nextId)
-    })
+    onSelectedListingChange?.(listingId)
   }
 
   return (
@@ -82,11 +43,10 @@ function MapOfferSheetContent({
 
       {listings.length ? (
         <MotionList
-          nodeRef={listRef}
           className="map-offer-sheet__list"
           data-scroll-enabled={progress > 0.86 ? 'true' : 'false'}
           data-motion-list="map-offers"
-          onScroll={handleListScroll}
+          data-map-scroll="independent"
         >
           {listings.map((listing, index) => {
             const selected = listing.id === selectedListingId || (!selectedListingId && index === 0 && progress > 0.12)
