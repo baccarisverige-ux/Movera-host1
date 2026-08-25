@@ -54,11 +54,8 @@ export function MapSearchFilters({
         </button>
       </div>
 
-      <section className="map-filter-section map-filter-section--property" aria-label="Type de logement">
-        <div className="map-filter-section__heading">
-          <strong>Type de séjour</strong>
-          <span>Choisir un univers</span>
-        </div>
+      <div className="map-filter-row map-filter-row--property" aria-label="Type de logement">
+        <span className="map-filter-row__label">Séjour</span>
         <div className="map-filter-rail map-filter-rail--property" data-testid="map-property-filters">
           {MAP_PROPERTY_FILTERS.map((filter) => {
             const active = propertyFilter === filter.id
@@ -72,19 +69,15 @@ export function MapSearchFilters({
                 aria-pressed={active}
                 onClick={() => onPropertyFilterChange(active ? null : filter.id)}
               >
-                <span className="map-filter-chip__dot" aria-hidden="true" />
                 {filter.label}
               </button>
             )
           })}
         </div>
-      </section>
+      </div>
 
-      <section className="map-filter-section map-filter-section--amenity" aria-label="Équipements">
-        <div className="map-filter-section__heading map-filter-section__heading--compact">
-          <strong>Équipements</strong>
-          <span>Confort souhaité</span>
-        </div>
+      <div className="map-filter-row map-filter-row--amenity" aria-label="Équipements">
+        <span className="map-filter-row__label map-filter-row__label--amenity">Confort</span>
         <div className="map-filter-rail map-filter-rail--amenities" data-testid="map-amenity-filters">
           {MAP_AMENITY_FILTERS.map((filter) => {
             const active = amenityFilters.has(filter.id)
@@ -104,7 +97,7 @@ export function MapSearchFilters({
             )
           })}
         </div>
-      </section>
+      </div>
     </div>
   )
 }
