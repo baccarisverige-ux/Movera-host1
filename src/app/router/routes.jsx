@@ -6,6 +6,7 @@ import { HotelPage } from '../../features/hotel/HotelPage.jsx'
 import { ApartmentPage } from '../../features/apartment/ApartmentPage.jsx'
 import { VillaPage } from '../../features/villa/VillaPage.jsx'
 import { MapPage } from '../../features/map/MapPage.jsx'
+import { FavoritesPage } from '../../features/favorites/FavoritesPage.jsx'
 
 const lazyNamed = (loader, name) => lazy(() => loader().then(module => ({ default: module[name] })))
 const CarouselLab = lazyNamed(() => import('../../features/carousel/CarouselShell.jsx'), 'CarouselLab')
@@ -21,6 +22,7 @@ export const routeDefinitions = [
   { path: '/appartement', area: 'guest', component: ApartmentPage },
   { path: '/villa', area: 'guest', component: VillaPage },
   { path: '/map', area: 'guest', component: MapPage },
+  { path: '/favorites', area: 'guest', component: FavoritesPage },
   { path: '/carousel-lab', area: 'guest', component: CarouselLab },
   { path: '/gesture-lab', area: 'guest', component: GestureLab },
   { path: '/resilience-lab', area: 'guest', component: ResilienceLab },
