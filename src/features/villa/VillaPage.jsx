@@ -1,7 +1,7 @@
 import { listingCatalog } from '../../entities/listing/listingCatalog.js'
 import { CollectionPage } from '../../shared/collection/CollectionPage.jsx'
 import '../../shared/collection/portrait-collection.css'
-import HERO_IMAGE from './assets/hero.jpg'
+import HERO_IMAGE from './assets/hero.webp'
 
 const VILLA_OFFERS = listingCatalog.filter((item) => item.category.split(' ').includes('prestige'))
 
