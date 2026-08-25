@@ -14,6 +14,8 @@ test('La Marsa map exposes only its mapped offers in the full-width Motion botto
   await expect(pageMap).toHaveAttribute('data-city-offer-count', '2')
   await expect(sheet).toBeVisible()
   await expect(sheet).toHaveAttribute('data-motion-engine', 'motion')
+  await expect(sheet).toHaveAttribute('data-motion-boundary', 'shared')
+  await expect(sheet.locator('[data-motion-list="map-offers"]')).toBeVisible()
   await expect(sheet.locator('[data-listing-id]')).toHaveCount(2)
   await expect(sheet.locator('[data-listing-id="loft-cote"]')).toHaveCount(1)
   await expect(sheet.locator('[data-listing-id="riad-marsa"]')).toHaveCount(1)
@@ -73,6 +75,7 @@ test('expanded Motion list sticks below the map top bar and shows large one-by-o
 
   const list = sheet.locator('.map-offer-sheet__list')
   await expect(list).toHaveCSS('scroll-snap-type', /y/)
+  await expect(list).toHaveAttribute('data-motion-list', 'map-offers')
   await expect(sheet.locator('[data-listing-id="villa-perle"]')).toHaveCSS('scroll-snap-align', 'start')
 
   const sheetBox = await sheet.boundingBox()
@@ -99,6 +102,7 @@ test('a destination with no mapped offers shows an honest empty state', async ({
 
   await expect(page.getByTestId('page-map')).toHaveAttribute('data-city-offer-count', '0')
   await expect(page.getByTestId('map-offer-sheet')).toHaveAttribute('data-motion-engine', 'motion')
+  await expect(page.getByTestId('map-offer-sheet')).toHaveAttribute('data-motion-boundary', 'shared')
   await expect(page.getByTestId('map-offer-sheet')).toContainText('Aucune offre Movera dans cette ville')
   await expect(page.getByTestId('map-offer-sheet').locator('[data-listing-id]')).toHaveCount(0)
 })
