@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { animate } from 'motion'
+import { animate } from '../../shared/motion/runtime.js'
 
 export function useSearchPanelHeightMotion({ active, open, ready, targetHeight, fallbackHeight }) {
   const [height, setHeight] = useState(fallbackHeight)
