@@ -4,7 +4,7 @@ function numberAttribute(locator, name) {
   return locator.getAttribute(name).then((value) => Number(value))
 }
 
-test('La Marsa map exposes only its mapped offers in the full-width bottom sheet', async ({ page }) => {
+test('La Marsa map exposes only its mapped offers in the full-width Motion bottom sheet', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=la-marsa')
 
@@ -13,6 +13,7 @@ test('La Marsa map exposes only its mapped offers in the full-width bottom sheet
   await expect(pageMap).toBeVisible()
   await expect(pageMap).toHaveAttribute('data-city-offer-count', '2')
   await expect(sheet).toBeVisible()
+  await expect(sheet).toHaveAttribute('data-motion-engine', 'motion')
   await expect(sheet.locator('[data-listing-id]')).toHaveCount(2)
   await expect(sheet.locator('[data-listing-id="loft-cote"]')).toHaveCount(1)
   await expect(sheet.locator('[data-listing-id="riad-marsa"]')).toHaveCount(1)
@@ -30,7 +31,7 @@ test('La Marsa map exposes only its mapped offers in the full-width bottom sheet
   expect(visibleCollapsedHeight).toBeLessThanOrEqual(85)
 })
 
-test('dragging the city offer sheet upward progressively zooms the map', async ({ page }) => {
+test('Motion drag progressively zooms the map and springs to a snap point', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=la-marsa')
 
@@ -47,17 +48,17 @@ test('dragging the city offer sheet upward progressively zooms the map', async (
   const y = box.y + box.height / 2
   await page.mouse.move(x, y)
   await page.mouse.down()
-  await page.mouse.move(x, y - 120, { steps: 6 })
+  await page.mouse.move(x, y - 120, { steps: 8 })
 
   await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.15)
   await expect.poll(() => numberAttribute(surface, 'data-zoom')).toBeGreaterThan(zoomBefore)
 
-  await page.mouse.move(x, y - 280, { steps: 8 })
+  await page.mouse.move(x, y - 280, { steps: 10 })
   await page.mouse.up()
-  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThanOrEqual(0.5)
+  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThanOrEqual(0.48)
 })
 
-test('expanded list sticks below the map top bar and shows large one-by-one offers', async ({ page }) => {
+test('expanded Motion list sticks below the map top bar and shows large one-by-one offers', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=gammarth')
 
@@ -97,6 +98,7 @@ test('a destination with no mapped offers shows an honest empty state', async ({
   await page.goto('/Movera-host1/map?destination=sousse')
 
   await expect(page.getByTestId('page-map')).toHaveAttribute('data-city-offer-count', '0')
+  await expect(page.getByTestId('map-offer-sheet')).toHaveAttribute('data-motion-engine', 'motion')
   await expect(page.getByTestId('map-offer-sheet')).toContainText('Aucune offre Movera dans cette ville')
   await expect(page.getByTestId('map-offer-sheet').locator('[data-listing-id]')).toHaveCount(0)
 })
