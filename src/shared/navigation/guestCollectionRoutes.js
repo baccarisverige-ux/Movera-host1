@@ -2,6 +2,7 @@ const CATEGORY_COLLECTION_ROUTES = Object.freeze({
   beach: '/plage',
   guesthouse: '/maison-d-hote',
   hotel: '/hotel',
+  family: '/appartement',
 })
 
 const COLLECTION_ROUTE_PATHS = Object.freeze(Object.values(CATEGORY_COLLECTION_ROUTES))
