@@ -38,7 +38,6 @@ const CATEGORY_ARTWORK = {
 const WELCOME_CITIES = [
   { id: 'sidi-bou-said', label: 'Sidi Bou Saïd' },
   { id: 'sousse', label: 'Sousse' },
-  { id: 'mehdia', label: 'Mehdia' },
   { id: 'hammamet', label: 'Hammamet' },
   { id: 'tunis', label: 'Tunis' },
   { id: 'djerba', label: 'Djerba' },
