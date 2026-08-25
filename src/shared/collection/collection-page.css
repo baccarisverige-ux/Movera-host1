@@ -44,8 +44,11 @@
 .beach-offer__badge,.beach-offer__rating{position:absolute;z-index:2;top:12px;border:1px solid rgba(255,255,255,.56);border-radius:999px;background:rgba(255,255,255,.82);color:#2b2e2b;backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px);box-shadow:0 4px 18px rgba(28,34,30,.045)}
 .beach-offer__badge{left:12px;padding:7px 10px;font-size:9px;font-weight:800;letter-spacing:.025em}
 .beach-offer__rating{right:52px;padding:7px 9px;font-size:9px;font-weight:800}
-.beach-offer__heart{position:absolute;z-index:3;top:10px;right:11px;width:34px;height:34px;border:1px solid rgba(255,255,255,.56);border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.82);color:#2c302d;backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px)}
+.beach-offer__heart{position:absolute;z-index:3;top:10px;right:11px;width:34px;height:34px;border:1px solid rgba(255,255,255,.56);border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.82);color:#2c302d;backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px);transition:transform .16s ease,background .16s ease,color .16s ease}
 .beach-offer__heart svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+.beach-offer__heart[data-active=true]{background:rgba(255,255,255,.94);color:#252926;box-shadow:0 5px 16px rgba(28,34,30,.08)}
+.beach-offer__heart[data-active=true] svg{fill:currentColor}
+.beach-offer__heart:active{transform:scale(.93)}
 .beach-offer__body{display:grid;grid-template-columns:1fr auto;align-items:end;gap:12px;padding:15px 15px 16px}
 .beach-offer__location{display:flex;align-items:center;gap:4px;margin-bottom:5px;color:#838884;font-size:9px;font-weight:650}
 .beach-offer__location svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.8}
@@ -60,9 +63,8 @@
 .beach-empty button{min-height:38px;border:0;border-radius:999px;padding:0 15px;background:#2a2d2b;color:#fff;font:700 10px/1 Inter,sans-serif}
 
 @media(min-width:431px){.beach-page{margin-top:12px;border-radius:30px 30px 0 0;overflow:hidden;box-shadow:0 18px 70px rgba(23,29,25,.065)}}
-@media(prefers-reduced-motion:reduce){.beach-offer__media img{transition:none}}
+@media(prefers-reduced-motion:reduce){.beach-offer__media img,.beach-offer__heart{transition:none}.beach-offer__heart:active{transform:none}}
 
-/* Requested hero/search refinement */
 .beach-hero{height:auto;overflow:visible;background:#fff;border-radius:0;isolation:auto}
 .beach-hero__image{position:relative;inset:auto;width:100%;height:clamp(205px,60vw,255px);display:block;object-fit:contain;object-position:center;transform:none;background:#fff;filter:none}
 .beach-hero__copy{position:relative;left:auto;right:auto;bottom:auto;z-index:1;padding:10px 16px 14px;background:#fff;color:#1d1f1e}
