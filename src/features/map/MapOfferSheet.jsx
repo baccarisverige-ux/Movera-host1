@@ -1,7 +1,7 @@
 import { MotionList, MotionListItem } from '../../shared/motion/MotionList.jsx'
 import { MapOfferSheetMotionSurface } from './motion/MapOfferSheetMotionSurface.jsx'
 import { MAP_OFFER_ITEM_MOTION } from './motion/mapOfferSheetMotion.config.js'
-import { useMapOfferScrollEdgeGuard } from './motion/useMapOfferScrollEdgeGuard.js'
+import { useMapOfferScrollSheetHandoff } from './motion/useMapOfferScrollSheetHandoff.js'
 import './map-offer-sheet.css'
 
 function ChevronIcon() {
@@ -12,16 +12,8 @@ function StarIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7L6.8 19l1-5.8-4.2-4.1 5.8-.8L12 3Z" /></svg>
 }
 
-function MapOfferSheetContent({
-  listings,
-  cityLabel,
-  selectedListingId,
-  onSelectedListingChange,
-  progress,
-  startDrag,
-  toggleExpanded,
-}) {
-  const listRef = useMapOfferScrollEdgeGuard()
+function MapOfferSheetContent({ listings, cityLabel, selectedListingId, onSelectedListingChange, progress, startDrag, toggleExpanded, externalDrag }) {
+  const listRef = useMapOfferScrollSheetHandoff({ expanded: progress > 0.86, externalDrag })
 
   const selectListing = (listingId) => {
     onSelectedListingChange?.(listingId)
@@ -29,11 +21,7 @@ function MapOfferSheetContent({
 
   return (
     <>
-      <div
-        className="map-offer-sheet__drag-zone"
-        data-testid="map-offer-sheet-handle"
-        onPointerDown={startDrag}
-      >
+      <div className="map-offer-sheet__drag-zone" data-testid="map-offer-sheet-handle" onPointerDown={startDrag}>
         <button type="button" className="map-offer-sheet__handle-button" onClick={toggleExpanded} aria-label={progress > 0.72 ? 'Réduire la liste des offres' : 'Afficher la liste des offres'}>
           <span className="map-offer-sheet__grabber" />
           <span className="map-offer-sheet__heading">
@@ -51,7 +39,7 @@ function MapOfferSheetContent({
           data-scroll-enabled={progress > 0.86 ? 'true' : 'false'}
           data-motion-list="map-offers"
           data-map-scroll="independent"
-          data-overscroll-guard="edge"
+          data-sheet-handoff="close-from-list"
         >
           {listings.map((listing, index) => {
             const selected = listing.id === selectedListingId || (!selectedListingId && index === 0 && progress > 0.12)
@@ -97,20 +85,10 @@ function MapOfferSheetContent({
   )
 }
 
-export function MapOfferSheet({
-  listings,
-  cityLabel,
-  selectedListingId,
-  onSelectedListingChange,
-  onProgressChange,
-}) {
+export function MapOfferSheet({ listings, cityLabel, selectedListingId, onSelectedListingChange, onProgressChange }) {
   return (
-    <MapOfferSheetMotionSurface
-      className="map-offer-sheet"
-      ariaLabel={`Offres ${cityLabel}`}
-      onProgressChange={onProgressChange}
-    >
-      {({ progress, startDrag, toggleExpanded }) => (
+    <MapOfferSheetMotionSurface className="map-offer-sheet" ariaLabel={`Offres ${cityLabel}`} onProgressChange={onProgressChange}>
+      {({ progress, startDrag, toggleExpanded, externalDrag }) => (
         <MapOfferSheetContent
           listings={listings}
           cityLabel={cityLabel}
@@ -119,6 +97,7 @@ export function MapOfferSheet({
           progress={progress}
           startDrag={startDrag}
           toggleExpanded={toggleExpanded}
+          externalDrag={externalDrag}
         />
       )}
     </MapOfferSheetMotionSurface>
