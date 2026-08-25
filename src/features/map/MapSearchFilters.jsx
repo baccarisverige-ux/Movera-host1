@@ -37,7 +37,7 @@ export function MapSearchFilters({
     <div className="map-search-filter-stack" data-testid="map-search-filter-stack">
       <div className="b225-map-search map-search-filter-stack__search">
         <button type="button" className="b225-map-search__main" onClick={onHome} aria-label="Modifier la recherche">
-          <SearchIcon />
+          <span className="map-search-filter-stack__search-icon"><SearchIcon /></span>
           <span className="b225-map-search__copy">
             <strong>{cityLabel}</strong>
             <span>{resultCount} offre{resultCount === 1 ? '' : 's'} · Dates · Voyageurs</span>
@@ -54,44 +54,57 @@ export function MapSearchFilters({
         </button>
       </div>
 
-      <div className="map-filter-rail" aria-label="Type de logement" data-testid="map-property-filters">
-        {MAP_PROPERTY_FILTERS.map((filter) => {
-          const active = propertyFilter === filter.id
-          return (
-            <button
-              key={filter.id}
-              type="button"
-              className="map-filter-chip map-filter-chip--property"
-              data-filter-id={filter.id}
-              data-active={active ? 'true' : 'false'}
-              aria-pressed={active}
-              onClick={() => onPropertyFilterChange(active ? null : filter.id)}
-            >
-              {filter.label}
-            </button>
-          )
-        })}
-      </div>
+      <section className="map-filter-section map-filter-section--property" aria-label="Type de logement">
+        <div className="map-filter-section__heading">
+          <strong>Type de séjour</strong>
+          <span>Choisir un univers</span>
+        </div>
+        <div className="map-filter-rail map-filter-rail--property" data-testid="map-property-filters">
+          {MAP_PROPERTY_FILTERS.map((filter) => {
+            const active = propertyFilter === filter.id
+            return (
+              <button
+                key={filter.id}
+                type="button"
+                className="map-filter-chip map-filter-chip--property"
+                data-filter-id={filter.id}
+                data-active={active ? 'true' : 'false'}
+                aria-pressed={active}
+                onClick={() => onPropertyFilterChange(active ? null : filter.id)}
+              >
+                <span className="map-filter-chip__dot" aria-hidden="true" />
+                {filter.label}
+              </button>
+            )
+          })}
+        </div>
+      </section>
 
-      <div className="map-filter-rail map-filter-rail--amenities" aria-label="Équipements" data-testid="map-amenity-filters">
-        {MAP_AMENITY_FILTERS.map((filter) => {
-          const active = amenityFilters.has(filter.id)
-          return (
-            <button
-              key={filter.id}
-              type="button"
-              className="map-filter-chip map-filter-chip--amenity"
-              data-filter-id={filter.id}
-              data-active={active ? 'true' : 'false'}
-              aria-pressed={active}
-              onClick={() => onAmenityFilterToggle(filter.id)}
-            >
-              <AmenityIcon id={filter.id} />
-              {filter.label}
-            </button>
-          )
-        })}
-      </div>
+      <section className="map-filter-section map-filter-section--amenity" aria-label="Équipements">
+        <div className="map-filter-section__heading map-filter-section__heading--compact">
+          <strong>Équipements</strong>
+          <span>Confort souhaité</span>
+        </div>
+        <div className="map-filter-rail map-filter-rail--amenities" data-testid="map-amenity-filters">
+          {MAP_AMENITY_FILTERS.map((filter) => {
+            const active = amenityFilters.has(filter.id)
+            return (
+              <button
+                key={filter.id}
+                type="button"
+                className="map-filter-chip map-filter-chip--amenity"
+                data-filter-id={filter.id}
+                data-active={active ? 'true' : 'false'}
+                aria-pressed={active}
+                onClick={() => onAmenityFilterToggle(filter.id)}
+              >
+                <AmenityIcon id={filter.id} />
+                {filter.label}
+              </button>
+            )
+          })}
+        </div>
+      </section>
     </div>
   )
 }
