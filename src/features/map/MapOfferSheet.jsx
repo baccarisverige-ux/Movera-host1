@@ -21,7 +21,7 @@ function MapOfferSheetContent({
   startDrag,
   toggleExpanded,
 }) {
-  const scrollEdgeGuard = useMapOfferScrollEdgeGuard()
+  const listRef = useMapOfferScrollEdgeGuard()
 
   const selectListing = (listingId) => {
     onSelectedListingChange?.(listingId)
@@ -46,12 +46,12 @@ function MapOfferSheetContent({
 
       {listings.length ? (
         <MotionList
+          nodeRef={listRef}
           className="map-offer-sheet__list"
           data-scroll-enabled={progress > 0.86 ? 'true' : 'false'}
           data-motion-list="map-offers"
           data-map-scroll="independent"
           data-overscroll-guard="edge"
-          {...scrollEdgeGuard}
         >
           {listings.map((listing, index) => {
             const selected = listing.id === selectedListingId || (!selectedListingId && index === 0 && progress > 0.12)
