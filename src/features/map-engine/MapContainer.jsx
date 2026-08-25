@@ -18,7 +18,14 @@ export const DEFAULT_MARKERS = Object.freeze([
   { id: 'gammarth-house', label: 'Gammarth', lat: 36.9179, lng: 10.2934 },
 ])
 
-export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: controlledSelectedId, onSelectedListingChange, initialViewport = INITIAL_VIEWPORT, onViewportChange }) {
+export function MapContainer({
+  markers = DEFAULT_MARKERS,
+  selectedListingId: controlledSelectedId,
+  onSelectedListingChange,
+  initialViewport = INITIAL_VIEWPORT,
+  onViewportChange,
+  viewportCommand = null,
+}) {
   const surfaceRef = useRef(null)
   const pointersRef = useRef(new Map())
   const pinchDistanceRef = useRef(null)
@@ -68,6 +75,13 @@ export function MapContainer({ markers = DEFAULT_MARKERS, selectedListingId: con
     const marker = markers.find((item) => item.id === selectedListingId)
     if (marker) focusPoint(marker, MARKER_FOCUS_ZOOM)
   }, [selectedListingId, markers, focusPoint])
+
+  useEffect(() => {
+    if (!viewportCommand) return
+    const { lat, lng, zoom } = viewportCommand
+    if (![lat, lng, zoom].every(Number.isFinite)) return
+    commitViewport((current) => ({ ...current, lat, lng, zoom }))
+  }, [viewportCommand?.lat, viewportCommand?.lng, viewportCommand?.zoom, viewportCommand?.revision, commitViewport])
 
   const onPointerDown = (event) => {
     if (event.target.closest('button, a, input, select, textarea')) return
