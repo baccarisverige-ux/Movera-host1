@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from './runtime.js'
 
 const MOTION_TAGS = Object.freeze({
   article: motion.article,
