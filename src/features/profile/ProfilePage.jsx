@@ -44,12 +44,8 @@ function BackIcon() {
 function CredentialMethodSwitch({ method, onChange }) {
   return (
     <div className="profile-method-switch" role="tablist" aria-label="Méthode d’identification">
-      <button type="button" role="tab" aria-selected={method === 'email'} data-active={method === 'email' ? 'true' : 'false'} onClick={() => onChange('email')}>
-        <MailIcon />E-mail
-      </button>
-      <button type="button" role="tab" aria-selected={method === 'phone'} data-active={method === 'phone' ? 'true' : 'false'} onClick={() => onChange('phone')}>
-        <PhoneIcon />Téléphone
-      </button>
+      <button type="button" role="tab" aria-selected={method === 'email'} data-active={method === 'email' ? 'true' : 'false'} onClick={() => onChange('email')}><MailIcon />E-mail</button>
+      <button type="button" role="tab" aria-selected={method === 'phone'} data-active={method === 'phone' ? 'true' : 'false'} onClick={() => onChange('phone')}><PhoneIcon />Téléphone</button>
     </div>
   )
 }
@@ -88,9 +84,7 @@ function PasswordField({ label = 'Mot de passe', value, onChange, showPassword, 
           placeholder="8 caractères, lettre + chiffre"
           aria-label={inputLabel}
         />
-        <button type="button" className="profile-password-toggle" onClick={onToggle} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}>
-          {showPassword ? 'Masquer' : 'Afficher'}
-        </button>
+        <button type="button" className="profile-password-toggle" onClick={onToggle} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}>{showPassword ? 'Masquer' : 'Afficher'}</button>
       </div>
     </label>
   )
@@ -148,10 +142,7 @@ export function ProfilePage({ onNavigate }) {
     setFeedback(null)
     try {
       const result = await signInWithCredentials({ method, identifier, password })
-      if (!result.ok) {
-        setFeedback({ type: 'error', message: result.message })
-        return
-      }
+      if (!result.ok) return setFeedback({ type: 'error', message: result.message })
       completeAuthentication()
     } finally {
       setLoading(false)
@@ -160,18 +151,12 @@ export function ProfilePage({ onNavigate }) {
 
   const submitSignUp = async (event) => {
     event.preventDefault()
-    if (!acceptedTerms) {
-      setFeedback({ type: 'error', message: 'Acceptez les conditions pour créer votre compte.' })
-      return
-    }
+    if (!acceptedTerms) return setFeedback({ type: 'error', message: 'Acceptez les conditions pour créer votre compte.' })
     setLoading(true)
     setFeedback(null)
     try {
       const result = await signUpWithCredentials({ displayName, method, identifier, password, confirmPassword })
-      if (!result.ok) {
-        setFeedback({ type: 'error', message: result.message })
-        return
-      }
+      if (!result.ok) return setFeedback({ type: 'error', message: result.message })
       setPendingId(result.pendingId)
       setDemoCode(result.verificationCode || '')
       setVerificationCode('')
@@ -189,10 +174,7 @@ export function ProfilePage({ onNavigate }) {
     setFeedback(null)
     try {
       const result = await verifySignUpCode({ pendingId, code: verificationCode })
-      if (!result.ok) {
-        setFeedback({ type: 'error', message: result.message })
-        return
-      }
+      if (!result.ok) return setFeedback({ type: 'error', message: result.message })
       completeAuthentication()
     } finally {
       setLoading(false)
@@ -204,10 +186,7 @@ export function ProfilePage({ onNavigate }) {
     setFeedback(null)
     try {
       const result = await resendVerificationCode(pendingId)
-      if (!result.ok) {
-        setFeedback({ type: 'error', message: result.message })
-        return
-      }
+      if (!result.ok) return setFeedback({ type: 'error', message: result.message })
       setDemoCode(result.verificationCode || '')
       setVerificationCode('')
       setFeedback({ type: 'info', message: 'Un nouveau code a été généré.' })
@@ -222,10 +201,7 @@ export function ProfilePage({ onNavigate }) {
     setFeedback(null)
     try {
       const result = await requestPasswordReset({ method, identifier })
-      if (!result.ok) {
-        setFeedback({ type: 'error', message: result.message })
-        return
-      }
+      if (!result.ok) return setFeedback({ type: 'error', message: result.message })
       setPendingId(result.pendingId)
       setDemoCode(result.verificationCode || '')
       setVerificationCode('')
@@ -241,10 +217,7 @@ export function ProfilePage({ onNavigate }) {
     setFeedback(null)
     try {
       const result = await verifyResetCode({ pendingId, code: verificationCode })
-      if (!result.ok) {
-        setFeedback({ type: 'error', message: result.message })
-        return
-      }
+      if (!result.ok) return setFeedback({ type: 'error', message: result.message })
       setVerificationCode('')
       setPassword('')
       setConfirmPassword('')
@@ -260,10 +233,7 @@ export function ProfilePage({ onNavigate }) {
     setFeedback(null)
     try {
       const result = await resetPassword({ pendingId, password, confirmPassword })
-      if (!result.ok) {
-        setFeedback({ type: 'error', message: result.message })
-        return
-      }
+      if (!result.ok) return setFeedback({ type: 'error', message: result.message })
       setPassword('')
       setConfirmPassword('')
       setPendingId('')
@@ -308,27 +278,13 @@ export function ProfilePage({ onNavigate }) {
             <div className="profile-verified" aria-label="Session active"><ShieldIcon /></div>
           </div>
         </div>
-
         <div className="profile-connected-content">
           <span className="profile-section-label">Votre compte</span>
           <div className="profile-menu-card">
-            <button type="button" onClick={() => onNavigate('/messages')}>
-              <span className="profile-menu-icon"><MailIcon /></span>
-              <span><strong>Messages</strong><small>Vos échanges et séjours</small></span>
-              <ChevronIcon />
-            </button>
-            <button type="button" onClick={() => onNavigate('/favorites')}>
-              <span className="profile-menu-icon profile-menu-icon--heart">♡</span>
-              <span><strong>Favoris</strong><small>Vos adresses enregistrées</small></span>
-              <ChevronIcon />
-            </button>
+            <button type="button" onClick={() => onNavigate('/messages')}><span className="profile-menu-icon"><MailIcon /></span><span><strong>Messages</strong><small>Vos échanges et séjours</small></span><ChevronIcon /></button>
+            <button type="button" onClick={() => onNavigate('/favorites')}><span className="profile-menu-icon profile-menu-icon--heart">♡</span><span><strong>Favoris</strong><small>Vos adresses enregistrées</small></span><ChevronIcon /></button>
           </div>
-
-          <div className="profile-security-note">
-            <ShieldIcon />
-            <div><strong>Session Movera active</strong><span>Messages est déverrouillé pour cette session.</span></div>
-          </div>
-
+          <div className="profile-security-note"><ShieldIcon /><div><strong>Session Movera active</strong><span>Messages est déverrouillé pour cette session.</span></div></div>
           <button type="button" className="profile-signout" onClick={signOut}>Se déconnecter</button>
         </div>
       </section>
@@ -357,21 +313,16 @@ export function ProfilePage({ onNavigate }) {
       <div className="profile-login-content">
         {(flow === 'signin' || flow === 'signup') ? (
           <>
-            <div className="profile-auth-mode" role="tablist" aria-label="Connexion ou création de compte">
+            <div className="profile-social-stack" aria-label="Accès avec Apple ou Google">
+              <button type="button" className="profile-social-button profile-social-button--apple" onClick={() => startProvider('apple')}><AppleIcon /><span>Continuer avec Apple</span></button>
+              <button type="button" className="profile-social-button profile-social-button--google" onClick={() => startProvider('google')}><GoogleIcon /><span>Continuer avec Google</span></button>
+            </div>
+            <p className="profile-provider-note">Apple et Google créent automatiquement votre compte lors de la première utilisation, puis vous reconnectent les fois suivantes.</p>
+            <div className="profile-divider"><span>avec e-mail ou téléphone</span></div>
+            <div className="profile-auth-mode" role="tablist" aria-label="Connexion ou création par e-mail ou téléphone">
               <button type="button" role="tab" aria-selected={flow === 'signin'} data-active={flow === 'signin' ? 'true' : 'false'} onClick={() => changeFlow('signin')}>Se connecter</button>
               <button type="button" role="tab" aria-selected={flow === 'signup'} data-active={flow === 'signup' ? 'true' : 'false'} onClick={() => changeFlow('signup')}>Créer un compte</button>
             </div>
-
-            <div className="profile-social-stack" aria-label="Connexion rapide">
-              <button type="button" className="profile-social-button profile-social-button--apple" onClick={() => startProvider('apple')}>
-                <AppleIcon /><span>Continuer avec Apple</span>
-              </button>
-              <button type="button" className="profile-social-button profile-social-button--google" onClick={() => startProvider('google')}>
-                <GoogleIcon /><span>Continuer avec Google</span>
-              </button>
-            </div>
-
-            <div className="profile-divider"><span>ou</span></div>
           </>
         ) : null}
 
@@ -392,10 +343,7 @@ export function ProfilePage({ onNavigate }) {
           <>
             <CredentialMethodSwitch method={method} onChange={changeMethod} />
             <form className="profile-login-form" onSubmit={submitSignUp} noValidate>
-              <label>
-                <span>Nom complet</span>
-                <div className="profile-field"><input value={displayName} onChange={(event) => { setDisplayName(event.target.value); setFeedback(null) }} placeholder="Votre nom" aria-label="Nom complet" autoComplete="name" /></div>
-              </label>
+              <label><span>Nom complet</span><div className="profile-field"><input value={displayName} onChange={(event) => { setDisplayName(event.target.value); setFeedback(null) }} placeholder="Votre nom" aria-label="Nom complet" autoComplete="name" /></div></label>
               <CredentialField method={method} value={identifier} onChange={(value) => { setIdentifier(value); setFeedback(null) }} />
               <PasswordField value={password} onChange={(value) => { setPassword(value); setFeedback(null) }} showPassword={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="new-password" />
               <PasswordField label="Confirmer le mot de passe" inputLabel="Confirmer le mot de passe" value={confirmPassword} onChange={(value) => { setConfirmPassword(value); setFeedback(null) }} showPassword={showPassword} onToggle={() => setShowPassword((value) => !value)} autoComplete="new-password" />
@@ -450,10 +398,7 @@ export function ProfilePage({ onNavigate }) {
           </form>
         ) : null}
 
-        <div className="profile-login-note">
-          <ShieldIcon />
-          <p><strong>Architecture sécurisée du prototype</strong><span>Les mots de passe locaux sont dérivés avec PBKDF2 + sel et ne sont jamais enregistrés dans la session.</span></p>
-        </div>
+        <div className="profile-login-note"><ShieldIcon /><p><strong>Architecture sécurisée du prototype</strong><span>Les mots de passe locaux sont dérivés avec PBKDF2 + sel et ne sont jamais enregistrés dans la session.</span></p></div>
       </div>
     </section>
   )
