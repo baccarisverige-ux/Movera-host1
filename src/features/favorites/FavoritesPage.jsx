@@ -1,8 +1,21 @@
 import { useMemo } from 'react'
 import { listingCatalog } from '../../entities/listing/listingCatalog.js'
+import { MotionList, MotionListItem } from '../../shared/motion/MotionList.jsx'
 import { homeCategoryOffers } from '../home/data/homeData.js'
 import { useFavorites } from './favoritesStore.js'
 import './favorites-page.css'
+
+const FAVORITES_ITEM_MOTION = Object.freeze({
+  enterScale: 0.99,
+  enterY: 10,
+  exitScale: 0.985,
+  exitY: -8,
+  initialOpacity: 0.72,
+  layout: true,
+  stagger: 0.024,
+  tapScale: 1,
+  spring: Object.freeze({ stiffness: 370, damping: 32, mass: 0.78 }),
+})
 
 function HeartIcon({ filled = false }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" data-filled={filled ? 'true' : 'false'}><path d="M20.8 4.8a5.3 5.3 0 0 0-7.5 0L12 6.1l-1.3-1.3a5.3 5.3 0 0 0-7.5 7.5L12 21l8.8-8.7a5.3 5.3 0 0 0 0-7.5Z"/></svg>
@@ -64,9 +77,16 @@ export function FavoritesPage({ onNavigate }) {
             <span>Enregistrés</span>
             <strong>{favorites.length} adresse{favorites.length > 1 ? 's' : ''}</strong>
           </div>
-          <div className="favorites-grid">
-            {favorites.map((item) => (
-              <article className="favorite-card" key={item.id} data-favorite-id={item.id}>
+          <MotionList className="favorites-grid" data-motion-list="favorites">
+            {favorites.map((item, index) => (
+              <MotionListItem
+                as="article"
+                className="favorite-card"
+                key={item.id}
+                index={index}
+                config={FAVORITES_ITEM_MOTION}
+                data-favorite-id={item.id}
+              >
                 <div className="favorite-card__media">
                   <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
                   {item.badge ? <span className="favorite-card__badge">{item.badge}</span> : null}
@@ -87,9 +107,9 @@ export function FavoritesPage({ onNavigate }) {
                     <span>★ {item.rating}</span>
                   </div>
                 </div>
-              </article>
+              </MotionListItem>
             ))}
-          </div>
+          </MotionList>
         </section>
       ) : (
         <section className="favorites-empty" aria-live="polite">
