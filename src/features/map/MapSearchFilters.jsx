@@ -1,4 +1,4 @@
-import { MAP_AMENITY_FILTERS, MAP_PROPERTY_FILTERS } from './mapListingFilters.js'
+import { MAP_AMENITY_FILTERS } from './mapListingFilters.js'
 import './map-search-filters.css'
 
 function BackIcon() {
@@ -11,14 +11,12 @@ function TuneIcon() {
 
 export function MapSearchFilters({
   cityLabel,
-  propertyFilter,
   amenityFilters,
   onHome,
-  onPropertyFilterChange,
   onAmenityFilterToggle,
   onResetFilters,
 }) {
-  const activeFilterCount = (propertyFilter ? 1 : 0) + amenityFilters.size
+  const activeFilterCount = amenityFilters.size
 
   return (
     <div className="map-search-filter-stack" data-testid="map-search-filter-stack">
@@ -39,7 +37,6 @@ export function MapSearchFilters({
           aria-label="Modifier la recherche"
         >
           <strong>Logements à {cityLabel}</strong>
-          <span>Dates · Voyageurs</span>
         </button>
 
         <button
@@ -53,44 +50,23 @@ export function MapSearchFilters({
         </button>
       </div>
 
-      <div className="map-filter-rail map-filter-rail--quick" data-testid="map-quick-filters" aria-label="Filtres rapides">
-        <div className="map-filter-group" data-testid="map-property-filters">
-          {MAP_PROPERTY_FILTERS.map((filter) => {
-            const active = propertyFilter === filter.id
-            return (
-              <button
-                key={filter.id}
-                type="button"
-                className="map-filter-chip map-filter-chip--property"
-                data-filter-id={filter.id}
-                data-active={active ? 'true' : 'false'}
-                aria-pressed={active}
-                onClick={() => onPropertyFilterChange(active ? null : filter.id)}
-              >
-                {filter.label}
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="map-filter-group map-filter-group--amenities" data-testid="map-amenity-filters">
-          {MAP_AMENITY_FILTERS.map((filter) => {
-            const active = amenityFilters.has(filter.id)
-            return (
-              <button
-                key={filter.id}
-                type="button"
-                className="map-filter-chip map-filter-chip--amenity"
-                data-filter-id={filter.id}
-                data-active={active ? 'true' : 'false'}
-                aria-pressed={active}
-                onClick={() => onAmenityFilterToggle(filter.id)}
-              >
-                {filter.label}
-              </button>
-            )
-          })}
-        </div>
+      <div className="map-filter-rail map-filter-rail--amenities" data-testid="map-amenity-filters" aria-label="Équipements">
+        {MAP_AMENITY_FILTERS.map((filter) => {
+          const active = amenityFilters.has(filter.id)
+          return (
+            <button
+              key={filter.id}
+              type="button"
+              className="map-filter-chip map-filter-chip--amenity"
+              data-filter-id={filter.id}
+              data-active={active ? 'true' : 'false'}
+              aria-pressed={active}
+              onClick={() => onAmenityFilterToggle(filter.id)}
+            >
+              {filter.label}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
