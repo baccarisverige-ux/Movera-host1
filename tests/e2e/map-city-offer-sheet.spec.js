@@ -67,7 +67,7 @@ test('expanded list scrolls freely without moving or reselecting the map', async
   const sheet = page.getByTestId('map-offer-sheet')
   const surface = page.getByTestId('map-surface')
   const engine = page.getByTestId('map-engine')
-  const searchBar = page.locator('.b225-map-search')
+  const topPanel = page.locator('.b225-map-top')
 
   await page.getByRole('button', { name: 'Afficher la liste des offres' }).click()
   await expect(sheet).toHaveAttribute('data-expanded', 'true')
@@ -80,12 +80,11 @@ test('expanded list scrolls freely without moving or reselecting the map', async
   await expect(list).toHaveAttribute('data-sheet-handoff', 'close-from-list')
 
   const sheetBox = await sheet.boundingBox()
-  const searchBox = await searchBar.boundingBox()
+  const topPanelBox = await topPanel.boundingBox()
   expect(sheetBox).not.toBeNull()
-  expect(searchBox).not.toBeNull()
-  const searchBottom = searchBox.y + searchBox.height
-  expect(sheetBox.y).toBeGreaterThanOrEqual(searchBottom)
-  expect(sheetBox.y - searchBottom).toBeLessThanOrEqual(14)
+  expect(topPanelBox).not.toBeNull()
+  const panelBottom = topPanelBox.y + topPanelBox.height
+  expect(Math.abs(sheetBox.y - panelBottom)).toBeLessThanOrEqual(2)
 
   const mediaBox = await sheet.locator('[data-listing-id="villa-perle"] .map-offer-sheet__media').boundingBox()
   expect(mediaBox).not.toBeNull()
