@@ -3,6 +3,12 @@ import { expect, test } from '@playwright/test'
 const AUTH_SESSION_KEY = 'movera:auth-session:v1'
 const AUTH_USERS_KEY = 'movera:auth-users:v1'
 
+async function openEmailAuth(page) {
+  await page.getByRole('button', { name: 'Continuer avec une adresse e-mail' }).click()
+  await expect(page.getByRole('tab', { name: 'Se connecter' })).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'Créer un compte' })).toBeVisible()
+}
+
 async function createEmailAccount(page, { name, email, password }) {
   await page.getByRole('tab', { name: 'Créer un compte' }).click()
   await page.getByLabel('Nom complet').fill(name)
@@ -31,6 +37,21 @@ async function createPhoneAccount(page, { name, phone, password }) {
   await page.getByRole('button', { name: 'Vérifier et continuer' }).click()
 }
 
+test('profile starts with Apple Google and email as three equal entry options', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/Movera-host1/profile')
+
+  await expect(page.getByTestId('page-profile')).toHaveAttribute('data-auth-flow', 'entry')
+  await expect(page.getByRole('button', { name: 'Continuer avec Apple' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Continuer avec Google' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Continuer avec une adresse e-mail' })).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'Se connecter' })).toHaveCount(0)
+  await expect(page.getByRole('tab', { name: 'Créer un compte' })).toHaveCount(0)
+
+  await openEmailAuth(page)
+  await expect(page.getByLabel('Adresse e-mail')).toBeVisible()
+})
+
 test('guest must create and verify an account before signing in to protected messages', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/messages')
@@ -39,6 +60,7 @@ test('guest must create and verify an account before signing in to protected mes
 
   await expect(page.getByTestId('page-profile')).toBeVisible()
   await expect(page).toHaveURL(/\/profile\?returnTo=%2Fmessages$/)
+  await openEmailAuth(page)
 
   await page.getByLabel('Adresse e-mail').fill('voyageur@movera.tn')
   await page.getByLabel('Mot de passe', { exact: true }).fill('Movera123')
@@ -63,6 +85,7 @@ test('guest must create and verify an account before signing in to protected mes
 
   const nav = page.locator('.app-shell--guest > .app-shell__nav')
   await expect(nav.locator('.app-shell__nav-item', { hasText: 'Messages' })).toHaveAttribute('aria-disabled', 'true')
+  await openEmailAuth(page)
 
   await page.getByLabel('Adresse e-mail').fill('voyageur@movera.tn')
   await page.getByLabel('Mot de passe', { exact: true }).fill('Movera123')
@@ -71,14 +94,16 @@ test('guest must create and verify an account before signing in to protected mes
   await expect(nav.locator('.app-shell__nav-item', { hasText: 'Messages' })).not.toHaveAttribute('aria-disabled', 'true')
 })
 
-test('phone account supports password recovery and rejects the old password', async ({ page }) => {
+test('phone account remains available inside standard account flow and supports password recovery', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/profile')
+  await openEmailAuth(page)
 
   await createPhoneAccount(page, { name: 'Client Movera', phone: '+216 20 123 456', password: 'Oldpass7' })
   await expect(page.getByText('Session Movera active')).toBeVisible()
   await page.getByRole('button', { name: 'Se déconnecter' }).click()
 
+  await openEmailAuth(page)
   await page.getByRole('button', { name: 'Mot de passe oublié ?' }).click()
   await page.getByRole('tab', { name: 'Téléphone' }).click()
   await page.getByLabel('Numéro de téléphone').fill('+216 20 123 456')
