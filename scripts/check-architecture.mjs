@@ -49,6 +49,8 @@ const required = [
   'src/shared/collection/CollectionPage.jsx',
   'src/shared/collection/collection-page.css',
   'src/shared/collection/collection-page-scale.css',
+  'src/shared/motion/MotionList.jsx',
+  'src/shared/motion/SnapSheetMotionSurface.jsx',
   'src/styles/tokens/index.css',
   'src/styles/tokens/colors.css',
   'src/styles/tokens/typography.css',
@@ -105,6 +107,11 @@ for (const file of files) {
   if ((repoPath.startsWith('src/entities/') || repoPath.startsWith('src/services/') || repoPath.startsWith('src/shared/')) && text.includes('/features/')) {
     violations.push(`${repoPath}: lower-level layer must not import from features`);
   }
+
+  const importsMotionPackage = /from\s+['"]motion(?:\/react)?['"]/.test(text);
+  if (importsMotionPackage && !repoPath.startsWith('src/shared/motion/')) {
+    violations.push(`${repoPath}: direct Motion package import; use src/shared/motion primitives`);
+  }
 }
 
 const indexHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8');
@@ -117,4 +124,4 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log(`Architecture guard passed: ${required.length} required boundaries present, page media externalized, retired paths absent, storage centralized, and lower-level layers independent from features.`);
+console.log(`Architecture guard passed: ${required.length} required boundaries present, page media externalized, retired paths absent, storage centralized, Motion centralized, and lower-level layers independent from features.`);
