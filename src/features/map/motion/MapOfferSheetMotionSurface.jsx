@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { animate, motion, useDragControls, useMotionValue, useMotionValueEvent, useReducedMotion } from 'motion/react'
+import { animate } from 'motion'
+import { motion, useDragControls, useMotionValue, useMotionValueEvent, useReducedMotion } from 'motion/react'
 
 const COLLAPSED_VISIBLE_PX = 62
 const SNAP_RATIOS = Object.freeze([0, 0.5, 1])
