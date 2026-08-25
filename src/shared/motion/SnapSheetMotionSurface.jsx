@@ -177,6 +177,7 @@ export function SnapSheetMotionSurface({
   }
 
   const roundedProgress = Math.round(progress * 100) / 100
+  const snapState = progress >= 0.985 ? 'expanded' : progress <= 0.015 ? 'collapsed' : 'moving'
   const externalDrag = {
     start: startExternalDrag,
     move: moveExternalDrag,
@@ -192,6 +193,7 @@ export function SnapSheetMotionSurface({
       data-testid={testId}
       data-progress={roundedProgress}
       data-expanded={progress > expandedThreshold ? 'true' : 'false'}
+      data-snap-state={snapState}
       data-motion-engine="motion"
       data-motion-boundary="shared"
       style={{ y }}
