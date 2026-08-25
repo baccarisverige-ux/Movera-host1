@@ -75,10 +75,9 @@ test('expanded list scrolls freely without moving or reselecting the map', async
 
   const list = sheet.locator('.map-offer-sheet__list')
   await expect(list).toHaveCSS('scroll-snap-type', 'none')
-  await expect(list).toHaveCSS('overscroll-behavior-y', 'none')
   await expect(list).toHaveAttribute('data-motion-list', 'map-offers')
   await expect(list).toHaveAttribute('data-map-scroll', 'independent')
-  await expect(list).toHaveAttribute('data-overscroll-guard', 'edge')
+  await expect(list).toHaveAttribute('data-sheet-handoff', 'close-from-list')
 
   const sheetBox = await sheet.boundingBox()
   const searchBox = await searchBar.boundingBox()
@@ -105,34 +104,42 @@ test('expanded list scrolls freely without moving or reselecting the map', async
   expect(await numberAttribute(surface, 'data-zoom')).toBeCloseTo(zoomBeforeScroll, 4)
   expect(await engine.getAttribute('data-selected-listing-id')).toBe(selectedBeforeScroll)
 
-  const bottom = await list.evaluate((node) => {
-    node.scrollTop = node.scrollHeight
-    const maxScrollTop = Math.max(0, node.scrollHeight - node.clientHeight)
-    return { scrollTop: node.scrollTop, maxScrollTop }
-  })
-  expect(bottom.scrollTop).toBeCloseTo(bottom.maxScrollTop, 1)
-
-  const sheetAtBottom = await sheet.boundingBox()
-  expect(sheetAtBottom).not.toBeNull()
-  const zoomAtBottom = await numberAttribute(surface, 'data-zoom')
-  const selectedAtBottom = await engine.getAttribute('data-selected-listing-id')
-
-  const edgeGesturePrevented = await list.evaluate((node) => {
-    const event = new WheelEvent('wheel', { deltaY: 480, bubbles: true, cancelable: true })
-    return !node.dispatchEvent(event)
-  })
-  expect(edgeGesturePrevented).toBe(true)
-  await page.waitForTimeout(120)
-
-  const sheetAfterEdgeGesture = await sheet.boundingBox()
-  expect(sheetAfterEdgeGesture).not.toBeNull()
-  expect(Math.abs(sheetAfterEdgeGesture.y - sheetAtBottom.y)).toBeLessThanOrEqual(1)
-  expect(await numberAttribute(surface, 'data-zoom')).toBeCloseTo(zoomAtBottom, 4)
-  expect(await engine.getAttribute('data-selected-listing-id')).toBe(selectedAtBottom)
-
   await sheet.locator('[data-listing-id="villa-emeraude"]').click()
   await expect(engine).toHaveAttribute('data-selected-listing-id', 'villa-emeraude')
   await expect.poll(() => numberAttribute(surface, 'data-zoom')).toBeGreaterThanOrEqual(13.6)
+})
+
+test('downward swipe starting on an offer can close the fully open sheet', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/Movera-host1/map?destination=gammarth')
+
+  const sheet = page.getByTestId('map-offer-sheet')
+  const list = sheet.locator('.map-offer-sheet__list')
+  const firstOffer = sheet.locator('[data-listing-id="villa-perle"]')
+
+  await page.getByRole('button', { name: 'Afficher la liste des offres' }).click()
+  await expect(sheet).toHaveAttribute('data-expanded', 'true')
+  await list.evaluate((node) => { node.scrollTop = 0 })
+  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.95)
+
+  await firstOffer.evaluate((node) => {
+    const fireTouch = (type, clientY, cancelable = true) => {
+      const event = new Event(type, { bubbles: true, cancelable })
+      Object.defineProperty(event, 'touches', {
+        configurable: true,
+        value: type === 'touchend' ? [] : [{ clientY }],
+      })
+      node.dispatchEvent(event)
+    }
+
+    fireTouch('touchstart', 280, false)
+    fireTouch('touchmove', 315)
+    fireTouch('touchmove', 390)
+    fireTouch('touchend', 390, false)
+  })
+
+  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeLessThan(0.86)
+  await expect(sheet).toHaveAttribute('data-expanded', 'false')
 })
 
 test('a destination with no mapped offers shows an honest empty state', async ({ page }) => {
