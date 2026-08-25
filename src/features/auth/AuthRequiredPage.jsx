@@ -4,7 +4,8 @@ function LockIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"/></svg>
 }
 
-export function AuthRequiredPage({ onNavigate, feature = 'cet espace' }) {
+export function AuthRequiredPage({ onNavigate, feature = 'cet espace', returnTo = '/' }) {
+  const loginPath = `/profile?returnTo=${encodeURIComponent(returnTo)}`
   return (
     <section className="auth-required-page" data-testid="page-auth-required" aria-labelledby="auth-required-title">
       <div className="auth-required-card">
@@ -19,7 +20,7 @@ export function AuthRequiredPage({ onNavigate, feature = 'cet espace' }) {
             <small>Le contenu reste verrouillé tant qu’aucune session Movera n’est active.</small>
           </div>
         </div>
-        <button type="button" onClick={() => onNavigate('/')}>Retour à l’accueil</button>
+        <button type="button" onClick={() => onNavigate(loginPath)}>Se connecter</button>
       </div>
     </section>
   )
