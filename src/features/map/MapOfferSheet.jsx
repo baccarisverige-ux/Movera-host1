@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
+import { MotionList, MotionListItem } from '../../shared/motion/MotionList.jsx'
 import { MapOfferSheetMotionSurface } from './motion/MapOfferSheetMotionSurface.jsx'
+import { MAP_OFFER_ITEM_MOTION } from './motion/mapOfferSheetMotion.config.js'
 import './map-offer-sheet.css'
 
 function ChevronIcon() {
@@ -79,18 +81,23 @@ function MapOfferSheetContent({
       </div>
 
       {listings.length ? (
-        <div
-          ref={listRef}
+        <MotionList
+          nodeRef={listRef}
           className="map-offer-sheet__list"
           data-scroll-enabled={progress > 0.86 ? 'true' : 'false'}
+          data-motion-list="map-offers"
           onScroll={handleListScroll}
         >
           {listings.map((listing, index) => {
             const selected = listing.id === selectedListingId || (!selectedListingId && index === 0 && progress > 0.12)
             return (
-              <button
+              <MotionListItem
+                as="button"
                 type="button"
                 key={listing.id}
+                index={index}
+                active={selected}
+                config={MAP_OFFER_ITEM_MOTION}
                 className="map-offer-sheet__card"
                 data-listing-id={listing.id}
                 data-active={selected ? 'true' : 'false'}
@@ -111,10 +118,10 @@ function MapOfferSheetContent({
                   </span>
                   <span className="map-offer-sheet__price"><b>{listing.price} {listing.currency}</b> <span>/ nuit</span></span>
                 </span>
-              </button>
+              </MotionListItem>
             )
           })}
-        </div>
+        </MotionList>
       ) : (
         <div className="map-offer-sheet__empty">
           <strong>Aucune offre Movera dans cette ville</strong>
