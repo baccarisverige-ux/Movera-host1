@@ -93,16 +93,35 @@ function listingsForMapContext(requestedDestination, requestedListing) {
 }
 
 export function MapPage({ onNavigate }) {
-  const searchParams = new URLSearchParams(window.location.search)
+  const searchString = window.location.search
+  const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString])
   const requestedDestination = searchParams.get('destination')
   const requestedListing = searchParams.get('listing')
+  const mapContextKey = requestedDestination || requestedListing || searchString || 'grand-tunis'
   const selectedMarker = requestedListing ? LISTING_MARKERS.find((marker) => marker.id === requestedListing) || null : null
-  const [selectedListingId, setSelectedListingId] = useState(selectedMarker?.id || null)
-  const [viewportCommand, setViewportCommand] = useState(null)
-  const handoffViewport = viewportFromSearch(searchParams)
+  const handoffViewport = useMemo(() => viewportFromSearch(searchParams), [searchParams])
   const destinationViewport = requestedDestination ? DESTINATION_VIEWPORTS[requestedDestination] || null : null
-  const listingViewport = selectedMarker ? { lat: selectedMarker.lat, lng: selectedMarker.lng, zoom: 13.5 } : null
+  const listingViewport = useMemo(
+    () => selectedMarker ? { lat: selectedMarker.lat, lng: selectedMarker.lng, zoom: 13.5 } : null,
+    [selectedMarker],
+  )
   const initialViewport = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
+
+  const [selectionState, setSelectionState] = useState(() => ({ contextKey: mapContextKey, id: selectedMarker?.id || null }))
+  const [viewportState, setViewportState] = useState(() => ({ contextKey: mapContextKey, command: null }))
+  const selectedListingId = selectionState.contextKey === mapContextKey ? selectionState.id : selectedMarker?.id || null
+  const viewportCommand = viewportState.contextKey === mapContextKey ? viewportState.command : null
+
+  const setSelectedListingId = useCallback((id) => {
+    setSelectionState({ contextKey: mapContextKey, id })
+  }, [mapContextKey])
+
+  const issueViewportCommand = useCallback((command) => {
+    setViewportState({
+      contextKey: mapContextKey,
+      command: { ...command, revision: performance.now() },
+    })
+  }, [mapContextKey])
 
   const cityListings = useMemo(
     () => listingsForMapContext(requestedDestination, requestedListing),
@@ -119,11 +138,6 @@ export function MapPage({ onNavigate }) {
     : requestedListing
       ? listingCatalog.find((listing) => listing.id === requestedListing)?.location || 'Cette ville'
       : 'Grand Tunis'
-
-  useEffect(() => {
-    setSelectedListingId(selectedMarker?.id || null)
-    setViewportCommand(null)
-  }, [selectedMarker?.id, requestedDestination])
 
   const returnToOffers = () => {
     if (!requestedListing) return
@@ -145,21 +159,20 @@ export function MapPage({ onNavigate }) {
     const zoom = Math.min(17, base.zoom + progress * 1.45)
 
     if (progress > 0.14 && !selectedListingId && cityListings[0]) setSelectedListingId(cityListings[0].id)
-    setViewportCommand({ lat, lng, zoom, revision: performance.now() })
-  }, [handoffViewport, listingViewport, destinationViewport, selectedListingId, cityListings, visibleMarkers])
+    issueViewportCommand({ lat, lng, zoom })
+  }, [handoffViewport, listingViewport, destinationViewport, selectedListingId, cityListings, visibleMarkers, setSelectedListingId, issueViewportCommand])
 
   const handleSheetSelectedListingChange = useCallback((listingId) => {
     setSelectedListingId(listingId)
     const marker = visibleMarkers.find((item) => item.id === listingId)
     const base = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
     if (!marker) return
-    setViewportCommand({
+    issueViewportCommand({
       lat: marker.lat,
       lng: marker.lng,
       zoom: Math.min(17, Math.max(13.6, base.zoom + 1.65)),
-      revision: performance.now(),
     })
-  }, [visibleMarkers, handoffViewport, listingViewport, destinationViewport])
+  }, [visibleMarkers, handoffViewport, listingViewport, destinationViewport, setSelectedListingId, issueViewportCommand])
 
   // Handoff readiness is layout-based only; tile-network timing never blocks route release.
   useEffect(() => {
@@ -205,7 +218,7 @@ export function MapPage({ onNavigate }) {
       window.cancelAnimationFrame(paintFrame)
       window.cancelAnimationFrame(finalFrame)
     }
-  }, [])
+  }, [mapContextKey])
 
   return (
     <section
@@ -232,6 +245,7 @@ export function MapPage({ onNavigate }) {
       ) : null}
 
       <MapContainer
+        key={`map-${mapContextKey}`}
         markers={visibleMarkers}
         selectedListingId={selectedListingId}
         onSelectedListingChange={setSelectedListingId}
@@ -240,6 +254,7 @@ export function MapPage({ onNavigate }) {
       />
 
       <MapOfferSheet
+        key={`sheet-${mapContextKey}`}
         listings={cityListings}
         cityLabel={cityLabel}
         selectedListingId={selectedListingId}
