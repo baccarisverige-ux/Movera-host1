@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useFavorites } from '../../features/favorites/favoritesStore.js'
+import { useFavorites } from '../../entities/favorite/favoritesStore.js'
 import './collection-page.css'
 import './collection-page-scale.css'
 import './collection-premium-architecture.css'
