@@ -131,20 +131,19 @@ export function MapPage({ onNavigate }) {
       data-handoff-viewport={handoffViewport ? 'true' : 'false'}
     >
       <div className="b225-map-top">
-        {requestedListing ? (
-          <div className="b225-map-return-row">
-            <button type="button" className="b225-map-return" onClick={returnToOffers} aria-label="Retour aux offres">
-              <span className="b225-map-return__icon"><BackIcon /></span>
-              <span>Retour aux offres</span>
-            </button>
-          </div>
-        ) : null}
         <button type="button" className="b225-map-search" onClick={() => onNavigate('/')} aria-label="Modifier la recherche">
           <SearchIcon />
-          <span className="b225-map-search__copy"><strong>Explorer la carte</strong><span>{selectedMarker ? selectedMarker.label : 'Grand Tunis · Dates · Voyageurs'}</span></span>
+          <span className="b225-map-search__copy"><strong>Explorer la carte</strong><span>Grand Tunis · Dates · Voyageurs</span></span>
           <span className="b225-map-filter-button" aria-hidden="true">≡</span>
         </button>
       </div>
+
+      {requestedListing ? (
+        <button type="button" className="b225-map-return b225-map-return--floating" onClick={returnToOffers} aria-label="Retour aux offres">
+          <span className="b225-map-return__icon"><BackIcon /></span>
+          <span>Retour aux offres</span>
+        </button>
+      ) : null}
 
       <MapContainer
         markers={LISTING_MARKERS}
