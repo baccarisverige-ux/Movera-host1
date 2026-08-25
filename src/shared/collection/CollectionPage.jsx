@@ -32,6 +32,10 @@ function PinIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.3"/></svg>
 }
 
+function MapIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5 8.7 3l6.6 2.5L21 3v15.5L15.3 21l-6.6-2.5L3 21V5.5Z"/><path d="M8.7 3v15.5M15.3 5.5V21"/></svg>
+}
+
 function HeartIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.8a5.3 5.3 0 0 0-7.5 0L12 6.1l-1.3-1.3a5.3 5.3 0 0 0-7.5 7.5L12 21l8.8-8.7a5.3 5.3 0 0 0 0-7.5Z"/></svg>
 }
@@ -46,6 +50,7 @@ export function CollectionPage({
   allResultsLabel,
   emptyTitle,
   badgeLabel,
+  onNavigate,
 }) {
   const [cityQuery, setCityQuery] = useState('')
   const [city, setCity] = useState('')
@@ -89,6 +94,11 @@ export function CollectionPage({
     setCityQuery(value)
     const exact = TUNISIA_CITIES.find((name) => normalize(name) === normalize(value))
     setCity(exact || '')
+  }
+
+  const openOfferOnMap = (item) => {
+    if (!onNavigate) return
+    onNavigate(`/map?listing=${encodeURIComponent(item.id)}`)
   }
 
   return (
@@ -177,7 +187,7 @@ export function CollectionPage({
           {visibleOffers.map((item) => {
             const favorite = favoriteIdSet.has(item.id)
             return (
-              <article className="beach-offer" key={item.id}>
+              <article className="beach-offer" key={item.id} data-offer-id={item.id}>
                 <div className="beach-offer__media">
                   <img src={item.image} alt={item.title} loading="lazy" decoding="async" />
                   <span className="beach-offer__badge">{item.badge || badgeLabel}</span>
@@ -195,6 +205,18 @@ export function CollectionPage({
                     <strong>{item.price} {item.currency}</strong>
                     <span>/ nuit</span>
                   </div>
+                </div>
+                <div className="beach-offer__actions">
+                  <button
+                    type="button"
+                    className="beach-offer__map-button"
+                    aria-label={`Voir ${item.title} sur la carte`}
+                    onClick={(event) => { event.stopPropagation(); openOfferOnMap(item) }}
+                  >
+                    <span className="beach-offer__map-icon"><MapIcon /></span>
+                    <span className="beach-offer__map-copy"><strong>Voir sur la carte</strong><small>Localiser cette adresse</small></span>
+                    <span className="beach-offer__map-arrow" aria-hidden="true">›</span>
+                  </button>
                 </div>
               </article>
             )
