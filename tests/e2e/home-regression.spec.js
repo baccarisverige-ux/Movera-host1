@@ -27,7 +27,7 @@ test('home keeps its current category structure, media and approved navigation s
   await expect.poll(() => categoryRail.evaluate(node => node.scrollLeft)).toBeGreaterThan(0)
   await categoryRail.evaluate(node => { node.scrollLeft = 0 })
 
-  await expect(page.getByTestId('home-welcome-cities').locator('.b225-welcome-city')).toHaveCount(7)
+  await expect(page.getByTestId('home-welcome-cities').locator('.b225-welcome-city')).toHaveCount(8)
   await expect(page.locator('[data-category-selection]')).toHaveCount(8)
   for (const id of categoryIds) {
     expect(await page.getByTestId(`home-selection-${id}`).locator('.b225-offer-card').count()).toBeGreaterThan(0)
@@ -58,7 +58,7 @@ test('home keeps its current category structure, media and approved navigation s
 })
 
 test('Bienvenue city cards open their exact map destination', async ({ page }) => {
-  for (const id of ['sidi-bou-said', 'sousse', 'hammamet', 'tunis', 'djerba', 'tozeur', 'tabarka']) {
+  for (const id of ['sidi-bou-said', 'sousse', 'mehdia', 'hammamet', 'tunis', 'djerba', 'tozeur', 'tabarka']) {
     await page.goto('/')
     await expect(page.getByTestId('page-home')).toBeVisible()
     const city = page.locator(`.b225-welcome-city[data-city-id="${id}"]`)
