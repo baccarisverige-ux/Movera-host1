@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('map uses a slim wide search bar with amenity filters only', async ({ page }) => {
+test('map keeps professional amenity filters fully inside the white header', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=la-marsa')
 
@@ -14,6 +14,7 @@ test('map uses a slim wide search bar with amenity filters only', async ({ page 
   const toolbar = page.locator('.map-search-filter-stack__toolbar')
   const searchPill = page.locator('.map-search-filter-stack__search-pill')
   const amenityFilters = page.getByTestId('map-amenity-filters')
+  const stage = page.locator('.b225-map-stage')
   const surface = page.getByTestId('map-surface')
 
   await expect(searchPill).toContainText('Logements à La Marsa')
@@ -24,33 +25,59 @@ test('map uses a slim wide search bar with amenity filters only', async ({ page 
   await expect(page.getByText('Hôtel', { exact: true })).toHaveCount(0)
   await expect(page.getByText('Maison d’hôte', { exact: true })).toHaveCount(0)
   await expect(page.getByText('Plage', { exact: true })).toHaveCount(0)
+  await expect(amenityFilters.locator('[data-filter-id]')).toHaveCount(5)
+  await expect(amenityFilters.locator('.map-filter-chip__icon')).toHaveCount(5)
 
   const headerBox = await header.boundingBox()
   const toolbarBox = await toolbar.boundingBox()
   const searchBox = await searchPill.boundingBox()
   const amenityBox = await amenityFilters.boundingBox()
+  const stageBox = await stage.boundingBox()
   const surfaceBox = await surface.boundingBox()
 
   expect(headerBox).not.toBeNull()
   expect(toolbarBox).not.toBeNull()
   expect(searchBox).not.toBeNull()
   expect(amenityBox).not.toBeNull()
+  expect(stageBox).not.toBeNull()
   expect(surfaceBox).not.toBeNull()
-  expect(headerBox.height).toBeLessThanOrEqual(90)
+  expect(headerBox.height).toBeLessThanOrEqual(94)
   expect(searchBox.height).toBeLessThanOrEqual(40)
   expect(searchBox.width).toBeGreaterThan(280)
   expect(amenityBox.y).toBeGreaterThan(toolbarBox.y + toolbarBox.height)
-  expect(Math.abs(surfaceBox.y - (headerBox.y + headerBox.height))).toBeLessThanOrEqual(2)
-  expect(Math.abs((headerBox.height + surfaceBox.height) - 844)).toBeLessThanOrEqual(3)
+  expect(amenityBox.y + amenityBox.height).toBeLessThanOrEqual(headerBox.y + headerBox.height)
+  expect(Math.abs(stageBox.y - (headerBox.y + headerBox.height))).toBeLessThanOrEqual(2)
+  expect(Math.abs(surfaceBox.y - stageBox.y)).toBeLessThanOrEqual(2)
+  expect(Math.abs((headerBox.height + stageBox.height) - 844)).toBeLessThanOrEqual(3)
+  await expect(header).toHaveCSS('background-color', 'rgb(255, 255, 255)')
 
   const firstAmenity = amenityFilters.locator('[data-filter-id]').first()
   const amenityChipBox = await firstAmenity.boundingBox()
   expect(amenityChipBox).not.toBeNull()
-  expect(amenityChipBox.height).toBeLessThanOrEqual(26)
+  expect(amenityChipBox.height).toBeLessThanOrEqual(29)
 
   await page.getByRole('button', { name: 'Retour à l’accueil' }).click()
   await expect(page.getByTestId('page-home')).toBeVisible()
   await expect(page).toHaveURL(/\/Movera-host1\/?$/)
+})
+
+test('map header remains contained on a narrow phone', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 })
+  await page.goto('/Movera-host1/map')
+
+  const header = page.locator('.b225-map-top')
+  const filters = page.getByTestId('map-amenity-filters')
+  const stage = page.locator('.b225-map-stage')
+  const headerBox = await header.boundingBox()
+  const filtersBox = await filters.boundingBox()
+  const stageBox = await stage.boundingBox()
+
+  expect(headerBox).not.toBeNull()
+  expect(filtersBox).not.toBeNull()
+  expect(stageBox).not.toBeNull()
+  expect(filtersBox.y + filtersBox.height).toBeLessThanOrEqual(headerBox.y + headerBox.height)
+  expect(Math.abs(stageBox.y - (headerBox.y + headerBox.height))).toBeLessThanOrEqual(2)
+  expect(headerBox.height).toBeLessThanOrEqual(92)
 })
 
 test('bottom navigation remains available outside the map', async ({ page }) => {
