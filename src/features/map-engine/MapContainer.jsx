@@ -39,6 +39,10 @@ export function MapContainer({
   const [internalSelectedId, setInternalSelectedId] = useState(null)
   const selectedListingId = controlledSelectedId === undefined ? internalSelectedId : controlledSelectedId
   const previousSelectedRef = useRef(selectedListingId)
+  const commandedLat = viewportCommand?.lat
+  const commandedLng = viewportCommand?.lng
+  const commandedZoom = viewportCommand?.zoom
+  const commandRevision = viewportCommand?.revision
   renderCountRef.current += 1
 
   useEffect(() => () => {
@@ -77,11 +81,9 @@ export function MapContainer({
   }, [selectedListingId, markers, focusPoint])
 
   useEffect(() => {
-    if (!viewportCommand) return
-    const { lat, lng, zoom } = viewportCommand
-    if (![lat, lng, zoom].every(Number.isFinite)) return
-    commitViewport((current) => ({ ...current, lat, lng, zoom }))
-  }, [viewportCommand?.lat, viewportCommand?.lng, viewportCommand?.zoom, viewportCommand?.revision, commitViewport])
+    if (![commandedLat, commandedLng, commandedZoom].every(Number.isFinite)) return
+    commitViewport((current) => ({ ...current, lat: commandedLat, lng: commandedLng, zoom: commandedZoom }))
+  }, [commandedLat, commandedLng, commandedZoom, commandRevision, commitViewport])
 
   const onPointerDown = (event) => {
     if (event.target.closest('button, a, input, select, textarea')) return
