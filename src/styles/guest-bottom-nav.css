@@ -114,6 +114,23 @@
   color:var(--movera-nav-active)!important;
 }
 
+.app-shell--guest > .app-shell__nav > .app-shell__nav-item[aria-disabled='true']{
+  opacity:.42!important;
+  transform:none!important;
+  cursor:default!important;
+}
+
+.app-shell--guest > .app-shell__nav > .app-shell__nav-item[aria-disabled='true']:active{
+  transform:none!important;
+}
+
+.app-shell--guest > .app-shell__nav > .app-shell__nav-item[aria-disabled='true'][data-active='true'],
+.app-shell--guest > .app-shell__nav > .app-shell__nav-item[aria-disabled='true'][data-active='true'] svg,
+.app-shell--guest > .app-shell__nav > .app-shell__nav-item[aria-disabled='true'][data-active='true'] span{
+  color:#6d716f!important;
+  stroke:#6d716f!important;
+}
+
 @media(max-width:350px){
   .app-shell--guest > .app-shell__nav{padding-inline:2px!important}
   .app-shell--guest > .app-shell__nav > .app-shell__nav-item{font-size:9px!important}
