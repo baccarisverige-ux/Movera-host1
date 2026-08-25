@@ -1,64 +1,48 @@
-import { writeAuthSession } from './authSession.js'
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const PHONE_RE = /^\+?[0-9][0-9\s().-]{7,19}$/
+import {
+  beginPasswordReset,
+  beginSignUp,
+  completePasswordReset,
+  resendSignUpCode,
+  signInLocal,
+  validateIdentifier,
+  validatePassword,
+  verifyPasswordResetCode,
+  verifySignUp,
+} from './localAuthStore.js'
 
 const OAUTH_ENTRYPOINTS = Object.freeze({
   google: import.meta.env.VITE_GOOGLE_AUTH_URL || '',
   apple: import.meta.env.VITE_APPLE_AUTH_URL || '',
 })
 
-function cleanPhone(value = '') {
-  return value.replace(/[\s().-]/g, '')
+export { validateIdentifier, validatePassword }
+
+export async function signInWithCredentials({ method, identifier, password }) {
+  return signInLocal({ method, identifier, password })
 }
 
-function displayNameFromIdentifier(method, identifier) {
-  if (method === 'email') {
-    const local = identifier.split('@')[0] || 'Voyageur'
-    return local
-      .split(/[._-]+/)
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ') || 'Voyageur'
-  }
-  return 'Voyageur Movera'
+export async function signUpWithCredentials(payload) {
+  return beginSignUp(payload)
 }
 
-export function validateCredentialSignIn({ method, identifier, password }) {
-  const value = String(identifier || '').trim()
-  const secret = String(password || '')
-
-  if (method === 'email' && !EMAIL_RE.test(value)) {
-    return { ok: false, field: 'identifier', message: 'Entrez une adresse e-mail valide.' }
-  }
-  if (method === 'phone' && !PHONE_RE.test(value)) {
-    return { ok: false, field: 'identifier', message: 'Entrez un numéro de téléphone valide.' }
-  }
-  if (secret.length < 6) {
-    return { ok: false, field: 'password', message: 'Le mot de passe doit contenir au moins 6 caractères.' }
-  }
-  return { ok: true }
+export async function verifySignUpCode(payload) {
+  return verifySignUp(payload)
 }
 
-export function signInWithCredentials({ method, identifier, password }) {
-  const validation = validateCredentialSignIn({ method, identifier, password })
-  if (!validation.ok) return validation
+export async function resendVerificationCode(pendingId) {
+  return resendSignUpCode(pendingId)
+}
 
-  const normalizedIdentifier = method === 'phone'
-    ? cleanPhone(identifier.trim())
-    : identifier.trim().toLowerCase()
+export async function requestPasswordReset(payload) {
+  return beginPasswordReset(payload)
+}
 
-  // Frontend prototype session. A production backend must verify the credential before calling writeAuthSession.
-  const session = writeAuthSession({
-    authenticated: true,
-    userId: `${method}:${normalizedIdentifier}`,
-    displayName: displayNameFromIdentifier(method, normalizedIdentifier),
-    provider: method,
-    email: method === 'email' ? normalizedIdentifier : '',
-    phone: method === 'phone' ? normalizedIdentifier : '',
-  })
+export async function verifyResetCode(payload) {
+  return verifyPasswordResetCode(payload)
+}
 
-  return { ok: true, session }
+export async function resetPassword(payload) {
+  return completePasswordReset(payload)
 }
 
 export function startOAuthSignIn(provider, returnTo = '/profile') {
