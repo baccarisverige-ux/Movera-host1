@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './map-offer-sheet.css'
 
-const COLLAPSED_TRANSLATE_PERCENT = 76
-const DRAG_DISTANCE_PX = 420
+const COLLAPSED_TRANSLATE_PERCENT = 91
+const DRAG_DISTANCE_PX = 520
 const DRAG_CLICK_SUPPRESS_PX = 8
-const SNAP_POINTS = [0, 0.56, 1]
+const SNAP_POINTS = [0, 0.5, 1]
 
 function clamp(value, min = 0, max = 1) {
   return Math.min(max, Math.max(min, value))
@@ -173,13 +173,21 @@ export function MapOfferSheet({
                 data-active={selected ? 'true' : 'false'}
                 onClick={() => selectListing(listing.id)}
               >
-                <img src={listing.image} alt="" loading={index < 2 ? 'eager' : 'lazy'} />
-                <span className="map-offer-sheet__card-copy">
-                  <span className="map-offer-sheet__card-meta"><span>{listing.location}</span><span className="map-offer-sheet__rating"><StarIcon />{listing.rating}</span></span>
-                  <strong>{listing.title}</strong>
-                  <span className="map-offer-sheet__price"><b>{listing.price} {listing.currency}</b> / nuit</span>
+                <span className="map-offer-sheet__media">
+                  <img src={listing.image} alt="" loading={index < 2 ? 'eager' : 'lazy'} />
+                  {listing.badge ? <span className="map-offer-sheet__badge">{listing.badge}</span> : null}
+                  <span className="map-offer-sheet__position" aria-hidden="true">{index + 1}/{listings.length}</span>
                 </span>
-                <span className="map-offer-sheet__index">{String(index + 1).padStart(2, '0')}</span>
+                <span className="map-offer-sheet__card-copy">
+                  <span className="map-offer-sheet__card-head">
+                    <span>
+                      <strong>{listing.title}</strong>
+                      <small>{listing.location}, Tunisie</small>
+                    </span>
+                    <span className="map-offer-sheet__rating"><StarIcon />{listing.rating}</span>
+                  </span>
+                  <span className="map-offer-sheet__price"><b>{listing.price} {listing.currency}</b> <span>/ nuit</span></span>
+                </span>
               </button>
             )
           })}
