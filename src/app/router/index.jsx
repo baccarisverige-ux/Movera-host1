@@ -87,8 +87,9 @@ export function AppRouter(){
  if(!resolved)return <NotFoundPage onNavigate={navigate}/>
  const {route,params}=resolved
  const Page=route.requiresAuth && !isAuthenticated ? AuthRequiredPage : route.component
+ const returnTo = `${internalPath}${window.location.search}`
  const pageProps = route.requiresAuth && !isAuthenticated
-   ? { feature: route.authFeature || 'cet espace', onNavigate: navigate }
+   ? { feature: route.authFeature || 'cet espace', returnTo, onNavigate: navigate }
    : { params, onNavigate: navigate }
  return <GuestLayout currentPath={internalPath} onNavigate={navigate}><Suspense fallback={<RouteFallback/>}><Page {...pageProps}/></Suspense></GuestLayout>
 }
