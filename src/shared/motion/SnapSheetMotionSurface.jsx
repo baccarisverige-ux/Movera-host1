@@ -61,6 +61,7 @@ export function SnapSheetMotionSurface({
   const progressCallbackRef = useRef(onProgressChange)
   const animationRef = useRef(null)
   const suppressClickRef = useRef(false)
+  const externalDragRef = useRef(null)
   const y = useMotionValue(0)
   const dragControls = useDragControls()
   const reduceMotion = useReducedMotion()
@@ -130,7 +131,58 @@ export function SnapSheetMotionSurface({
     animateTo(progressRef.current > toggleThreshold ? distance : 0)
   }
 
+  const startExternalDrag = (clientY) => {
+    if (!Number.isFinite(clientY)) return false
+    animationRef.current?.stop?.()
+    suppressClickRef.current = true
+    const now = performance.now()
+    externalDragRef.current = {
+      startClientY: clientY,
+      startSheetY: clamp(y.get(), 0, collapsedYRef.current),
+      lastClientY: clientY,
+      lastAt: now,
+      velocityY: 0,
+    }
+    return true
+  }
+
+  const moveExternalDrag = (clientY) => {
+    const state = externalDragRef.current
+    if (!state || !Number.isFinite(clientY)) return false
+    const now = performance.now()
+    const elapsedMs = Math.max(8, now - state.lastAt)
+    state.velocityY = ((clientY - state.lastClientY) / elapsedMs) * 1000
+    state.lastClientY = clientY
+    state.lastAt = now
+    y.set(clamp(state.startSheetY + (clientY - state.startClientY), 0, collapsedYRef.current))
+    return true
+  }
+
+  const finishExternalDrag = ({ cancel = false } = {}) => {
+    const state = externalDragRef.current
+    if (!state) return false
+    externalDragRef.current = null
+    const distance = collapsedYRef.current
+    const currentY = clamp(y.get(), 0, distance)
+    const velocityY = cancel ? 0 : state.velocityY
+    animateTo(resolveSnapTarget({
+      distance,
+      currentY,
+      fastSwipeVelocity,
+      snapRatios,
+      velocityProjectionSeconds,
+      velocityY,
+    }), velocityY)
+    return true
+  }
+
   const roundedProgress = Math.round(progress * 100) / 100
+  const externalDrag = {
+    start: startExternalDrag,
+    move: moveExternalDrag,
+    end: () => finishExternalDrag(),
+    cancel: () => finishExternalDrag({ cancel: true }),
+  }
 
   return (
     <motion.section
@@ -163,7 +215,7 @@ export function SnapSheetMotionSurface({
         }), info.velocity.y)
       }}
     >
-      {children({ progress, startDrag, toggleExpanded })}
+      {children({ progress, startDrag, toggleExpanded, externalDrag })}
     </motion.section>
   )
 }
