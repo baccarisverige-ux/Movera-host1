@@ -20,6 +20,8 @@ const COLLECTION_HEADER_LABELS = Object.freeze({
 
 const mapShellStyle = { maxWidth: 430, margin: '0 auto', background: '#eff1ef' }
 const mapContentStyle = { padding: 0, overflow: 'hidden' }
+const hostShellStyle = { maxWidth: 430, margin: '0 auto', background: '#f4f7f5' }
+const hostContentStyle = { padding: 0, overflow: 'visible', background: '#f4f7f5' }
 const collectionContentStyle = { padding: 0, overflow: 'auto', background: '#f7f7f5' }
 
 function AppLink({ children, className, href, onNavigate, active, disabled = false }) {
@@ -45,13 +47,16 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
   const { isAuthenticated } = useAuthSession()
   const activePath = currentPath.startsWith('/messages/') ? '/messages' : getGuestNavigationPath(currentPath)
   const isMapRoute = currentPath === '/map'
+  const isHostRoute = currentPath === '/host' || currentPath.startsWith('/host/')
   const isCollectionRoute = isGuestCollectionRoute(currentPath)
   const isBeachRoute = currentPath === '/plage'
   const collectionHeaderLabel = COLLECTION_HEADER_LABELS[currentPath] || ''
+  const shellStyle = isMapRoute ? mapShellStyle : isHostRoute ? hostShellStyle : undefined
+  const contentStyle = isMapRoute ? mapContentStyle : isHostRoute ? hostContentStyle : isCollectionRoute ? collectionContentStyle : undefined
 
   return (
-    <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isCollectionRoute ? ' app-shell--collection' : ''}${isBeachRoute ? ' app-shell--beach' : ''}`} style={isMapRoute ? mapShellStyle : undefined}>
-      <header className="app-shell__header" style={isMapRoute ? { display: 'none' } : undefined}>
+    <div className={`app-shell app-shell--guest${isMapRoute ? ' app-shell--map' : ''}${isHostRoute ? ' app-shell--host' : ''}${isCollectionRoute ? ' app-shell--collection' : ''}${isBeachRoute ? ' app-shell--beach' : ''}`} style={shellStyle}>
+      <header className="app-shell__header" style={isMapRoute || isHostRoute ? { display: 'none' } : undefined}>
         <strong>Movera Host</strong>
         {collectionHeaderLabel ? <span className="app-shell__collection-badge">{collectionHeaderLabel}</span> : null}
       </header>
@@ -59,11 +64,11 @@ export function GuestLayout({ children, currentPath, onNavigate }) {
         className="app-shell__content"
         id="main-content"
         tabIndex={-1}
-        style={isMapRoute ? mapContentStyle : isCollectionRoute ? collectionContentStyle : undefined}
+        style={contentStyle}
       >
         {children}
       </main>
-      {!isMapRoute ? (
+      {!isMapRoute && !isHostRoute ? (
         <nav className="app-shell__nav" aria-label="Navigation principale">
           {guestNav.map(({ label, path, icon, disabled: permanentlyDisabled, requiresAuth }) => {
             const disabled = Boolean(permanentlyDisabled || (requiresAuth && !isAuthenticated))
