@@ -3,6 +3,7 @@ import { useHostProfile } from '../../entities/host/hostProfileStore.js'
 import { useAuthSession } from '../auth/authSession.js'
 import { HostCalendarPage } from './calendar/HostCalendarPage.jsx'
 import { HostOnboardingPage } from './onboarding/HostOnboardingPage.jsx'
+import './onboarding/hostIntroVideoEnhancer.js'
 
 export function HostEntryPage({ onNavigate }) {
   const { session } = useAuthSession()
