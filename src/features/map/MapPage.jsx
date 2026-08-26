@@ -276,16 +276,16 @@ export function MapPage({ onNavigate }) {
           initialViewport={initialViewport}
           viewportCommand={viewportCommand}
         />
-
-        <MapOfferSheet
-          key={`sheet-${mapContextKey}`}
-          listings={cityListings}
-          cityLabel={cityLabel}
-          selectedListingId={selectedListingId}
-          onSelectedListingChange={handleSheetSelectedListingChange}
-          onProgressChange={handleSheetProgress}
-        />
       </div>
+
+      <MapOfferSheet
+        key={`sheet-${mapContextKey}`}
+        listings={cityListings}
+        cityLabel={cityLabel}
+        selectedListingId={selectedListingId}
+        onSelectedListingChange={handleSheetSelectedListingChange}
+        onProgressChange={handleSheetProgress}
+      />
     </section>
   )
 }
