@@ -34,7 +34,7 @@ test('La Marsa map exposes only its mapped offers in the full-width Motion botto
   expect(visibleCollapsedHeight).toBeLessThanOrEqual(85)
 })
 
-test('Motion drag progressively zooms the map and keeps the sheet visually joined until its final snap', async ({ page }) => {
+test('Motion drag progressively zooms the map while the sheet travels beneath the fixed header', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=la-marsa')
 
@@ -63,22 +63,23 @@ test('Motion drag progressively zooms the map and keeps the sheet visually joine
   await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThanOrEqual(0.48)
 })
 
-test('expanded list separates from the header and scrolls freely without moving or reselecting the map', async ({ page }) => {
+test('fully expanded list sits under the white header as one continuous page and scrolls independently', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=gammarth')
 
+  const pageMap = page.getByTestId('page-map')
   const sheet = page.getByTestId('map-offer-sheet')
   const surface = page.getByTestId('map-surface')
   const engine = page.getByTestId('map-engine')
   const topPanel = page.locator('.b225-map-top')
-  const connectedShadow = await sheet.evaluate((node) => getComputedStyle(node).boxShadow)
 
   await page.getByRole('button', { name: 'Afficher la liste des offres' }).click()
   await expect(sheet).toHaveAttribute('data-expanded', 'true')
   await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
   await expect(sheet.locator('[data-listing-id]')).toHaveCount(2)
-  const separatedShadow = await sheet.evaluate((node) => getComputedStyle(node).boxShadow)
-  expect(separatedShadow).not.toBe(connectedShadow)
+  await expect(sheet).toHaveCSS('box-shadow', 'none')
+  await expect(sheet).toHaveCSS('border-top-left-radius', '0px')
+  await expect(sheet).toHaveCSS('border-top-right-radius', '0px')
 
   const list = sheet.locator('.map-offer-sheet__list')
   await expect(list).toHaveCSS('scroll-snap-type', 'none')
@@ -86,12 +87,26 @@ test('expanded list separates from the header and scrolls freely without moving 
   await expect(list).toHaveAttribute('data-map-scroll', 'independent')
   await expect(list).toHaveAttribute('data-sheet-handoff', 'close-from-list')
 
+  const mapBox = await pageMap.boundingBox()
   const sheetBox = await sheet.boundingBox()
   const topPanelBox = await topPanel.boundingBox()
+  expect(mapBox).not.toBeNull()
   expect(sheetBox).not.toBeNull()
   expect(topPanelBox).not.toBeNull()
-  const panelBottom = topPanelBox.y + topPanelBox.height
-  expect(Math.abs(sheetBox.y - panelBottom)).toBeLessThanOrEqual(2)
+  expect(Math.abs(sheetBox.y - mapBox.y)).toBeLessThanOrEqual(2)
+  expect(topPanelBox.y + topPanelBox.height).toBeGreaterThan(sheetBox.y + 50)
+
+  const zOrder = await page.evaluate(() => {
+    const header = document.querySelector('.b225-map-top')
+    const offerSheet = document.querySelector('[data-testid="map-offer-sheet"]')
+    return {
+      header: Number(getComputedStyle(header).zIndex),
+      sheet: Number(getComputedStyle(offerSheet).zIndex),
+      parentClass: offerSheet.parentElement?.className || '',
+    }
+  })
+  expect(zOrder.header).toBeGreaterThan(zOrder.sheet)
+  expect(zOrder.parentClass).toContain('b225-map-page')
 
   const mediaBox = await sheet.locator('[data-listing-id="villa-perle"] .map-offer-sheet__media').boundingBox()
   expect(mediaBox).not.toBeNull()
