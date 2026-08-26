@@ -31,3 +31,11 @@ export function writeHostCalendarDays(userId, keys, settings) {
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(HOST_CALENDAR_EVENT, { detail: { userId, ...next } }))
   return next
 }
+
+export function clearHostCalendar(userId) {
+  if (!userId) return
+  const calendars = readAllCalendars()
+  delete calendars[userId]
+  storageAdapter.setJson(HOST_CALENDAR_KEY, calendars)
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(HOST_CALENDAR_EVENT, { detail: { userId, days: {} } }))
+}
