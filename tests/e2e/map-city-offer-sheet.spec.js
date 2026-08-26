@@ -34,33 +34,49 @@ test('La Marsa map exposes only its mapped offers in the full-width Motion botto
   expect(visibleCollapsedHeight).toBeLessThanOrEqual(85)
 })
 
-test('Motion drag progressively zooms the map while the sheet travels beneath the fixed header', async ({ page }) => {
+test('sheet attachment approaches the fixed header progressively without switching to list scroll mid-gesture', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=la-marsa')
 
+  const pageMap = page.getByTestId('page-map')
   const surface = page.getByTestId('map-surface')
   const sheet = page.getByTestId('map-offer-sheet')
   const handle = page.getByTestId('map-offer-sheet-handle')
+  const list = sheet.locator('.map-offer-sheet__list')
   await expect(sheet).toHaveAttribute('data-progress', '0')
   await expect(sheet).toHaveAttribute('data-snap-state', 'collapsed')
+  await expect(handle).toHaveAttribute('data-header-offset', '0')
 
   const zoomBefore = await numberAttribute(surface, 'data-zoom')
-  const box = await handle.boundingBox()
-  expect(box).not.toBeNull()
+  const mapBox = await pageMap.boundingBox()
+  const sheetBox = await sheet.boundingBox()
+  const handleBox = await handle.boundingBox()
+  expect(mapBox).not.toBeNull()
+  expect(sheetBox).not.toBeNull()
+  expect(handleBox).not.toBeNull()
 
-  const x = box.x + box.width / 2
-  const y = box.y + box.height / 2
+  const travel = sheetBox.y - mapBox.y
+  const x = handleBox.x + handleBox.width / 2
+  const y = handleBox.y + handleBox.height / 2
   await page.mouse.move(x, y)
   await page.mouse.down()
-  await page.mouse.move(x, y - 120, { steps: 8 })
+  await page.mouse.move(x, y - travel * 0.84, { steps: 20 })
 
-  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.15)
+  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.8)
   await expect(sheet).toHaveAttribute('data-snap-state', 'moving')
+  await expect(list).toHaveAttribute('data-scroll-enabled', 'false')
+  const firstOffset = await numberAttribute(handle, 'data-header-offset')
+  expect(firstOffset).toBeGreaterThan(0)
+
+  await page.mouse.move(x, y - travel * 0.93, { steps: 8 })
+  await expect.poll(() => numberAttribute(handle, 'data-header-offset')).toBeGreaterThan(firstOffset)
+  await expect(list).toHaveAttribute('data-scroll-enabled', 'false')
   await expect.poll(() => numberAttribute(surface, 'data-zoom')).toBeGreaterThan(zoomBefore)
 
-  await page.mouse.move(x, y - 280, { steps: 10 })
   await page.mouse.up()
-  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThanOrEqual(0.48)
+  await expect(sheet).toHaveAttribute('data-expanded', 'true')
+  await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
+  await expect(list).toHaveAttribute('data-scroll-enabled', 'true')
 })
 
 test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible below the fixed header', async ({ page }) => {
@@ -90,6 +106,7 @@ test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible 
   await expect(list).toHaveAttribute('data-motion-list', 'map-offers')
   await expect(list).toHaveAttribute('data-map-scroll', 'independent')
   await expect(list).toHaveAttribute('data-sheet-handoff', 'drag-from-offer')
+  await expect(list).toHaveAttribute('data-scroll-enabled', 'true')
 
   const mapBox = await pageMap.boundingBox()
   const sheetBox = await sheet.boundingBox()
@@ -103,6 +120,8 @@ test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible 
   expect(mediaBox).not.toBeNull()
 
   const headerBottom = topPanelBox.y + topPanelBox.height
+  const finalHeaderOffset = await numberAttribute(dragZone, 'data-header-offset')
+  expect(Math.abs(finalHeaderOffset - topPanelBox.height)).toBeLessThanOrEqual(2)
   expect(Math.abs(sheetBox.y - mapBox.y)).toBeLessThanOrEqual(2)
   expect(dragZoneBox.y).toBeGreaterThanOrEqual(headerBottom - 2)
   expect(mediaBox.y).toBeGreaterThanOrEqual(dragZoneBox.y + dragZoneBox.height - 2)
@@ -187,7 +206,7 @@ test('downward swipe starting on an offer can close the fully open sheet', async
   await expect(sheet).toHaveAttribute('data-expanded', 'true')
   await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
   await list.evaluate((node) => { node.scrollTop = 0 })
-  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.95)
+  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.98)
 
   await firstOffer.evaluate((node) => {
     const fireTouch = (type, clientY, cancelable = true) => {
