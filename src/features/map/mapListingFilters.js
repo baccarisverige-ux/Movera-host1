@@ -5,6 +5,7 @@ export const MAP_AMENITY_FILTERS = Object.freeze([
   { id: 'pool', label: 'Piscine' },
   { id: 'parking', label: 'Parking' },
   { id: 'ac', label: 'Clim' },
+  { id: 'tv', label: 'TV' },
   { id: 'pet', label: 'Animaux' },
 ])
 
@@ -15,6 +16,7 @@ const AMENITY_MATCHERS = Object.freeze({
   pool: (amenities) => amenities.includes('Piscine'),
   parking: (amenities) => amenities.includes('Parking'),
   ac: (amenities) => amenities.includes('Climatisation'),
+  tv: (amenities) => amenities.includes('Télévision'),
   pet: (_amenities, listingId) => PET_FRIENDLY_LISTING_IDS.has(listingId),
 })
 
