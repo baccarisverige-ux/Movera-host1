@@ -60,8 +60,16 @@ test('first-time traveler completes the full Movera host procedure before reachi
   await continueOnboarding(page)
 
   await expect(onboarding).toHaveAttribute('data-screen', 'amenities')
+  await expect(page.getByRole('heading', { name: 'Les indispensables' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Confort apprécié' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Équipements & services' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Cadre & emplacement' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Sèche-linge/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Machine à café/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Borne de recharge/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Accès plage/ })).toBeVisible()
   await page.getByRole('button', { name: 'Piscine' }).click()
-  await page.getByRole('button', { name: 'TV' }).click()
+  await page.getByRole('button', { name: 'Télévision' }).click()
   await continueOnboarding(page)
 
   await expect(onboarding).toHaveAttribute('data-screen', 'photos')
