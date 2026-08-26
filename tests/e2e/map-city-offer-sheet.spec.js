@@ -10,6 +10,7 @@ test('La Marsa map exposes only its mapped offers in the full-width Motion botto
 
   const pageMap = page.getByTestId('page-map')
   const sheet = page.getByTestId('map-offer-sheet')
+  const panel = sheet.locator('.map-offer-sheet__panel')
   await expect(pageMap).toBeVisible()
   await expect(pageMap).toHaveAttribute('data-city-offer-count', '2')
   await expect(sheet).toBeVisible()
@@ -23,39 +24,54 @@ test('La Marsa map exposes only its mapped offers in the full-width Motion botto
   await expect(sheet.locator('[data-listing-id="villa-perle"]')).toHaveCount(0)
 
   const mapBox = await pageMap.boundingBox()
-  const collapsedBox = await sheet.boundingBox()
+  const collapsedPanelBox = await panel.boundingBox()
   expect(mapBox).not.toBeNull()
-  expect(collapsedBox).not.toBeNull()
-  expect(Math.abs(collapsedBox.x - mapBox.x)).toBeLessThanOrEqual(1)
-  expect(Math.abs(collapsedBox.width - mapBox.width)).toBeLessThanOrEqual(1)
+  expect(collapsedPanelBox).not.toBeNull()
+  expect(Math.abs(collapsedPanelBox.x - mapBox.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(collapsedPanelBox.width - mapBox.width)).toBeLessThanOrEqual(1)
 
-  const visibleCollapsedHeight = mapBox.y + mapBox.height - collapsedBox.y
+  const visibleCollapsedHeight = mapBox.y + mapBox.height - collapsedPanelBox.y
   expect(visibleCollapsedHeight).toBeGreaterThanOrEqual(45)
   expect(visibleCollapsedHeight).toBeLessThanOrEqual(85)
 })
 
-test('sheet attachment approaches the fixed header progressively without switching to list scroll mid-gesture', async ({ page }) => {
+test('sheet attachment uses one Motion translation with a stable structural header offset', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=la-marsa')
 
   const pageMap = page.getByTestId('page-map')
   const surface = page.getByTestId('map-surface')
   const sheet = page.getByTestId('map-offer-sheet')
+  const panel = sheet.locator('.map-offer-sheet__panel')
+  const spacer = page.getByTestId('map-offer-sheet-header-spacer')
   const handle = page.getByTestId('map-offer-sheet-handle')
   const list = sheet.locator('.map-offer-sheet__list')
+  const listContent = page.getByTestId('map-offer-sheet-list-content')
+  const header = page.locator('.b225-map-top')
+
   await expect(sheet).toHaveAttribute('data-progress', '0')
   await expect(sheet).toHaveAttribute('data-snap-state', 'collapsed')
-  await expect(handle).toHaveAttribute('data-header-offset', '0')
+  await expect(list).toHaveAttribute('data-scroll-enabled', 'false')
+  await expect(listContent).toHaveCSS('transform', 'none')
 
-  const zoomBefore = await numberAttribute(surface, 'data-zoom')
   const mapBox = await pageMap.boundingBox()
+  const headerBox = await header.boundingBox()
   const sheetBox = await sheet.boundingBox()
+  const panelBox = await panel.boundingBox()
+  const spacerBox = await spacer.boundingBox()
   const handleBox = await handle.boundingBox()
   expect(mapBox).not.toBeNull()
+  expect(headerBox).not.toBeNull()
   expect(sheetBox).not.toBeNull()
+  expect(panelBox).not.toBeNull()
+  expect(spacerBox).not.toBeNull()
   expect(handleBox).not.toBeNull()
 
-  const travel = sheetBox.y - mapBox.y
+  const structuralOffset = panelBox.y - sheetBox.y
+  expect(Math.abs(structuralOffset - headerBox.height)).toBeLessThanOrEqual(2)
+  expect(Math.abs(spacerBox.height - headerBox.height)).toBeLessThanOrEqual(2)
+
+  const travel = panelBox.y - (headerBox.y + headerBox.height)
   const x = handleBox.x + handleBox.width / 2
   const y = handleBox.y + handleBox.height / 2
   await page.mouse.move(x, y)
@@ -65,18 +81,35 @@ test('sheet attachment approaches the fixed header progressively without switchi
   await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.8)
   await expect(sheet).toHaveAttribute('data-snap-state', 'moving')
   await expect(list).toHaveAttribute('data-scroll-enabled', 'false')
-  const firstOffset = await numberAttribute(handle, 'data-header-offset')
-  expect(firstOffset).toBeGreaterThan(0)
 
-  await page.mouse.move(x, y - travel * 0.93, { steps: 8 })
-  await expect.poll(() => numberAttribute(handle, 'data-header-offset')).toBeGreaterThan(firstOffset)
+  const sheetBoxAt84 = await sheet.boundingBox()
+  const panelBoxAt84 = await panel.boundingBox()
+  expect(sheetBoxAt84).not.toBeNull()
+  expect(panelBoxAt84).not.toBeNull()
+  expect(Math.abs((panelBoxAt84.y - sheetBoxAt84.y) - structuralOffset)).toBeLessThanOrEqual(1.5)
+  const zoomAt84 = await numberAttribute(surface, 'data-zoom')
+
+  await page.mouse.move(x, y - travel * 0.94, { steps: 10 })
+  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThan(0.9)
   await expect(list).toHaveAttribute('data-scroll-enabled', 'false')
-  await expect.poll(() => numberAttribute(surface, 'data-zoom')).toBeGreaterThan(zoomBefore)
+  await expect(listContent).toHaveCSS('transform', 'none')
+
+  const sheetBoxAt94 = await sheet.boundingBox()
+  const panelBoxAt94 = await panel.boundingBox()
+  expect(sheetBoxAt94).not.toBeNull()
+  expect(panelBoxAt94).not.toBeNull()
+  expect(Math.abs((panelBoxAt94.y - sheetBoxAt94.y) - structuralOffset)).toBeLessThanOrEqual(1.5)
+  expect(await numberAttribute(surface, 'data-zoom')).toBeCloseTo(zoomAt84, 4)
 
   await page.mouse.up()
   await expect(sheet).toHaveAttribute('data-expanded', 'true')
   await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
+  await expect(panel).toHaveAttribute('data-attachment-state', 'attached')
   await expect(list).toHaveAttribute('data-scroll-enabled', 'true')
+
+  const attachedPanelBox = await panel.boundingBox()
+  expect(attachedPanelBox).not.toBeNull()
+  expect(Math.abs(attachedPanelBox.y - (headerBox.y + headerBox.height))).toBeLessThanOrEqual(2)
 })
 
 test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible below the fixed header', async ({ page }) => {
@@ -85,6 +118,7 @@ test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible 
 
   const pageMap = page.getByTestId('page-map')
   const sheet = page.getByTestId('map-offer-sheet')
+  const panel = sheet.locator('.map-offer-sheet__panel')
   const surface = page.getByTestId('map-surface')
   const engine = page.getByTestId('map-engine')
   const topPanel = page.locator('.b225-map-top')
@@ -94,12 +128,13 @@ test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible 
   await page.getByRole('button', { name: 'Afficher la liste des offres' }).click()
   await expect(sheet).toHaveAttribute('data-expanded', 'true')
   await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
+  await expect(panel).toHaveAttribute('data-attachment-state', 'attached')
   await expect(sheet.locator('[data-listing-id]')).toHaveCount(8)
   await expect(dragZone).toContainText('8 offres')
   await expect(dragZone).toContainText('Grand Tunis')
-  await expect(sheet).toHaveCSS('box-shadow', 'none')
-  await expect(sheet).toHaveCSS('border-top-left-radius', '0px')
-  await expect(sheet).toHaveCSS('border-top-right-radius', '0px')
+  await expect(panel).toHaveCSS('box-shadow', 'none')
+  await expect(panel).toHaveCSS('border-top-left-radius', '0px')
+  await expect(panel).toHaveCSS('border-top-right-radius', '0px')
 
   const list = sheet.locator('.map-offer-sheet__list')
   await expect(list).toHaveCSS('scroll-snap-type', 'none')
@@ -110,11 +145,13 @@ test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible 
 
   const mapBox = await pageMap.boundingBox()
   const sheetBox = await sheet.boundingBox()
+  const panelBox = await panel.boundingBox()
   const topPanelBox = await topPanel.boundingBox()
   const dragZoneBox = await dragZone.boundingBox()
   const mediaBox = await sheet.locator('[data-listing-id="villa-perle"] .map-offer-sheet__media').boundingBox()
   expect(mapBox).not.toBeNull()
   expect(sheetBox).not.toBeNull()
+  expect(panelBox).not.toBeNull()
   expect(topPanelBox).not.toBeNull()
   expect(dragZoneBox).not.toBeNull()
   expect(mediaBox).not.toBeNull()
@@ -123,7 +160,8 @@ test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible 
   const finalHeaderOffset = await numberAttribute(dragZone, 'data-header-offset')
   expect(Math.abs(finalHeaderOffset - topPanelBox.height)).toBeLessThanOrEqual(2)
   expect(Math.abs(sheetBox.y - mapBox.y)).toBeLessThanOrEqual(2)
-  expect(dragZoneBox.y).toBeGreaterThanOrEqual(headerBottom - 2)
+  expect(Math.abs(panelBox.y - headerBottom)).toBeLessThanOrEqual(2)
+  expect(Math.abs(dragZoneBox.y - panelBox.y)).toBeLessThanOrEqual(2)
   expect(mediaBox.y).toBeGreaterThanOrEqual(dragZoneBox.y + dragZoneBox.height - 2)
   expect(mediaBox.width).toBeGreaterThan(340)
   expect(mediaBox.height).toBeGreaterThan(240)
