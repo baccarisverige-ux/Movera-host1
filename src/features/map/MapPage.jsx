@@ -11,6 +11,8 @@ import { listingMatchesMapFilters } from './mapListingFilters.js'
 import { MapOfferSheet } from './MapOfferSheet.jsx'
 import { MapSearchFilters } from './MapSearchFilters.jsx'
 
+const MAP_MOTION_PROGRESS_LIMIT = 0.72
+
 const LISTING_MARKERS = Object.freeze(
   listingCatalog
     .map((listing) => {
@@ -186,6 +188,14 @@ export function MapPage({ onNavigate }) {
   }
 
   const handleSheetProgress = useCallback((progress) => {
+    if (progress > 0.14 && !selectedListingId && cityListings[0]) setSelectedListingId(cityListings[0].id)
+
+    // The final attachment phase is intentionally map-idle. Once the sheet is
+    // covering most of the map, continuing to pan/zoom tiles only competes
+    // with the spring animation on the iOS main thread and can create a small
+    // visual vibration at the header boundary.
+    if (progress > MAP_MOTION_PROGRESS_LIMIT) return
+
     const base = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
     const activeId = selectedListingId || cityListings[0]?.id
     const activeMarker = activeId ? visibleMarkers.find((marker) => marker.id === activeId) : null
@@ -195,7 +205,6 @@ export function MapPage({ onNavigate }) {
     const lng = activeMarker ? base.lng + (activeMarker.lng - base.lng) * focusStrength : base.lng
     const zoom = Math.min(17, base.zoom + progress * 1.45)
 
-    if (progress > 0.14 && !selectedListingId && cityListings[0]) setSelectedListingId(cityListings[0].id)
     issueViewportCommand({ lat, lng, zoom })
   }, [handoffViewport, listingViewport, destinationViewport, selectedListingId, cityListings, visibleMarkers, setSelectedListingId, issueViewportCommand])
 
