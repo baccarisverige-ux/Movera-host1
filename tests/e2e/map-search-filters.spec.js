@@ -19,10 +19,19 @@ test('amenity filters update offers and markers without moving the map', async (
   await expect(amenityFilters.locator('[data-filter-id="pool"]')).toContainText('Piscine')
   await expect(amenityFilters.locator('[data-filter-id="parking"]')).toContainText('Parking')
   await expect(amenityFilters.locator('[data-filter-id="ac"]')).toContainText('Clim')
+  await expect(amenityFilters.locator('[data-filter-id="tv"]')).toContainText('TV')
   await expect(amenityFilters.locator('[data-filter-id="pet"]')).toContainText('Animaux')
 
   await expect(pageMap).toHaveAttribute('data-city-offer-count', '8')
   const zoomBefore = await numberAttribute(surface, 'data-zoom')
+
+  await amenityFilters.locator('[data-filter-id="tv"]').click()
+  await expect(amenityFilters.locator('[data-filter-id="tv"]')).toHaveAttribute('aria-pressed', 'true')
+  await expect(pageMap).toHaveAttribute('data-city-offer-count', '6')
+  expect(await numberAttribute(surface, 'data-zoom')).toBeCloseTo(zoomBefore, 4)
+
+  await page.getByRole('button', { name: 'Réinitialiser les filtres' }).click()
+  await expect(pageMap).toHaveAttribute('data-city-offer-count', '8')
 
   await amenityFilters.locator('[data-filter-id="pool"]').click()
   await expect(amenityFilters.locator('[data-filter-id="pool"]')).toHaveAttribute('aria-pressed', 'true')
