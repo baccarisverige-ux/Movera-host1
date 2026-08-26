@@ -1,19 +1,22 @@
 import { useEffect, useRef } from 'react'
 
 const EDGE_EPSILON_PX = 1
-const DIRECTION_EPSILON_PX = 1.5
+const DIRECTION_EPSILON_PX = 2
 
 /**
- * Keeps offer scrolling native, but when the sheet is fully open and a
- * downward finger gesture reaches the top of the offer list, ownership of the
- * same gesture is handed to the sheet so it can close from anywhere on a card.
- * This hook never talks to the map engine.
+ * Keeps native list scrolling when the sheet is fully open, while allowing
+ * the sheet itself to be dragged directly from an offer/card image whenever
+ * it is not fully open. At the top of an expanded list, a downward gesture is
+ * handed back to the sheet so it can close from the card as well.
+ *
+ * This hook is intentionally isolated from the map engine.
  */
 export function useMapOfferScrollSheetHandoff({ expanded, externalDrag }) {
   const nodeRef = useRef(null)
   const gestureRef = useRef(null)
   const externalDragRef = useRef(externalDrag)
   const expandedRef = useRef(expanded)
+  const suppressNextClickRef = useRef(false)
 
   useEffect(() => { externalDragRef.current = externalDrag }, [externalDrag])
   useEffect(() => { expandedRef.current = expanded }, [expanded])
@@ -21,6 +24,17 @@ export function useMapOfferScrollSheetHandoff({ expanded, externalDrag }) {
   useEffect(() => {
     const node = nodeRef.current
     if (!node) return undefined
+
+    const beginHandoff = (state, clientY, event) => {
+      const started = externalDragRef.current?.start(state.lastClientY)
+      if (!started) return false
+      state.handedOff = true
+      suppressNextClickRef.current = true
+      event.preventDefault()
+      event.stopPropagation()
+      externalDragRef.current?.move(clientY)
+      return true
+    }
 
     const onTouchStart = (event) => {
       const clientY = event.touches?.[0]?.clientY
@@ -42,17 +56,19 @@ export function useMapOfferScrollSheetHandoff({ expanded, externalDrag }) {
         return
       }
 
-      const movingFingerDown = clientY - state.lastClientY > DIRECTION_EPSILON_PX
+      const deltaY = clientY - state.lastClientY
+      const movedEnough = Math.abs(deltaY) > DIRECTION_EPSILON_PX
+      const movingFingerDown = deltaY > DIRECTION_EPSILON_PX
       const atTop = node.scrollTop <= EDGE_EPSILON_PX
 
-      if (expandedRef.current && atTop && movingFingerDown) {
-        const started = externalDragRef.current?.start(state.lastClientY)
-        if (started) {
-          state.handedOff = true
-          event.preventDefault()
-          event.stopPropagation()
-          externalDragRef.current?.move(clientY)
-        }
+      // While collapsed or midway, the list is not a scrolling surface: any
+      // deliberate vertical gesture from a card/image owns the whole sheet.
+      if (!expandedRef.current && movedEnough) {
+        beginHandoff(state, clientY, event)
+      // Once fully open, keep native scrolling. Only a downward gesture at the
+      // top edge hands control back to the sheet so the user can close it.
+      } else if (expandedRef.current && atTop && movingFingerDown) {
+        beginHandoff(state, clientY, event)
       }
 
       state.lastClientY = clientY
@@ -66,6 +82,13 @@ export function useMapOfferScrollSheetHandoff({ expanded, externalDrag }) {
       else externalDragRef.current?.end()
     }
 
+    const onClickCapture = (event) => {
+      if (!suppressNextClickRef.current) return
+      suppressNextClickRef.current = false
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
     const onTouchEnd = () => finish(false)
     const onTouchCancel = () => finish(true)
 
@@ -73,12 +96,14 @@ export function useMapOfferScrollSheetHandoff({ expanded, externalDrag }) {
     node.addEventListener('touchmove', onTouchMove, { passive: false })
     node.addEventListener('touchend', onTouchEnd, { passive: true })
     node.addEventListener('touchcancel', onTouchCancel, { passive: true })
+    node.addEventListener('click', onClickCapture, true)
 
     return () => {
       node.removeEventListener('touchstart', onTouchStart)
       node.removeEventListener('touchmove', onTouchMove)
       node.removeEventListener('touchend', onTouchEnd)
       node.removeEventListener('touchcancel', onTouchCancel)
+      node.removeEventListener('click', onClickCapture, true)
     }
   }, [])
 
