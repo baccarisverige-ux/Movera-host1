@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { startOAuthSignIn } from '../auth/authClient.js'
-import { useAuthSession } from '../auth/authSession.js'
+import { useAuthSession, writeAuthSession } from '../auth/authSession.js'
 import { ProfilePage } from './ProfilePage.jsx'
 import './profile-page.css'
 import './profile-gateway-page.css'
@@ -21,6 +21,10 @@ function BackIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
 }
 
+function TestUserIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25"/><path d="M5.5 20c.7-4 3-6 6.5-6s5.8 2 6.5 6"/><path d="M18.5 4.5 20 6l2.5-2.5"/></svg>
+}
+
 export function ProfileGatewayPage({ onNavigate }) {
   const { isAuthenticated } = useAuthSession()
   const [standardOpen, setStandardOpen] = useState(false)
@@ -39,6 +43,18 @@ export function ProfileGatewayPage({ onNavigate }) {
     setFeedback(null)
     const result = startOAuthSignIn(provider, returnTo || '/profile')
     if (!result.ok) setFeedback({ type: 'info', message: result.message })
+  }
+
+  const startTestSession = () => {
+    setFeedback(null)
+    writeAuthSession({
+      authenticated: true,
+      userId: 'movera-demo-user',
+      displayName: 'Compte test Movera',
+      provider: 'demo',
+      email: 'demo@movera.test',
+    })
+    if (returnTo) onNavigate(returnTo)
   }
 
   if (isAuthenticated) return <ProfilePage onNavigate={onNavigate} />
@@ -77,6 +93,14 @@ export function ProfileGatewayPage({ onNavigate }) {
           </button>
           <button type="button" className="profile-social-button profile-social-button--email" onClick={() => { setStandardOpen(true); setFeedback(null) }}>
             <MailIcon /><span>Continuer avec une adresse e-mail</span>
+          </button>
+        </div>
+
+        <div className="profile-test-login" aria-label="Accès de démonstration">
+          <span className="profile-test-login__label">Test rapide</span>
+          <button type="button" className="profile-test-login__button" onClick={startTestSession} data-testid="profile-test-login">
+            <TestUserIcon />
+            <span>Connexion test</span>
           </button>
         </div>
 
