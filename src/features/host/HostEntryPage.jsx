@@ -14,5 +14,5 @@ export function HostEntryPage({ onNavigate }) {
     return <HostOnboardingPage onNavigate={onNavigate} onActivated={setActivatedProfile} />
   }
 
-  return <HostCalendarPage onNavigate={onNavigate} />
+  return <HostCalendarPage onNavigate={onNavigate} hostProfile={activeProfile} />
 }
