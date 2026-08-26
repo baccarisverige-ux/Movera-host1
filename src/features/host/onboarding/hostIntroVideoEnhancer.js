@@ -10,7 +10,7 @@ function createIntroVideo() {
   video.src = HOST_INTRO_VIDEO_SRC
   video.muted = true
   video.defaultMuted = true
-  video.loop = true
+  video.loop = false
   video.playsInline = true
   video.preload = 'auto'
   video.setAttribute('muted', '')
