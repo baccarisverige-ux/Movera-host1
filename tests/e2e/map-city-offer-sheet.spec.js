@@ -63,20 +63,24 @@ test('Motion drag progressively zooms the map while the sheet travels beneath th
   await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeGreaterThanOrEqual(0.48)
 })
 
-test('fully expanded list sits under the white header as one continuous page and scrolls independently', async ({ page }) => {
+test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible below the fixed header', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/Movera-host1/map?destination=gammarth')
+  await page.goto('/Movera-host1/map')
 
   const pageMap = page.getByTestId('page-map')
   const sheet = page.getByTestId('map-offer-sheet')
   const surface = page.getByTestId('map-surface')
   const engine = page.getByTestId('map-engine')
   const topPanel = page.locator('.b225-map-top')
+  const dragZone = page.getByTestId('map-offer-sheet-handle')
 
+  await expect(pageMap).toHaveAttribute('data-city-offer-count', '8')
   await page.getByRole('button', { name: 'Afficher la liste des offres' }).click()
   await expect(sheet).toHaveAttribute('data-expanded', 'true')
   await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
-  await expect(sheet.locator('[data-listing-id]')).toHaveCount(2)
+  await expect(sheet.locator('[data-listing-id]')).toHaveCount(8)
+  await expect(dragZone).toContainText('8 offres')
+  await expect(dragZone).toContainText('Grand Tunis')
   await expect(sheet).toHaveCSS('box-shadow', 'none')
   await expect(sheet).toHaveCSS('border-top-left-radius', '0px')
   await expect(sheet).toHaveCSS('border-top-right-radius', '0px')
@@ -90,11 +94,20 @@ test('fully expanded list sits under the white header as one continuous page and
   const mapBox = await pageMap.boundingBox()
   const sheetBox = await sheet.boundingBox()
   const topPanelBox = await topPanel.boundingBox()
+  const dragZoneBox = await dragZone.boundingBox()
+  const mediaBox = await sheet.locator('[data-listing-id="villa-perle"] .map-offer-sheet__media').boundingBox()
   expect(mapBox).not.toBeNull()
   expect(sheetBox).not.toBeNull()
   expect(topPanelBox).not.toBeNull()
+  expect(dragZoneBox).not.toBeNull()
+  expect(mediaBox).not.toBeNull()
+
+  const headerBottom = topPanelBox.y + topPanelBox.height
   expect(Math.abs(sheetBox.y - mapBox.y)).toBeLessThanOrEqual(2)
-  expect(topPanelBox.y + topPanelBox.height).toBeGreaterThan(sheetBox.y + 50)
+  expect(dragZoneBox.y).toBeGreaterThanOrEqual(headerBottom - 2)
+  expect(mediaBox.y).toBeGreaterThanOrEqual(dragZoneBox.y + dragZoneBox.height - 2)
+  expect(mediaBox.width).toBeGreaterThan(340)
+  expect(mediaBox.height).toBeGreaterThan(240)
 
   const zOrder = await page.evaluate(() => {
     const header = document.querySelector('.b225-map-top')
@@ -108,26 +121,57 @@ test('fully expanded list sits under the white header as one continuous page and
   expect(zOrder.header).toBeGreaterThan(zOrder.sheet)
   expect(zOrder.parentClass).toContain('b225-map-page')
 
-  const mediaBox = await sheet.locator('[data-listing-id="villa-perle"] .map-offer-sheet__media').boundingBox()
-  expect(mediaBox).not.toBeNull()
-  expect(mediaBox.width).toBeGreaterThan(340)
-  expect(mediaBox.height).toBeGreaterThan(240)
-
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(350)
   const zoomBeforeScroll = await numberAttribute(surface, 'data-zoom')
   const selectedBeforeScroll = await engine.getAttribute('data-selected-listing-id')
   const scrollBefore = await list.evaluate((node) => node.scrollTop)
 
   await list.evaluate((node) => node.scrollBy({ top: 360, behavior: 'instant' }))
   await expect.poll(() => list.evaluate((node) => node.scrollTop)).toBeGreaterThan(scrollBefore)
-  await page.waitForTimeout(250)
+  await page.waitForTimeout(200)
 
   expect(await numberAttribute(surface, 'data-zoom')).toBeCloseTo(zoomBeforeScroll, 4)
   expect(await engine.getAttribute('data-selected-listing-id')).toBe(selectedBeforeScroll)
+})
 
-  await sheet.locator('[data-listing-id="villa-emeraude"]').click()
-  await expect(engine).toHaveAttribute('data-selected-listing-id', 'villa-emeraude')
-  await expect.poll(() => numberAttribute(surface, 'data-zoom')).toBeGreaterThanOrEqual(13.6)
+test('one remaining offer can close the fully open sheet by swiping directly on its image', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/Movera-host1/map?destination=gammarth')
+
+  const pageMap = page.getByTestId('page-map')
+  const sheet = page.getByTestId('map-offer-sheet')
+  await page.getByRole('button', { name: 'Piscine' }).click()
+  await expect(pageMap).toHaveAttribute('data-city-offer-count', '1')
+  await expect(sheet.locator('[data-listing-id]')).toHaveCount(1)
+  await expect(sheet.locator('[data-listing-id="villa-emeraude"]')).toHaveCount(1)
+
+  await page.getByRole('button', { name: 'Afficher la liste des offres' }).click()
+  await expect(sheet).toHaveAttribute('data-expanded', 'true')
+  await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
+
+  const list = sheet.locator('.map-offer-sheet__list')
+  await list.evaluate((node) => { node.scrollTop = 0 })
+  const image = sheet.locator('[data-listing-id="villa-emeraude"] .map-offer-sheet__media')
+  await expect(image).toBeVisible()
+
+  await image.evaluate((node) => {
+    const fireTouch = (type, clientY, cancelable = true) => {
+      const event = new Event(type, { bubbles: true, cancelable })
+      Object.defineProperty(event, 'touches', {
+        configurable: true,
+        value: type === 'touchend' ? [] : [{ clientY }],
+      })
+      node.dispatchEvent(event)
+    }
+
+    fireTouch('touchstart', 310, false)
+    fireTouch('touchmove', 350)
+    fireTouch('touchmove', 430)
+    fireTouch('touchend', 430, false)
+  })
+
+  await expect.poll(() => numberAttribute(sheet, 'data-progress')).toBeLessThan(0.86)
+  await expect(sheet).toHaveAttribute('data-expanded', 'false')
 })
 
 test('downward swipe starting on an offer can close the fully open sheet', async ({ page }) => {
