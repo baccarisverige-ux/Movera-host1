@@ -1,22 +1,9 @@
 import {
   ArrowLeftIcon,
-  ParkingIcon,
-  PawPrintIcon,
   SlidersHorizontalIcon,
-  SnowflakeIcon,
-  WavesIcon,
-  WifiIcon,
 } from '../../shared/icons/AppIcons.jsx'
 import { MAP_AMENITY_FILTERS } from './mapListingFilters.js'
 import './map-search-filters.css'
-
-const AMENITY_ICON_BY_ID = Object.freeze({
-  wifi: WifiIcon,
-  pool: WavesIcon,
-  parking: ParkingIcon,
-  ac: SnowflakeIcon,
-  pet: PawPrintIcon,
-})
 
 export function MapSearchFilters({
   cityLabel,
@@ -62,7 +49,6 @@ export function MapSearchFilters({
       <div className="map-filter-rail map-filter-rail--amenities" data-testid="map-amenity-filters" aria-label="Équipements">
         {MAP_AMENITY_FILTERS.map((filter) => {
           const active = amenityFilters.has(filter.id)
-          const AmenityIcon = AMENITY_ICON_BY_ID[filter.id]
           return (
             <button
               key={filter.id}
@@ -73,7 +59,6 @@ export function MapSearchFilters({
               aria-pressed={active}
               onClick={() => onAmenityFilterToggle(filter.id)}
             >
-              {AmenityIcon ? <AmenityIcon className="map-filter-chip__icon" /> : null}
               <span>{filter.label}</span>
             </button>
           )
