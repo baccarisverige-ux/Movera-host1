@@ -32,19 +32,37 @@ function createIntroVideo() {
   return video
 }
 
-function createPropertyTypeVisual() {
-  const visual = document.createElement('div')
-  visual.className = 'host-onboarding__property-type-visual'
+function triggerHostAction(selector) {
+  const button = document.querySelector(`.host-onboarding[data-screen="property-type"] ${selector}`)
+  button?.click()
+}
+
+function createPropertyTypeScreen() {
+  const screen = document.createElement('div')
+  screen.className = 'host-onboarding__bb-screen'
 
   const image = document.createElement('img')
+  image.className = 'host-onboarding__bb-screen-image'
   image.src = HOST_PROPERTY_TYPE_IMAGE_SRC
-  image.alt = ''
+  image.alt = 'Choix du type de logement'
   image.decoding = 'async'
   image.loading = 'eager'
-  image.setAttribute('aria-hidden', 'true')
+  image.draggable = false
 
-  visual.append(image)
-  return visual
+  const backHit = document.createElement('button')
+  backHit.type = 'button'
+  backHit.className = 'host-onboarding__bb-hit host-onboarding__bb-hit--back'
+  backHit.setAttribute('aria-label', 'Retour')
+  backHit.addEventListener('click', () => triggerHostAction('.host-onboarding__back'))
+
+  const continueHit = document.createElement('button')
+  continueHit.type = 'button'
+  continueHit.className = 'host-onboarding__bb-hit host-onboarding__bb-hit--continue'
+  continueHit.setAttribute('aria-label', 'Continuer')
+  continueHit.addEventListener('click', () => triggerHostAction('.host-onboarding__primary'))
+
+  screen.append(image, backHit, continueHit)
+  return screen
 }
 
 function enhanceHostIntro() {
@@ -57,12 +75,10 @@ function enhanceHostIntro() {
 
 function enhancePropertyTypeScreen() {
   const step = document.querySelector(PROPERTY_TYPE_SELECTOR)
-  if (!step || step.querySelector('.host-onboarding__property-type-visual')) return
+  if (!step || step.querySelector('.host-onboarding__bb-screen')) return
 
-  const choices = step.querySelector('.host-onboarding__choice-grid')
-  if (!choices) return
-
-  choices.before(createPropertyTypeVisual())
+  step.classList.add('host-onboarding__step--bb-screen')
+  step.append(createPropertyTypeScreen())
 }
 
 function enhanceHostOnboardingVisuals() {
