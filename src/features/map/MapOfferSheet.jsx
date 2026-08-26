@@ -1,11 +1,14 @@
+import { useEffect, useState } from 'react'
 import { MotionList, MotionListItem } from '../../shared/motion/MotionList.jsx'
 import { MapOfferSheetMotionSurface } from './motion/MapOfferSheetMotionSurface.jsx'
 import { MAP_OFFER_ITEM_MOTION } from './motion/mapOfferSheetMotion.config.js'
 import { useMapOfferScrollSheetHandoff } from './motion/useMapOfferScrollSheetHandoff.js'
 import './map-offer-sheet.css'
 
-const FULLY_EXPANDED_PROGRESS = 0.985
-const ATTACH_START_PROGRESS = 0.78
+const ATTACH_START_PROGRESS = 0.74
+const ATTACH_END_PROGRESS = 0.965
+const ATTACHED_ENTER_PROGRESS = 0.995
+const ATTACHED_EXIT_PROGRESS = 0.92
 
 function clamp01(value) {
   return Math.min(1, Math.max(0, value))
@@ -14,6 +17,19 @@ function clamp01(value) {
 function smoothstep(value) {
   const t = clamp01(value)
   return t * t * (3 - 2 * t)
+}
+
+function useStableAttached(progress) {
+  const [attached, setAttached] = useState(() => progress >= ATTACHED_ENTER_PROGRESS)
+
+  useEffect(() => {
+    setAttached((current) => {
+      if (current) return progress > ATTACHED_EXIT_PROGRESS
+      return progress >= ATTACHED_ENTER_PROGRESS
+    })
+  }, [progress])
+
+  return attached
 }
 
 function ChevronIcon() {
@@ -25,10 +41,10 @@ function StarIcon() {
 }
 
 function MapOfferSheetContent({ listings, cityLabel, headerHeight, selectedListingId, onSelectedListingChange, progress, startDrag, toggleExpanded, externalDrag }) {
-  const fullyExpanded = progress >= FULLY_EXPANDED_PROGRESS
-  const attachProgress = smoothstep((progress - ATTACH_START_PROGRESS) / (1 - ATTACH_START_PROGRESS))
+  const attached = useStableAttached(progress)
+  const attachProgress = smoothstep((progress - ATTACH_START_PROGRESS) / (ATTACH_END_PROGRESS - ATTACH_START_PROGRESS))
   const headerOffset = Math.max(0, headerHeight || 0) * attachProgress
-  const listRef = useMapOfferScrollSheetHandoff({ expanded: fullyExpanded, externalDrag })
+  const listRef = useMapOfferScrollSheetHandoff({ expanded: attached, externalDrag })
 
   const selectListing = (listingId) => {
     onSelectedListingChange?.(listingId)
@@ -40,6 +56,7 @@ function MapOfferSheetContent({ listings, cityLabel, headerHeight, selectedListi
         className="map-offer-sheet__drag-zone"
         data-testid="map-offer-sheet-handle"
         data-attachment-progress={Math.round(attachProgress * 100) / 100}
+        data-attachment-state={attached ? 'attached' : 'moving'}
         data-header-offset={Math.round(headerOffset)}
         onPointerDown={startDrag}
         style={{ transform: `translate3d(0, ${headerOffset}px, 0)` }}
@@ -58,50 +75,57 @@ function MapOfferSheetContent({ listings, cityLabel, headerHeight, selectedListi
         <MotionList
           nodeRef={listRef}
           className="map-offer-sheet__list"
-          data-scroll-enabled={fullyExpanded ? 'true' : 'false'}
+          data-scroll-enabled={attached ? 'true' : 'false'}
           data-motion-list="map-offers"
           data-map-scroll="independent"
           data-sheet-handoff="drag-from-offer"
-          style={{ paddingTop: `${headerOffset}px` }}
         >
-          {listings.map((listing, index) => {
-            const selected = listing.id === selectedListingId || (!selectedListingId && index === 0 && progress > 0.12)
-            return (
-              <MotionListItem
-                as="button"
-                type="button"
-                key={listing.id}
-                index={index}
-                active={selected}
-                config={MAP_OFFER_ITEM_MOTION}
-                className="map-offer-sheet__card"
-                data-listing-id={listing.id}
-                data-active={selected ? 'true' : 'false'}
-                onClick={() => selectListing(listing.id)}
-              >
-                <span className="map-offer-sheet__media">
-                  <img src={listing.image} alt="" loading={index < 2 ? 'eager' : 'lazy'} />
-                  {listing.badge ? <span className="map-offer-sheet__badge">{listing.badge}</span> : null}
-                  <span className="map-offer-sheet__position" aria-hidden="true">{index + 1}/{listings.length}</span>
-                </span>
-                <span className="map-offer-sheet__card-copy">
-                  <span className="map-offer-sheet__card-head">
-                    <span>
-                      <strong>{listing.title}</strong>
-                      <small>{listing.location}, Tunisie</small>
-                    </span>
-                    <span className="map-offer-sheet__rating"><StarIcon />{listing.rating}</span>
+          <div
+            className="map-offer-sheet__list-content"
+            data-testid="map-offer-sheet-list-content"
+            style={{ transform: `translate3d(0, ${headerOffset}px, 0)` }}
+          >
+            {listings.map((listing, index) => {
+              const selected = listing.id === selectedListingId || (!selectedListingId && index === 0 && progress > 0.12)
+              return (
+                <MotionListItem
+                  as="button"
+                  type="button"
+                  key={listing.id}
+                  index={index}
+                  active={selected}
+                  config={MAP_OFFER_ITEM_MOTION}
+                  className="map-offer-sheet__card"
+                  data-listing-id={listing.id}
+                  data-active={selected ? 'true' : 'false'}
+                  onClick={() => selectListing(listing.id)}
+                >
+                  <span className="map-offer-sheet__media">
+                    <img src={listing.image} alt="" loading={index < 2 ? 'eager' : 'lazy'} />
+                    {listing.badge ? <span className="map-offer-sheet__badge">{listing.badge}</span> : null}
+                    <span className="map-offer-sheet__position" aria-hidden="true">{index + 1}/{listings.length}</span>
                   </span>
-                  <span className="map-offer-sheet__price"><b>{listing.price} {listing.currency}</b> <span>/ nuit</span></span>
-                </span>
-              </MotionListItem>
-            )
-          })}
+                  <span className="map-offer-sheet__card-copy">
+                    <span className="map-offer-sheet__card-head">
+                      <span>
+                        <strong>{listing.title}</strong>
+                        <small>{listing.location}, Tunisie</small>
+                      </span>
+                      <span className="map-offer-sheet__rating"><StarIcon />{listing.rating}</span>
+                    </span>
+                    <span className="map-offer-sheet__price"><b>{listing.price} {listing.currency}</b> <span>/ nuit</span></span>
+                  </span>
+                </MotionListItem>
+              )
+            })}
+          </div>
         </MotionList>
       ) : (
-        <div className="map-offer-sheet__empty" style={{ paddingTop: `${52 + headerOffset}px` }}>
-          <strong>Aucune offre Movera dans cette ville</strong>
-          <span>La carte reste disponible pour explorer la zone.</span>
+        <div className="map-offer-sheet__empty">
+          <div className="map-offer-sheet__empty-content" style={{ transform: `translate3d(0, ${headerOffset}px, 0)` }}>
+            <strong>Aucune offre Movera dans cette ville</strong>
+            <span>La carte reste disponible pour explorer la zone.</span>
+          </div>
         </div>
       )}
     </>
