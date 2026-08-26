@@ -39,7 +39,7 @@ function MapOfferSheetContent({ listings, cityLabel, selectedListingId, onSelect
           data-scroll-enabled={progress > 0.86 ? 'true' : 'false'}
           data-motion-list="map-offers"
           data-map-scroll="independent"
-          data-sheet-handoff="close-from-list"
+          data-sheet-handoff="drag-from-offer"
         >
           {listings.map((listing, index) => {
             const selected = listing.id === selectedListingId || (!selectedListingId && index === 0 && progress > 0.12)
