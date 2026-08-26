@@ -10,6 +10,7 @@ import { FavoritesPage } from '../../features/favorites/FavoritesPage.jsx'
 import { MessagesPage } from '../../features/messages/MessagesPage.jsx'
 import { MessageThreadPage } from '../../features/messages/MessageThreadPage.jsx'
 import { ProfileGatewayPage } from '../../features/profile/ProfileGatewayPage.jsx'
+import { HostEntryPage } from '../../features/host/HostEntryPage.jsx'
 
 const lazyNamed = (loader, name) => lazy(() => loader().then(module => ({ default: module[name] })))
 const CarouselLab = lazyNamed(() => import('../../features/carousel/CarouselShell.jsx'), 'CarouselLab')
@@ -29,6 +30,8 @@ export const routeDefinitions = [
   { path: '/messages', area: 'guest', component: MessagesPage, requiresAuth: true, authFeature: 'vos messages' },
   { path: '/messages/:threadId', area: 'guest', component: MessageThreadPage, requiresAuth: true, authFeature: 'vos messages' },
   { path: '/profile', area: 'guest', component: ProfileGatewayPage },
+  { path: '/host', area: 'host', component: HostEntryPage, requiresAuth: true, authFeature: 'votre espace Hôte' },
+  { path: '/host/calendar', area: 'host', component: HostEntryPage, requiresAuth: true, authFeature: 'votre calendrier Hôte' },
   { path: '/carousel-lab', area: 'guest', component: CarouselLab },
   { path: '/gesture-lab', area: 'guest', component: GestureLab },
   { path: '/resilience-lab', area: 'guest', component: ResilienceLab },
