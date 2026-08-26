@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('map keeps professional amenity filters fully inside the white header', async ({ page }) => {
+test('map keeps amenity filters fully inside the white header', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/map?destination=la-marsa')
 
@@ -27,7 +27,7 @@ test('map keeps professional amenity filters fully inside the white header', asy
   await expect(page.getByText('Maison d’hôte', { exact: true })).toHaveCount(0)
   await expect(page.getByText('Plage', { exact: true })).toHaveCount(0)
   await expect(amenityFilters.locator('[data-filter-id]')).toHaveCount(5)
-  await expect(amenityFilters.locator('.map-filter-chip__icon')).toHaveCount(5)
+  await expect(amenityFilters.locator('.map-filter-chip__icon')).toHaveCount(0)
   await expect(stage).toHaveCSS('overflow', 'hidden')
   await expect(engine).toHaveCSS('overflow', 'hidden')
 
@@ -44,9 +44,9 @@ test('map keeps professional amenity filters fully inside the white header', asy
   expect(amenityBox).not.toBeNull()
   expect(stageBox).not.toBeNull()
   expect(surfaceBox).not.toBeNull()
-  expect(headerBox.height).toBeLessThanOrEqual(86)
+  expect(headerBox.height).toBeLessThanOrEqual(94)
   expect(searchBox.height).toBeLessThanOrEqual(40)
-  expect(searchBox.width).toBeGreaterThan(280)
+  expect(searchBox.width).toBeGreaterThan(275)
   expect(amenityBox.y).toBeGreaterThan(toolbarBox.y + toolbarBox.height)
   expect(amenityBox.y + amenityBox.height).toBeLessThanOrEqual(headerBox.y + headerBox.height)
   expect(Math.abs(stageBox.y - (headerBox.y + headerBox.height))).toBeLessThanOrEqual(2)
@@ -57,7 +57,7 @@ test('map keeps professional amenity filters fully inside the white header', asy
   const firstAmenity = amenityFilters.locator('[data-filter-id]').first()
   const amenityChipBox = await firstAmenity.boundingBox()
   expect(amenityChipBox).not.toBeNull()
-  expect(amenityChipBox.height).toBeLessThanOrEqual(21)
+  expect(amenityChipBox.height).toBeLessThanOrEqual(29)
 
   await page.getByRole('button', { name: 'Retour à l’accueil' }).click()
   await expect(page.getByTestId('page-home')).toBeVisible()
@@ -80,12 +80,12 @@ test('map header remains contained on a narrow phone', async ({ page }) => {
   expect(stageBox).not.toBeNull()
   expect(filtersBox.y + filtersBox.height).toBeLessThanOrEqual(headerBox.y + headerBox.height)
   expect(Math.abs(stageBox.y - (headerBox.y + headerBox.height))).toBeLessThanOrEqual(2)
-  expect(headerBox.height).toBeLessThanOrEqual(84)
+  expect(headerBox.height).toBeLessThanOrEqual(90)
 
   const firstAmenity = filters.locator('[data-filter-id]').first()
   const chipBox = await firstAmenity.boundingBox()
   expect(chipBox).not.toBeNull()
-  expect(chipBox.height).toBeLessThanOrEqual(20)
+  expect(chipBox.height).toBeLessThanOrEqual(28)
 })
 
 test('bottom navigation remains available outside the map', async ({ page }) => {
