@@ -5,6 +5,7 @@ export function MapOfferSheetMotionSurface({
   className,
   ariaLabel,
   children,
+  collapsedVisiblePx,
   onProgressChange,
 }) {
   return (
@@ -12,6 +13,7 @@ export function MapOfferSheetMotionSurface({
       {...MAP_OFFER_SHEET_MOTION}
       className={className}
       ariaLabel={ariaLabel}
+      collapsedVisiblePx={collapsedVisiblePx ?? MAP_OFFER_SHEET_MOTION.collapsedVisiblePx}
       onProgressChange={onProgressChange}
       testId="map-offer-sheet"
     >
