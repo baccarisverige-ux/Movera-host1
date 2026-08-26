@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { listingCatalog } from '../../entities/listing/listingCatalog.js'
 import { getListingMapPosition } from '../../entities/listing/listingMapPositions.js'
 import { ArrowLeftIcon } from '../../shared/icons/AppIcons.jsx'
@@ -102,11 +102,28 @@ export function MapPage({ onNavigate }) {
   )
   const initialViewport = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
 
+  const headerRef = useRef(null)
+  const [headerHeight, setHeaderHeight] = useState(0)
   const [selectionState, setSelectionState] = useState(() => ({ contextKey: mapContextKey, id: selectedMarker?.id || null }))
   const [viewportState, setViewportState] = useState(() => ({ contextKey: mapContextKey, command: null }))
   const [amenityFilters, setAmenityFilters] = useState(() => new Set())
   const selectedListingId = selectionState.contextKey === mapContextKey ? selectionState.id : selectedMarker?.id || null
   const viewportCommand = viewportState.contextKey === mapContextKey ? viewportState.command : null
+
+  useLayoutEffect(() => {
+    const header = headerRef.current
+    if (!header) return undefined
+
+    const measure = () => {
+      const nextHeight = header.getBoundingClientRect().height
+      setHeaderHeight((current) => Math.abs(current - nextHeight) < 0.5 ? current : nextHeight)
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(header)
+    return () => observer.disconnect()
+  }, [])
 
   const setSelectedListingId = useCallback((id) => {
     setSelectionState({ contextKey: mapContextKey, id })
@@ -250,7 +267,7 @@ export function MapPage({ onNavigate }) {
       data-context-offer-count={contextListings.length}
       data-amenity-filter-count={amenityFilters.size}
     >
-      <div className="b225-map-top">
+      <div ref={headerRef} className="b225-map-top">
         <MapSearchFilters
           cityLabel={cityLabel}
           amenityFilters={amenityFilters}
@@ -282,6 +299,7 @@ export function MapPage({ onNavigate }) {
         key={`sheet-${mapContextKey}`}
         listings={cityListings}
         cityLabel={cityLabel}
+        headerHeight={headerHeight}
         selectedListingId={selectedListingId}
         onSelectedListingChange={handleSheetSelectedListingChange}
         onProgressChange={handleSheetProgress}
