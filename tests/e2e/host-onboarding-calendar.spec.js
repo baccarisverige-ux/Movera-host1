@@ -2,15 +2,21 @@ import { expect, test } from '@playwright/test'
 
 const HOST_PROFILES_KEY = 'movera:host-profiles:v1'
 const HOST_CALENDAR_KEY = 'movera:host-calendar:v1'
+const HOST_DRAFT_KEY = 'movera:host-onboarding-drafts:v1'
 
 async function clearHostState(page) {
-  await page.evaluate(([profilesKey, calendarKey]) => {
+  await page.evaluate(([profilesKey, calendarKey, draftKey]) => {
     window.localStorage.removeItem(profilesKey)
     window.localStorage.removeItem(calendarKey)
-  }, [HOST_PROFILES_KEY, HOST_CALENDAR_KEY])
+    window.localStorage.removeItem(draftKey)
+  }, [HOST_PROFILES_KEY, HOST_CALENDAR_KEY, HOST_DRAFT_KEY])
 }
 
-test('first-time traveler becomes a host before reaching the B225-derived calendar', async ({ page }) => {
+async function continueOnboarding(page) {
+  await page.getByRole('button', { name: 'Continuer' }).click()
+}
+
+test('first-time traveler completes the full Movera host procedure before reaching the calendar', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/Movera-host1/profile')
   await page.getByTestId('profile-test-login').click()
@@ -22,21 +28,82 @@ test('first-time traveler becomes a host before reaching the B225-derived calend
   await page.getByTestId('switch-to-hosting').click()
 
   await expect(page).toHaveURL(/\/host$/)
-  await expect(page.getByTestId('host-onboarding')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Devenir hôte avec Movera.' })).toBeVisible()
+  const onboarding = page.getByTestId('host-onboarding')
+  await expect(onboarding).toBeVisible()
+  await expect(onboarding).toHaveAttribute('data-screen', 'intro-place')
   await expect(page.locator('.app-shell__nav')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Commencer' }).click()
-  await page.getByLabel('Nom du logement').fill('Villa Saphir — Front de mer')
-  await page.getByLabel('Ville du logement').fill('La Marsa')
-  await page.getByRole('radio', { name: 'Villa' }).click()
-  await page.getByRole('button', { name: 'Continuer' }).click()
 
+  await expect(onboarding).toHaveAttribute('data-screen', 'property-type')
+  await page.getByRole('radio', { name: 'Villa' }).click()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'guest-access')
+  await page.getByRole('radio', { name: /Logement entier/ }).click()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'address')
+  await page.getByLabel('Adresse du logement').fill('12 rue du Littoral')
+  await page.getByLabel('Ville du logement').fill('La Marsa')
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'pin')
+  await page.getByRole('button', { name: 'Confirmer cet emplacement' }).click()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'basics')
+  await page.getByRole('button', { name: 'Augmenter Voyageurs' }).click()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'intro-presentation')
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'amenities')
+  await page.getByRole('button', { name: 'Piscine' }).click()
+  await page.getByRole('button', { name: 'TV' }).click()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'photos')
+  await expect(page.getByTestId('host-photo-placeholders').locator('> div')).toHaveCount(5)
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'title')
+  await page.getByLabel('Titre de l’annonce').fill('Villa Saphir — Front de mer')
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'highlights')
+  await page.getByRole('button', { name: 'Calme' }).click()
+  await page.getByRole('button', { name: 'Élégant' }).click()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'description')
+  await page.getByLabel('Description du logement').fill('Une villa lumineuse avec de beaux espaces extérieurs, proche de la mer et pensée pour un séjour confortable.')
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'safety')
+  await page.getByLabel('Détecteur de fumée').check()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'intro-publish')
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'booking')
+  await page.getByRole('radio', { name: /Approuver les premières réservations/ }).click()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'price')
   await page.getByLabel('Prix par nuit').fill('220')
-  await page.getByRole('button', { name: 'Continuer' }).click()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'promotions')
+  await page.getByRole('button', { name: /Réduction semaine/ }).click()
+  await continueOnboarding(page)
+
+  await expect(onboarding).toHaveAttribute('data-screen', 'review')
   await page.locator('.host-onboarding__check input').nth(0).check()
   await page.locator('.host-onboarding__check input').nth(1).check()
-  await page.getByRole('button', { name: 'Activer mon espace Hôte' }).click()
+  await page.getByRole('button', { name: 'Publier le logement' }).click()
 
   const calendarPage = page.getByTestId('host-calendar-page')
   await expect(calendarPage).toBeVisible()
@@ -46,7 +113,35 @@ test('first-time traveler becomes a host before reaching the B225-derived calend
 
   const hostProfile = await page.evaluate((key) => window.localStorage.getItem(key), HOST_PROFILES_KEY)
   expect(hostProfile).toContain('Villa Saphir')
+  expect(hostProfile).toContain('12 rue du Littoral')
+  expect(hostProfile).toContain('pool')
+  expect(hostProfile).toContain('smokeAlarm')
   expect(hostProfile).toContain('"status":"active"')
+
+  const draft = await page.evaluate((key) => window.localStorage.getItem(key), HOST_DRAFT_KEY)
+  expect(draft).not.toContain('Villa Saphir')
+})
+
+test('host onboarding draft resumes the last logical screen after save and exit', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/Movera-host1/profile')
+  await page.getByTestId('profile-test-login').click()
+  await clearHostState(page)
+  await page.reload()
+  await page.getByTestId('switch-to-hosting').click()
+  await page.getByRole('button', { name: 'Commencer' }).click()
+  await page.getByRole('radio', { name: 'Villa' }).click()
+  await continueOnboarding(page)
+  await page.getByRole('radio', { name: /Logement entier/ }).click()
+  await continueOnboarding(page)
+  await page.getByLabel('Adresse du logement').fill('7 avenue de Carthage')
+  await page.getByLabel('Ville du logement').fill('Tunis')
+  await page.getByRole('button', { name: 'Enregistrer et quitter' }).click()
+
+  await expect(page).toHaveURL(/\/profile$/)
+  await page.getByTestId('switch-to-hosting').click()
+  await expect(page.getByTestId('host-onboarding')).toHaveAttribute('data-screen', 'address')
+  await expect(page.getByLabel('Adresse du logement')).toHaveValue('7 avenue de Carthage')
 })
 
 test('host calendar supports month navigation, day pricing, blocking and booking detail', async ({ page }) => {
