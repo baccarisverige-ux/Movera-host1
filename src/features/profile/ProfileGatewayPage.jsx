@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { startOAuthSignIn } from '../auth/authClient.js'
 import { useAuthSession, writeAuthSession } from '../auth/authSession.js'
+import { ConnectedProfilePage } from './ConnectedProfilePage.jsx'
 import { ProfilePage } from './ProfilePage.jsx'
 import './profile-page.css'
 import './profile-gateway-page.css'
@@ -57,7 +58,7 @@ export function ProfileGatewayPage({ onNavigate }) {
     if (returnTo) onNavigate(returnTo)
   }
 
-  if (isAuthenticated) return <ProfilePage onNavigate={onNavigate} />
+  if (isAuthenticated) return <ConnectedProfilePage onNavigate={onNavigate} />
 
   if (standardOpen) {
     return (
