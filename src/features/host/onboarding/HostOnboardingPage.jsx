@@ -5,6 +5,7 @@ import { useAuthSession } from '../../auth/authSession.js'
 import { clearHostOnboardingDraft, readHostOnboardingDraft, writeHostOnboardingDraft } from './hostOnboardingDraftStore.js'
 import {
   HOST_AMENITIES,
+  HOST_AMENITY_GROUPS,
   HOST_GUEST_ACCESS,
   HOST_HIGHLIGHTS,
   HOST_ONBOARDING_SCREENS,
@@ -48,17 +49,30 @@ function CheckIcon() {
 function AmenityGlyph({ id }) {
   if (id === 'wifi') return <WifiIcon size={24} />
   if (id === 'parking') return <ParkingIcon size={24} />
-  if (id === 'pool') return <WavesIcon size={24} />
+  if (id === 'pool' || id === 'waterfront' || id === 'beach-access') return <WavesIcon size={24} />
   if (id === 'ac') return <SnowflakeIcon size={24} />
   const glyphs = {
     tv: 'TV',
-    kitchen: 'K',
-    washer: 'W',
-    gym: 'G',
-    'hot-tub': 'H',
-    fireplace: 'F',
-    outdoor: 'O',
-    workspace: 'D',
+    kitchen: 'CU',
+    washer: 'LL',
+    dryer: 'SL',
+    essentials: 'ES',
+    heating: 'CH',
+    'hot-water': 'EC',
+    refrigerator: 'RF',
+    'coffee-maker': 'CA',
+    'cooking-basics': 'UC',
+    'hair-dryer': 'SC',
+    hangers: 'CI',
+    iron: 'FR',
+    shampoo: 'PD',
+    crib: 'LB',
+    gym: 'EF',
+    'hot-tub': 'BR',
+    fireplace: 'CM',
+    outdoor: 'MT',
+    workspace: 'BU',
+    'ev-charger': 'EV',
   }
   return <span className="host-onboarding__letter-icon" aria-hidden="true">{glyphs[id] || '•'}</span>
 }
@@ -276,12 +290,26 @@ export function HostOnboardingPage({ onNavigate, onActivated }) {
         <main className="host-onboarding__step">
           <span className="host-onboarding__eyebrow">Équipements</span>
           <h1>Que propose votre logement ?</h1>
-          <p>Sélectionnez les équipements disponibles. Vous pourrez compléter cette liste plus tard.</p>
-          <div className="host-onboarding__amenity-grid">
-            {HOST_AMENITIES.map((item) => {
-              const active = draft.amenities.includes(item.id)
-              return <button key={item.id} type="button" aria-pressed={active} data-active={active ? 'true' : 'false'} onClick={() => toggleArrayValue('amenities', item.id)}><AmenityGlyph id={item.id} /><strong>{item.label}</strong>{active ? <span className="host-onboarding__choice-check"><CheckIcon /></span> : null}</button>
-            })}
+          <p>Sélectionnez ce qui est réellement disponible. Les équipements sont regroupés pour aller plus vite.</p>
+          <div className="host-onboarding__amenity-groups">
+            {HOST_AMENITY_GROUPS.map((group) => (
+              <section className="host-onboarding__amenity-section" key={group.id}>
+                <h2>{group.label}</h2>
+                <div className="host-onboarding__amenity-grid">
+                  {HOST_AMENITIES.filter((item) => item.group === group.id).map((item) => {
+                    const active = draft.amenities.includes(item.id)
+                    return (
+                      <button key={item.id} type="button" aria-pressed={active} data-active={active ? 'true' : 'false'} onClick={() => toggleArrayValue('amenities', item.id)}>
+                        <AmenityGlyph id={item.id} />
+                        <strong>{item.label}</strong>
+                        {item.detail ? <small>{item.detail}</small> : null}
+                        {active ? <span className="host-onboarding__choice-check"><CheckIcon /></span> : null}
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
           </div>
         </main>
       ) : null}
