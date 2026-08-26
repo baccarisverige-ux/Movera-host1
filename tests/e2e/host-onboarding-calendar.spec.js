@@ -213,7 +213,42 @@ test('existing host sees direct host access in profile', async ({ page }) => {
   }, HOST_PROFILES_KEY)
 
   await expect(page.getByTestId('switch-to-hosting')).toContainText('Ouvrir l’espace Hôte')
+  await expect(page.getByTestId('restart-host-onboarding')).toContainText('Recommencer')
   await page.getByTestId('switch-to-hosting').click()
   await expect(page.getByTestId('host-calendar-page')).toBeVisible()
   await expect(page.getByTestId('host-calendar-page')).toContainText('Dar Movera')
+})
+
+test('demo host can reset only host test data and restart Devenir hôte from the beginning', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/Movera-host1/profile')
+  await page.getByTestId('profile-test-login').click()
+
+  await page.evaluate(([profilesKey, calendarKey]) => {
+    const userId = 'movera-demo-user'
+    window.localStorage.setItem(profilesKey, JSON.stringify({
+      [userId]: {
+        status: 'active',
+        userId,
+        createdAt: new Date().toISOString(),
+        listing: { id: 'primary-listing', name: 'Test Host', city: 'Tunis', type: 'Appartement', basePrice: 180, currency: 'TND' },
+      },
+    }))
+    window.localStorage.setItem(calendarKey, JSON.stringify({ [userId]: { days: { '2026-08-20': { price: 250, blocked: true } } } }))
+  }, [HOST_PROFILES_KEY, HOST_CALENDAR_KEY])
+  await page.reload()
+
+  const restart = page.getByTestId('restart-host-onboarding')
+  await expect(restart).toBeVisible()
+  await restart.click()
+
+  await expect(page).toHaveURL(/\/host$/)
+  await expect(page.getByTestId('host-onboarding')).toHaveAttribute('data-screen', 'intro-place')
+
+  const state = await page.evaluate(([profilesKey, calendarKey]) => ({
+    profiles: window.localStorage.getItem(profilesKey),
+    calendar: window.localStorage.getItem(calendarKey),
+  }), [HOST_PROFILES_KEY, HOST_CALENDAR_KEY])
+  expect(state.profiles).not.toContain('Test Host')
+  expect(state.calendar).not.toContain('2026-08-20')
 })
