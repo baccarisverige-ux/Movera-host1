@@ -1,8 +1,8 @@
-import HOST_INTRO_VIDEO_SRC from './hostIntroVideo.js'
 import './host-intro-premium.css'
 
 const INTRO_SELECTOR = '.host-onboarding[data-screen="intro-place"] .host-onboarding__phase-visual'
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
+const HOST_INTRO_VIDEO_SRC = `${import.meta.env.BASE_URL}assets/host-intro.mp4`
 
 function createIntroVideo() {
   const video = document.createElement('video')
