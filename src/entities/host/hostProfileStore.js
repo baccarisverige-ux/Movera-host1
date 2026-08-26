@@ -89,6 +89,14 @@ export function activateHostProfile(userId, listing) {
   return profile
 }
 
+export function clearHostProfile(userId) {
+  if (!userId) return
+  const profiles = readAllProfiles()
+  delete profiles[userId]
+  storageAdapter.setJson(HOST_PROFILES_KEY, profiles)
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(HOST_PROFILE_EVENT, { detail: { userId, status: 'cleared' } }))
+}
+
 export function useHostProfile(userId) {
   const [profile, setProfile] = useState(() => readHostProfile(userId))
 
