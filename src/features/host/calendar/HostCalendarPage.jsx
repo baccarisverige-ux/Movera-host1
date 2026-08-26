@@ -39,9 +39,10 @@ function bookingDateLabel(date) {
   return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(date)
 }
 
-export function HostCalendarPage({ onNavigate }) {
+export function HostCalendarPage({ onNavigate, hostProfile = null }) {
   const { session } = useAuthSession()
-  const { profile } = useHostProfile(session?.userId)
+  const { profile: storedProfile } = useHostProfile(session?.userId)
+  const profile = hostProfile || storedProfile
   const now = useMemo(() => new Date(), [])
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
@@ -72,7 +73,7 @@ export function HostCalendarPage({ onNavigate }) {
     const day = Number(first.slice(-2)) || 1
     setEditPrice(String(value.price ?? defaultNightlyPrice(listing?.basePrice || 180, day)))
     setEditBlocked(Boolean(value.blocked))
-  }, [selectedArray.join('|'), calendar.days, listing?.basePrice])
+  }, [selectedArray, calendar.days, listing?.basePrice])
 
   const changeMonth = (delta) => {
     const date = new Date(year, month + delta, 1)
