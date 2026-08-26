@@ -28,16 +28,8 @@ export const HOST_PHASES = Object.freeze([
 export const HOST_PROPERTY_TYPES = Object.freeze([
   'Appartement',
   'Villa',
-  'Maison',
   "Maison d’hôte",
   'Hôtel',
-  'Studio',
-  'Loft',
-  'Riad',
-  'Chalet',
-  'Ferme',
-  'Bateau',
-  'Tiny home',
 ])
 
 export const HOST_GUEST_ACCESS = Object.freeze([
