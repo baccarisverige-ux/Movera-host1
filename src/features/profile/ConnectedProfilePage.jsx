@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useHostProfile } from '../../entities/host/hostProfileStore.js'
+import { clearHostCalendar } from '../../entities/host/hostCalendarStore.js'
+import { clearHostProfile, useHostProfile } from '../../entities/host/hostProfileStore.js'
 import { authProviderLabel } from '../auth/authClient.js'
 import { clearAuthSession, useAuthSession } from '../auth/authSession.js'
 import './connected-profile-page.css'
@@ -63,6 +64,7 @@ export function ConnectedProfilePage({ onNavigate }) {
   const initial = displayName.charAt(0).toUpperCase()
   const contact = session?.email || session?.phone || 'Compte Movera'
   const provider = authProviderLabel(session?.provider)
+  const isDemoSession = session?.provider === 'demo'
 
   const signOut = () => {
     clearAuthSession()
@@ -77,6 +79,14 @@ export function ConnectedProfilePage({ onNavigate }) {
     })
     const continueNavigation = window.dispatchEvent(event)
     if (continueNavigation) onNavigate('/host')
+  }
+
+  const restartDemoHostOnboarding = () => {
+    if (!isDemoSession || !session?.userId) return
+    clearHostCalendar(session.userId)
+    clearHostProfile(session.userId)
+    setNotice('')
+    onNavigate('/host')
   }
 
   const showPrototypeNotice = (label) => {
@@ -136,6 +146,12 @@ export function ConnectedProfilePage({ onNavigate }) {
             <span>{isHost ? 'Ouvrir l’espace Hôte' : 'Devenir hôte'}</span>
             <ChevronIcon />
           </button>
+          {isDemoSession && isHost ? (
+            <button type="button" className="connected-profile__host-button" onClick={restartDemoHostOnboarding} data-testid="restart-host-onboarding">
+              <span>Recommencer « Devenir hôte »</span>
+              <ChevronIcon />
+            </button>
+          ) : null}
         </section>
 
         <section className="connected-profile__settings" aria-label="Compte et assistance">
