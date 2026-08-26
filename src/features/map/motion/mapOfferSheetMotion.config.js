@@ -1,13 +1,13 @@
 export const MAP_OFFER_SHEET_MOTION = Object.freeze({
   collapsedVisiblePx: 62,
-  expandedThreshold: 0.86,
+  expandedThreshold: 0.985,
   fastSwipeVelocity: 680,
   snapRatios: Object.freeze([0, 0.5, 1]),
   spring: Object.freeze({
-    stiffness: 430,
-    damping: 38,
+    stiffness: 420,
+    damping: 44,
     mass: 0.82,
-    restDelta: 0.35,
+    restDelta: 0.3,
     restSpeed: 2,
   }),
   toggleThreshold: 0.72,
