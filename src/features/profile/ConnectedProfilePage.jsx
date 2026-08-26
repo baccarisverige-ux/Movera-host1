@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useHostProfile } from '../../entities/host/hostProfileStore.js'
 import { authProviderLabel } from '../auth/authClient.js'
 import { clearAuthSession, useAuthSession } from '../auth/authSession.js'
 import './connected-profile-page.css'
@@ -56,6 +57,7 @@ const SUPPORT_ROWS = [
 
 export function ConnectedProfilePage({ onNavigate }) {
   const { session } = useAuthSession()
+  const { isHost } = useHostProfile(session?.userId)
   const [notice, setNotice] = useState('')
   const displayName = session?.displayName || 'Voyageur Movera'
   const initial = displayName.charAt(0).toUpperCase()
@@ -68,8 +70,13 @@ export function ConnectedProfilePage({ onNavigate }) {
   }
 
   const requestHostMode = () => {
-    setNotice('Transition Voyageur → Hôte prête à lancer.')
-    window.dispatchEvent(new CustomEvent('movera:host-mode-request', { detail: { source: 'profile' } }))
+    setNotice('')
+    const event = new CustomEvent('movera:host-mode-request', {
+      cancelable: true,
+      detail: { source: 'profile', firstTime: !isHost, target: '/host' },
+    })
+    const continueNavigation = window.dispatchEvent(event)
+    if (continueNavigation) onNavigate('/host')
   }
 
   const showPrototypeNotice = (label) => {
@@ -96,7 +103,7 @@ export function ConnectedProfilePage({ onNavigate }) {
           </div>
           <div className="connected-profile__identity-copy">
             <strong>{displayName}</strong>
-            <span>Voyageur Movera</span>
+            <span>{isHost ? 'Voyageur & Hôte Movera' : 'Voyageur Movera'}</span>
             <small>{contact}</small>
           </div>
           <div className="connected-profile__session">
@@ -118,15 +125,15 @@ export function ConnectedProfilePage({ onNavigate }) {
           </button>
         </section>
 
-        <section className="connected-profile__host-card" aria-label="Passer en mode Hôte">
+        <section className="connected-profile__host-card" aria-label={isHost ? 'Ouvrir le mode Hôte' : 'Devenir hôte'}>
           <div className="connected-profile__host-symbol"><HostIcon /></div>
           <div className="connected-profile__host-copy">
-            <span>Mode Hôte</span>
-            <strong>Accueillez autrement.</strong>
-            <p>Gérez vos logements, réservations et voyageurs depuis un espace dédié Movera.</p>
+            <span>{isHost ? 'Mode Hôte' : 'Devenir hôte'}</span>
+            <strong>{isHost ? 'Votre calendrier vous attend.' : 'Accueillez autrement.'}</strong>
+            <p>{isHost ? 'Ouvrez votre espace Hôte et gérez les disponibilités de votre logement.' : 'Créez votre espace Hôte en quelques étapes, puis pilotez prix et disponibilités depuis le calendrier.'}</p>
           </div>
           <button type="button" className="connected-profile__host-button" onClick={requestHostMode} data-testid="switch-to-hosting">
-            <span>Passer en mode Hôte</span>
+            <span>{isHost ? 'Ouvrir l’espace Hôte' : 'Devenir hôte'}</span>
             <ChevronIcon />
           </button>
         </section>
