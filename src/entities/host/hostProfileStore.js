@@ -9,6 +9,22 @@ function readAllProfiles() {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {}
 }
 
+function stringArray(value) {
+  if (!Array.isArray(value)) return []
+  return value.filter((item) => typeof item === 'string' && item.trim()).map((item) => item.trim())
+}
+
+function normalizeSafety(value) {
+  const source = value && typeof value === 'object' ? value : {}
+  return {
+    exteriorCamera: Boolean(source.exteriorCamera),
+    noiseMonitor: Boolean(source.noiseMonitor),
+    weapons: Boolean(source.weapons),
+    smokeAlarm: Boolean(source.smokeAlarm),
+    carbonMonoxideAlarm: Boolean(source.carbonMonoxideAlarm),
+  }
+}
+
 function normalizeListing(value) {
   if (!value || typeof value !== 'object') return null
   const name = typeof value.name === 'string' ? value.name.trim() : ''
@@ -23,6 +39,19 @@ function normalizeListing(value) {
     type,
     basePrice: Math.round(basePrice),
     currency: 'TND',
+    address: typeof value.address === 'string' ? value.address.trim() : '',
+    guestAccess: typeof value.guestAccess === 'string' ? value.guestAccess : 'entire',
+    guests: Math.max(1, Number(value.guests) || 1),
+    bedrooms: Math.max(0, Number(value.bedrooms) || 0),
+    beds: Math.max(1, Number(value.beds) || 1),
+    bathrooms: Math.max(0, Number(value.bathrooms) || 0),
+    amenities: stringArray(value.amenities),
+    highlights: stringArray(value.highlights).slice(0, 2),
+    description: typeof value.description === 'string' ? value.description.trim() : '',
+    bookingMode: value.bookingMode === 'instant' ? 'instant' : 'request-first',
+    promotions: stringArray(value.promotions),
+    safety: normalizeSafety(value.safety),
+    photos: [],
   }
 }
 
