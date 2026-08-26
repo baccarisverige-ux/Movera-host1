@@ -1,8 +1,10 @@
 import './host-intro-premium.css'
 
 const INTRO_SELECTOR = '.host-onboarding[data-screen="intro-place"] .host-onboarding__phase-visual'
+const PROPERTY_TYPE_SELECTOR = '.host-onboarding[data-screen="property-type"] .host-onboarding__step'
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 const HOST_INTRO_VIDEO_SRC = `${import.meta.env.BASE_URL}assets/host-intro.mp4`
+const HOST_PROPERTY_TYPE_IMAGE_SRC = `${import.meta.env.BASE_URL}assets/bootstrap/bb.jpeg`
 
 function createIntroVideo() {
   const video = document.createElement('video')
@@ -30,6 +32,21 @@ function createIntroVideo() {
   return video
 }
 
+function createPropertyTypeVisual() {
+  const visual = document.createElement('div')
+  visual.className = 'host-onboarding__property-type-visual'
+
+  const image = document.createElement('img')
+  image.src = HOST_PROPERTY_TYPE_IMAGE_SRC
+  image.alt = ''
+  image.decoding = 'async'
+  image.loading = 'eager'
+  image.setAttribute('aria-hidden', 'true')
+
+  visual.append(image)
+  return visual
+}
+
 function enhanceHostIntro() {
   const intro = document.querySelector(INTRO_SELECTOR)
   if (!intro || intro.querySelector('.host-onboarding__intro-video')) return
@@ -38,7 +55,22 @@ function enhanceHostIntro() {
   intro.append(createIntroVideo())
 }
 
-const observer = new MutationObserver(enhanceHostIntro)
+function enhancePropertyTypeScreen() {
+  const step = document.querySelector(PROPERTY_TYPE_SELECTOR)
+  if (!step || step.querySelector('.host-onboarding__property-type-visual')) return
+
+  const choices = step.querySelector('.host-onboarding__choice-grid')
+  if (!choices) return
+
+  choices.before(createPropertyTypeVisual())
+}
+
+function enhanceHostOnboardingVisuals() {
+  enhanceHostIntro()
+  enhancePropertyTypeScreen()
+}
+
+const observer = new MutationObserver(enhanceHostOnboardingVisuals)
 observer.observe(document.documentElement, {
   childList: true,
   subtree: true,
@@ -47,9 +79,9 @@ observer.observe(document.documentElement, {
 })
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', enhanceHostIntro, { once: true })
+  document.addEventListener('DOMContentLoaded', enhanceHostOnboardingVisuals, { once: true })
 } else {
-  enhanceHostIntro()
+  enhanceHostOnboardingVisuals()
 }
 
-requestAnimationFrame(enhanceHostIntro)
+requestAnimationFrame(enhanceHostOnboardingVisuals)
