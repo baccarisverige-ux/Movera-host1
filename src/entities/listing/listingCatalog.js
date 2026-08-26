@@ -46,7 +46,7 @@ export const LISTING_DETAILS = {
   'villa-perle': {
     id: 'villa-perle', title: 'Villa Saphir — Front de mer', subtitle: 'Villa premium en bord de mer', location: 'Gammarth, Tunis', rating: 4.98, reviews: 74,
     nightlyRate: 580, currency: 'TND', fees: 45,
-    amenities: ['Wi‑Fi', 'Vue mer', 'Climatisation', 'Cuisine équipée', 'Parking'],
+    amenities: ['Wi‑Fi', 'Vue mer', 'Climatisation', 'Cuisine équipée', 'Parking', 'Télévision'],
     host: { name: 'Movera Host', since: 'Hôte professionnel', response: 'Assistance dédiée' },
     availability: 'Disponible sur demande',
     images: [
@@ -58,7 +58,7 @@ export const LISTING_DETAILS = {
   'maison-bleue': {
     id: 'maison-bleue', title: 'Suite Panorama Sidi Bou Saïd', subtitle: 'Suite de charme avec panorama', location: 'Sidi Bou Saïd, Tunis', rating: 4.95, reviews: 52,
     nightlyRate: 480, currency: 'TND', fees: 35,
-    amenities: ['Wi‑Fi', 'Terrasse', 'Climatisation', 'Petit-déjeuner', 'Vue panoramique'],
+    amenities: ['Wi‑Fi', 'Terrasse', 'Climatisation', 'Petit-déjeuner', 'Vue panoramique', 'Télévision'],
     host: { name: 'Movera Host', since: 'Hôte professionnel', response: 'Assistance dédiée' },
     availability: 'Quelques dates restantes',
     images: [
@@ -70,7 +70,7 @@ export const LISTING_DETAILS = {
   'res-carthage': {
     id: 'res-carthage', title: 'Dar Carthage Résidence', subtitle: 'Résidence familiale confortable', location: 'Carthage, Tunis', rating: 4.88, reviews: 39,
     nightlyRate: 340, currency: 'TND', fees: 30,
-    amenities: ['Wi‑Fi', 'Cuisine équipée', 'Climatisation', 'Parking', 'Espace famille'],
+    amenities: ['Wi‑Fi', 'Cuisine équipée', 'Climatisation', 'Parking', 'Espace famille', 'Télévision'],
     host: { name: 'Movera Host', since: 'Hôte professionnel', response: 'Assistance dédiée' },
     availability: 'Disponible cette semaine',
     images: [
@@ -82,7 +82,7 @@ export const LISTING_DETAILS = {
   'villa-emeraude': {
     id: 'villa-emeraude', title: 'Villa Émeraude — Domaine privé', subtitle: 'Villa de prestige dans un domaine privé', location: 'Gammarth, Tunis', rating: 4.99, reviews: 83,
     nightlyRate: 1200, currency: 'TND', fees: 80,
-    amenities: ['Wi‑Fi', 'Piscine', 'Jardin', 'Parking', 'Service premium'],
+    amenities: ['Wi‑Fi', 'Piscine', 'Jardin', 'Parking', 'Service premium', 'Télévision'],
     host: { name: 'Movera Host', since: 'Hôte professionnel', response: 'Assistance dédiée' },
     availability: 'Disponible sur demande',
     images: [
@@ -94,7 +94,7 @@ export const LISTING_DETAILS = {
   'loft-cote': {
     id: 'loft-cote', title: 'Loft Côte Bleue Design', subtitle: 'Loft design proche de la côte', location: 'La Marsa, Tunis', rating: 4.82, reviews: 27,
     nightlyRate: 420, currency: 'TND', fees: 30,
-    amenities: ['Wi‑Fi', 'Climatisation', 'Cuisine équipée', 'Balcon', 'Design contemporain'],
+    amenities: ['Wi‑Fi', 'Climatisation', 'Cuisine équipée', 'Balcon', 'Design contemporain', 'Télévision'],
     host: { name: 'Movera Host', since: 'Hôte professionnel', response: 'Assistance dédiée' },
     availability: 'Disponible cette semaine',
     images: [
@@ -130,7 +130,7 @@ export const LISTING_DETAILS = {
   'riad-marsa': {
     id: 'riad-marsa', title: 'Riad La Marsa — Patio Andalou', subtitle: 'Riad de charme avec patio', location: 'La Marsa, Tunis', rating: 4.89, reviews: 35,
     nightlyRate: 410, currency: 'TND', fees: 30,
-    amenities: ['Wi‑Fi', 'Patio', 'Petit-déjeuner', 'Climatisation', 'Cuisine équipée'],
+    amenities: ['Wi‑Fi', 'Patio', 'Petit-déjeuner', 'Climatisation', 'Cuisine équipée', 'Télévision'],
     host: { name: 'Movera Host', since: 'Hôte professionnel', response: 'Assistance dédiée' },
     availability: 'Disponible sur demande',
     images: [
