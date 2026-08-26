@@ -33,6 +33,7 @@ function createIntroVideo() {
 function enhanceHostIntro() {
   const intro = document.querySelector(INTRO_SELECTOR)
   if (!intro || intro.querySelector('.host-onboarding__intro-video')) return
+
   intro.classList.add('host-onboarding__phase-visual--video')
   intro.append(createIntroVideo())
 }
