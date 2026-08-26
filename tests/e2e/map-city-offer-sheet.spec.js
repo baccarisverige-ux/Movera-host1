@@ -89,7 +89,7 @@ test('Grand Tunis fully expanded keeps 8 offers summary and first offer visible 
   await expect(list).toHaveCSS('scroll-snap-type', 'none')
   await expect(list).toHaveAttribute('data-motion-list', 'map-offers')
   await expect(list).toHaveAttribute('data-map-scroll', 'independent')
-  await expect(list).toHaveAttribute('data-sheet-handoff', 'close-from-list')
+  await expect(list).toHaveAttribute('data-sheet-handoff', 'drag-from-offer')
 
   const mapBox = await pageMap.boundingBox()
   const sheetBox = await sheet.boundingBox()
@@ -150,6 +150,7 @@ test('one remaining offer can close the fully open sheet by swiping directly on 
   await expect(sheet).toHaveAttribute('data-snap-state', 'expanded')
 
   const list = sheet.locator('.map-offer-sheet__list')
+  await expect(list).toHaveAttribute('data-sheet-handoff', 'drag-from-offer')
   await list.evaluate((node) => { node.scrollTop = 0 })
   const image = sheet.locator('[data-listing-id="villa-emeraude"] .map-offer-sheet__media')
   await expect(image).toBeVisible()
