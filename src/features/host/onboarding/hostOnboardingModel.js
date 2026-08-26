@@ -46,19 +46,44 @@ export const HOST_GUEST_ACCESS = Object.freeze([
   { id: 'shared', label: 'Chambre partagée', description: 'Les voyageurs dorment dans un espace partagé.' },
 ])
 
+export const HOST_AMENITY_GROUPS = Object.freeze([
+  { id: 'essentials', label: 'Les indispensables' },
+  { id: 'popular', label: 'Confort apprécié' },
+  { id: 'features', label: 'Équipements & services' },
+  { id: 'location', label: 'Cadre & emplacement' },
+])
+
 export const HOST_AMENITIES = Object.freeze([
-  { id: 'wifi', label: 'Wi-Fi' },
-  { id: 'tv', label: 'TV' },
-  { id: 'kitchen', label: 'Cuisine' },
-  { id: 'washer', label: 'Lave-linge' },
-  { id: 'parking', label: 'Parking' },
-  { id: 'pool', label: 'Piscine' },
-  { id: 'ac', label: 'Climatisation' },
-  { id: 'gym', label: 'Salle de sport' },
-  { id: 'hot-tub', label: 'Jacuzzi' },
-  { id: 'fireplace', label: 'Cheminée' },
-  { id: 'outdoor', label: 'Mobilier extérieur' },
-  { id: 'workspace', label: 'Espace de travail' },
+  { id: 'ac', label: 'Climatisation', group: 'essentials' },
+  { id: 'dryer', label: 'Sèche-linge', group: 'essentials' },
+  { id: 'essentials', label: 'Linge & essentiels', detail: 'Draps, serviettes, savon et papier', group: 'essentials' },
+  { id: 'heating', label: 'Chauffage', group: 'essentials' },
+  { id: 'hot-water', label: 'Eau chaude', group: 'essentials' },
+  { id: 'kitchen', label: 'Cuisine équipée', group: 'essentials' },
+  { id: 'refrigerator', label: 'Réfrigérateur', group: 'essentials' },
+  { id: 'tv', label: 'Télévision', group: 'essentials' },
+  { id: 'washer', label: 'Lave-linge', group: 'essentials' },
+  { id: 'wifi', label: 'Wi-Fi haut débit', group: 'essentials' },
+
+  { id: 'coffee-maker', label: 'Machine à café', group: 'popular' },
+  { id: 'cooking-basics', label: 'Ustensiles de cuisine', detail: 'Casseroles, poêles et condiments de base', group: 'popular' },
+  { id: 'hair-dryer', label: 'Sèche-cheveux', group: 'popular' },
+  { id: 'hangers', label: 'Cintres', group: 'popular' },
+  { id: 'iron', label: 'Fer à repasser', group: 'popular' },
+  { id: 'shampoo', label: 'Produits douche', group: 'popular' },
+
+  { id: 'crib', label: 'Lit bébé', group: 'features' },
+  { id: 'workspace', label: 'Coin bureau', group: 'features' },
+  { id: 'ev-charger', label: 'Borne de recharge', group: 'features' },
+  { id: 'parking', label: 'Parking privé', group: 'features' },
+  { id: 'gym', label: 'Espace fitness', group: 'features' },
+  { id: 'hot-tub', label: 'Bain à remous', group: 'features' },
+  { id: 'fireplace', label: 'Cheminée intérieure', group: 'features' },
+  { id: 'outdoor', label: 'Mobilier de terrasse', group: 'features' },
+  { id: 'pool', label: 'Piscine', group: 'features' },
+
+  { id: 'beach-access', label: 'Accès plage', group: 'location' },
+  { id: 'waterfront', label: 'Bord de mer', group: 'location' },
 ])
 
 export const HOST_HIGHLIGHTS = Object.freeze([
