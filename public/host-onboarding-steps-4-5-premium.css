@@ -1,307 +1,166 @@
 /* Premium polish for onboarding Étape 4 (address) and Étape 5 (pin).
-   Scoped only to these two screens. Existing colors, white background and behavior stay unchanged. */
+   Same Movera palette and white background. */
 
-/* ---------- Shared layout ---------- */
-.host-onboarding[data-screen="address"] .host-onboarding__step,
-.host-onboarding[data-screen="pin"] .host-onboarding__step {
-  padding-top: 30px !important;
+/* ---------- Étape 4 · premium address form ---------- */
+.host-onboarding[data-screen="address"] {
+  background: #fff !important;
 }
 
-.host-onboarding[data-screen="address"] h1,
-.host-onboarding[data-screen="pin"] h1 {
+.host-onboarding[data-screen="address"] .host-onboarding__step {
+  width: 100% !important;
+  max-width: 430px !important;
+  margin: 0 auto !important;
+  padding: 42px 22px 34px !important;
+}
+
+.host-onboarding[data-screen="address"] .host-onboarding__eyebrow {
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  border: 1px solid #e8ece8 !important;
+  border-radius: 999px !important;
+  background: #f7f9f7 !important;
+  color: #1f6a43 !important;
+  font-size: 11px !important;
+  font-weight: 720 !important;
+  letter-spacing: .01em !important;
+  box-shadow: 0 5px 16px rgba(28,36,30,.035) !important;
+}
+
+.host-onboarding[data-screen="address"] h1 {
   max-width: 360px !important;
-}
-
-.host-onboarding[data-screen="address"] p,
-.host-onboarding[data-screen="pin"] p {
-  max-width: 350px !important;
-}
-
-/* ---------- Étape 4 · address ---------- */
-.host-onboarding[data-screen="address"] .host-onboarding__step label:not(.host-onboarding__check):not(.host-onboarding__toggle-row) {
-  position: relative;
-  gap: 9px !important;
   margin-top: 18px !important;
+  font-size: clamp(35px, 9vw, 42px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -.05em !important;
+  font-weight: 760 !important;
+  color: #101210 !important;
+}
+
+.host-onboarding[data-screen="address"] p {
+  max-width: 350px !important;
+  margin-top: 13px !important;
+  color: #737873 !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.host-onboarding[data-screen="address"] .host-onboarding__step label:not(.host-onboarding__check):not(.host-onboarding__toggle-row) {
+  position: relative !important;
+  display: grid !important;
+  gap: 8px !important;
+  margin-top: 15px !important;
 }
 
 .host-onboarding[data-screen="address"] .host-onboarding__step label:first-of-type {
-  margin-top: 26px !important;
+  margin-top: 28px !important;
 }
 
 .host-onboarding[data-screen="address"] .host-onboarding__step label > span {
-  padding-left: 3px;
-  color: #555a56 !important;
-  font-size: 12px !important;
-  font-weight: 670 !important;
-  letter-spacing: -0.012em !important;
+  padding-left: 3px !important;
+  color: #505650 !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: -.008em !important;
 }
 
 .host-onboarding[data-screen="address"] .host-onboarding__step input:not([type="checkbox"]) {
+  width: 100% !important;
   height: 62px !important;
   padding: 0 18px !important;
-  border: 1px solid #dedfdd !important;
-  border-radius: 20px !important;
-  background: #fff !important;
-  color: #121412 !important;
+  border: 1px solid #dfe2df !important;
+  border-radius: 19px !important;
+  outline: 0 !important;
+  background: #fbfcfb !important;
+  color: #141614 !important;
   font-size: 15px !important;
-  font-weight: 570 !important;
-  letter-spacing: -0.015em !important;
-  box-shadow:
-    0 10px 26px rgba(20, 24, 21, 0.035),
-    inset 0 1px 0 rgba(255,255,255,.9) !important;
-  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease !important;
+  font-weight: 590 !important;
+  letter-spacing: -.015em !important;
+  box-shadow: 0 8px 24px rgba(21,29,23,.035), inset 0 1px 0 rgba(255,255,255,.95) !important;
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease, transform .12s ease !important;
+}
+
+.host-onboarding[data-screen="address"] .host-onboarding__step input:not([type="checkbox"]):hover {
+  border-color: #cfd4cf !important;
+  background: #fff !important;
 }
 
 .host-onboarding[data-screen="address"] .host-onboarding__step input:not([type="checkbox"]):focus {
-  border-color: #111 !important;
-  box-shadow:
-    0 0 0 1px #111 inset,
-    0 12px 30px rgba(20, 24, 21, 0.055) !important;
+  border-color: #1f6a43 !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(31,106,67,.10), 0 11px 28px rgba(21,29,23,.05) !important;
 }
 
 .host-onboarding[data-screen="address"] .host-onboarding__step input::placeholder {
-  color: #a0a39f !important;
+  color: #a2a6a2 !important;
   opacity: 1 !important;
+  font-weight: 520 !important;
 }
 
 .host-onboarding[data-screen="address"] .host-onboarding__address-note {
-  min-height: 66px !important;
+  min-height: 70px !important;
   margin-top: 20px !important;
   padding: 14px 15px !important;
-  gap: 12px !important;
+  display: flex !important;
   align-items: center !important;
-  border: 1px solid #e5e8e5 !important;
+  gap: 12px !important;
+  border: 1px solid #e3e9e4 !important;
   border-radius: 20px !important;
-  background: #f7f8f6 !important;
-  box-shadow: 0 8px 22px rgba(20,24,21,.025) !important;
+  background: linear-gradient(145deg,#f9fbf9,#f4f7f4) !important;
+  box-shadow: 0 10px 26px rgba(24,32,26,.035) !important;
 }
 
 .host-onboarding[data-screen="address"] .host-onboarding__address-note svg {
-  width: 36px !important;
-  height: 36px !important;
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 38px !important;
   padding: 9px !important;
-  flex: 0 0 36px !important;
-  border-radius: 12px !important;
+  border: 1px solid #dce9df !important;
+  border-radius: 13px !important;
   background: #eef6f0 !important;
   stroke: #1f6a43 !important;
-  stroke-width: 1.85 !important;
+  stroke-width: 1.9 !important;
 }
 
 .host-onboarding[data-screen="address"] .host-onboarding__address-note span {
-  color: #5e645f !important;
-  font-size: 12px !important;
-  line-height: 1.46 !important;
-  letter-spacing: -0.01em !important;
+  color: #59605a !important;
+  font-size: 11.5px !important;
+  line-height: 1.48 !important;
+  letter-spacing: -.008em !important;
 }
 
-/* ---------- Étape 5 · map pin ---------- */
-.host-onboarding[data-screen="pin"] .host-onboarding__map-card {
-  height: 382px !important;
-  margin-top: 24px !important;
-  border: 1px solid #e7e7e3 !important;
-  border-radius: 30px !important;
-  background:
-    radial-gradient(circle at 9% 27%, #dfe7dc 0 10.5%, transparent 11%),
-    radial-gradient(circle at 87% 76%, #e7ece5 0 8%, transparent 8.5%),
-    linear-gradient(31deg, transparent 0 31%, rgba(255,255,255,.98) 31.4% 33.1%, transparent 33.5% 58%, rgba(255,255,255,.96) 58.4% 60%, transparent 60.4%),
-    linear-gradient(104deg, transparent 0 40%, rgba(255,255,255,.98) 40.4% 42%, transparent 42.4% 67%, rgba(255,255,255,.96) 67.4% 69%, transparent 69.4%),
-    #f5f3ee !important;
-  box-shadow:
-    0 18px 42px rgba(24, 29, 25, 0.07),
-    inset 0 1px 0 rgba(255,255,255,.85) !important;
-  isolation: isolate;
+.host-onboarding[data-screen="address"] .host-onboarding__footer {
+  border-top: 1px solid rgba(229,232,229,.92) !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 -12px 32px rgba(24,30,26,.045) !important;
+  backdrop-filter: blur(18px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.08) !important;
 }
 
-.host-onboarding[data-screen="pin"] .host-onboarding__map-card::before,
-.host-onboarding[data-screen="pin"] .host-onboarding__map-card::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  border: 1px solid rgba(205,208,203,.7);
-  background: rgba(255,255,255,.34);
-  pointer-events: none;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-card::before {
-  width: 92px;
-  height: 54px;
-  left: 28px;
-  bottom: 62px;
-  border-radius: 15px;
-  rotate: -11deg;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-card::after {
-  width: 74px;
-  height: 46px;
-  right: 48px;
-  top: 116px;
-  border-radius: 13px;
-  rotate: 8deg;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__address-chip {
-  z-index: 8 !important;
-  left: 17px !important;
-  right: 17px !important;
-  top: 17px !important;
-  min-height: 54px !important;
-  padding: 0 15px !important;
-  border: 1px solid rgba(225,226,222,.96) !important;
+.host-onboarding[data-screen="address"] .host-onboarding__primary,
+.host-onboarding[data-screen="address"] .host-onboarding__back {
   border-radius: 18px !important;
-  background: rgba(255,255,255,.93) !important;
-  box-shadow: 0 9px 26px rgba(24,29,25,.075) !important;
-  backdrop-filter: blur(16px) saturate(1.08) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
 }
 
-.host-onboarding[data-screen="pin"] .host-onboarding__address-chip svg {
-  width: 20px !important;
-  height: 20px !important;
-  stroke: #1f6a43 !important;
-  stroke-width: 1.9 !important;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__address-chip span {
-  color: #202320 !important;
-  font-size: 12px !important;
-  font-weight: 640 !important;
-  letter-spacing: -0.012em !important;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-pin {
-  z-index: 9 !important;
-  left: 50% !important;
-  top: 52% !important;
-  width: 58px !important;
-  height: 58px !important;
-  border-radius: 50% !important;
-  rotate: 0deg !important;
-  transform: translate(-50%, -50%) !important;
-  background: #1f6a43 !important;
-  border: 5px solid rgba(255,255,255,.94) !important;
-  box-shadow:
-    0 11px 24px rgba(31,106,67,.25),
-    0 0 0 7px rgba(31,106,67,.11) !important;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-pin::before {
-  content: "";
-  position: absolute;
-  inset: -14px;
-  border: 1px solid rgba(31,106,67,.18);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-pin::after {
-  content: "" !important;
-  position: absolute !important;
-  width: 8px !important;
-  height: 8px !important;
-  left: 50% !important;
-  bottom: -18px !important;
-  transform: translateX(-50%) !important;
-  border-radius: 50% !important;
-  background: rgba(31,106,67,.24) !important;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-pin svg {
-  width: 25px !important;
-  height: 25px !important;
-  rotate: 0deg !important;
-  stroke: #fff !important;
-  stroke-width: 1.9 !important;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-road {
-  z-index: 2 !important;
-  height: 7px !important;
-  background: rgba(255,255,255,.92) !important;
-  box-shadow: 0 0 0 1px rgba(225,225,220,.38) !important;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-zoom {
-  z-index: 10 !important;
-  right: 14px !important;
-  bottom: 16px !important;
-  width: 46px !important;
-  border: 1px solid rgba(224,225,221,.96) !important;
-  border-radius: 16px !important;
-  background: rgba(255,255,255,.94) !important;
-  box-shadow: 0 8px 22px rgba(20,24,21,.08) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-zoom button {
-  width: 46px !important;
-  height: 44px !important;
-  background: transparent !important;
-  color: #202320 !important;
-  font-size: 22px !important;
-  font-weight: 430 !important;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__map-hint {
-  z-index: 9 !important;
-  left: 16px !important;
-  right: 74px !important;
-  bottom: 18px !important;
-  width: auto !important;
-  max-width: none !important;
-  min-height: 42px !important;
-  padding: 0 16px !important;
-  transform: none !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 15px !important;
-  background: rgba(36,38,36,.94) !important;
-  color: #fff !important;
-  font-size: 11px !important;
-  font-weight: 590 !important;
-  letter-spacing: -0.01em !important;
-  box-shadow: 0 8px 22px rgba(0,0,0,.14) !important;
+/* ---------- Étape 5 · base ---------- */
+.host-onboarding[data-screen="pin"] {
+  background: #f5f3ee !important;
 }
 
 .host-onboarding[data-screen="pin"] .host-onboarding__secondary {
-  min-height: 56px !important;
-  margin-top: 14px !important;
-  border: 1px solid #dcdedb !important;
-  border-radius: 19px !important;
-  background: #fff !important;
-  color: #242724 !important;
-  font-size: 12px !important;
-  font-weight: 680 !important;
-  box-shadow: 0 8px 22px rgba(20,24,21,.035) !important;
-  transition: transform .12s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease !important;
+  transition: transform .12s ease, box-shadow .16s ease, background .16s ease !important;
 }
 
 .host-onboarding[data-screen="pin"] .host-onboarding__secondary:active {
-  transform: scale(.988) !important;
-}
-
-.host-onboarding[data-screen="pin"] .host-onboarding__secondary[data-active="true"] {
-  border-color: #c9ddcf !important;
-  background: #eef6f0 !important;
-  color: #1f6a43 !important;
-  box-shadow: 0 8px 22px rgba(31,106,67,.06) !important;
+  transform: scale(.985) !important;
 }
 
 @media (max-width: 360px) {
+  .host-onboarding[data-screen="address"] .host-onboarding__step {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
   .host-onboarding[data-screen="address"] .host-onboarding__step input:not([type="checkbox"]) {
     height: 58px !important;
-  }
-
-  .host-onboarding[data-screen="pin"] .host-onboarding__map-card {
-    height: 350px !important;
-    border-radius: 26px !important;
-  }
-
-  .host-onboarding[data-screen="pin"] .host-onboarding__map-hint {
-    right: 68px !important;
-    padding-inline: 12px !important;
-    font-size: 10.5px !important;
   }
 }
