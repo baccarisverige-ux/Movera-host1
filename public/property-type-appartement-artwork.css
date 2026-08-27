@@ -1,0 +1,8 @@
+/* Appartement artwork only. Keeps the existing property-type layout and interaction unchanged. */
+.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(1) > span:first-child {
+  background-image: url("assets/bootstrap/property/appartement-building.webp") !important;
+  background-size: contain !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  filter: none !important;
+}
