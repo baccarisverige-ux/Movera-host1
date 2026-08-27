@@ -1,18 +1,19 @@
 /* Guest access icons from the user-supplied reference: house, door, single bed.
-   Visual-only override; React state, labels and navigation stay untouched. */
+   Visual-only override; React state, labels and navigation stay untouched.
+   Keep the same icon footprint as the original screen so layout does not change. */
 .host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button > svg {
   display: none !important;
 }
 
 .host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button {
-  grid-template-columns: 27px minmax(0, 1fr) 78px !important;
+  grid-template-columns: 27px minmax(0, 1fr) 72px !important;
 }
 
 .host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button::after {
   content: "";
   display: block;
-  width: 74px;
-  height: 74px;
+  width: 64px;
+  height: 64px;
   justify-self: end;
   align-self: center;
   background-repeat: no-repeat;
@@ -44,13 +45,13 @@
 
 @media (max-width: 360px) {
   .host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button {
-    grid-template-columns: 25px minmax(0, 1fr) 64px !important;
+    grid-template-columns: 25px minmax(0, 1fr) 58px !important;
     gap: 10px !important;
     padding-inline: 16px !important;
   }
 
   .host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button::after {
-    width: 62px;
-    height: 62px;
+    width: 54px;
+    height: 54px;
   }
 }
