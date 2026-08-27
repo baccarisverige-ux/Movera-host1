@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { SEARCH_ADDRESS_SUGGESTIONS, SEARCH_DESTINATIONS } from './searchData.js'
 
 const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org/search'
+export const SEARCH_ADDRESS_PREVIEW_EVENT = 'movera:search-address-preview'
 
 function normalize(value) {
   return String(value || '').trim().toLocaleLowerCase('fr')
@@ -96,6 +97,20 @@ function dedupe(items) {
   })
 }
 
+function publishPreview(address) {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent(SEARCH_ADDRESS_PREVIEW_EVENT, {
+    detail: address
+      ? {
+          id: address.id,
+          label: address.label,
+          subtitle: address.subtitle,
+          viewport: address.viewport,
+        }
+      : null,
+  }))
+}
+
 export function useAddressAutocomplete(query, active) {
   const local = useMemo(() => localMatches(query), [query])
   const [remote, setRemote] = useState([])
@@ -106,6 +121,7 @@ export function useAddressAutocomplete(query, active) {
     if (!active || normalized.length < 3) {
       setRemote([])
       setLoading(false)
+      publishPreview(null)
       return undefined
     }
 
@@ -127,12 +143,17 @@ export function useAddressAutocomplete(query, active) {
         })
         if (!response.ok) throw new Error(`Address search HTTP ${response.status}`)
         const data = await response.json()
-        const next = (Array.isArray(data) ? data : [])
+        const next = dedupe((Array.isArray(data) ? data : [])
           .map(parseNominatimResult)
-          .filter(Boolean)
-        setRemote(dedupe(next).slice(0, 10))
+          .filter(Boolean))
+          .slice(0, 10)
+        setRemote(next)
+        publishPreview(next[0] || null)
       } catch (error) {
-        if (error?.name !== 'AbortError') setRemote([])
+        if (error?.name !== 'AbortError') {
+          setRemote([])
+          publishPreview(null)
+        }
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
