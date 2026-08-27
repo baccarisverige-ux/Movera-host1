@@ -1,0 +1,56 @@
+/* Guest access icons from the user-supplied reference: house, door, single bed.
+   Visual-only override; React state, labels and navigation stay untouched. */
+.host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button > svg {
+  display: none !important;
+}
+
+.host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button {
+  grid-template-columns: 27px minmax(0, 1fr) 78px !important;
+}
+
+.host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button::after {
+  content: "";
+  display: block;
+  width: 74px;
+  height: 74px;
+  justify-self: end;
+  align-self: center;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* Logement entier — house */
+.host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button:nth-child(1)::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23111111' stroke-width='4' stroke-linecap='square' stroke-linejoin='miter'%3E%3Cpath d='M20 42 48 16l28 26'/%3E%3Cpath d='M27 37v41h42V37'/%3E%3Cpath d='M40 78V53h16v25'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Chambre privée — door */
+.host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button:nth-child(2)::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23111111' stroke-width='4' stroke-linecap='square' stroke-linejoin='miter'%3E%3Cpath d='M31 15h34v65H31z'/%3E%3Cpath d='M38 22h20v58'/%3E%3Ccircle cx='53' cy='51' r='2.5'/%3E%3Cpath d='M22 80h52'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Chambre partagée — single bed */
+.host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button:nth-child(3)::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23111111' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 17v64M74 30v51M23 62h51'/%3E%3Cpath d='M23 44h35c9 0 16 7 16 16v2'/%3E%3Cpath d='M30 44V31h15c8 0 14 6 14 13'/%3E%3Cpath d='M19 81h8M69 81h10'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Keep the reference icons black even when a card is selected. */
+.host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button[data-active="true"]::after {
+  filter: none !important;
+}
+
+@media (max-width: 360px) {
+  .host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button {
+    grid-template-columns: 25px minmax(0, 1fr) 64px !important;
+    gap: 10px !important;
+    padding-inline: 16px !important;
+  }
+
+  .host-onboarding[data-screen="guest-access"] .host-onboarding__stacked-options button::after {
+    width: 62px;
+    height: 62px;
+  }
+}
