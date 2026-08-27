@@ -51,10 +51,10 @@ function parseResult(result, source = 'tunisia-search', forcedZoom = null) {
   const state = address.state || address.region || ''
   const country = address.country || 'Tunisie'
   const named = result.name || result.namedetails?.name || ''
-  const street = [houseNumber, road].filter(Boolean).join(' ')
+  const exactStreet = [houseNumber, road].filter(Boolean).join(' ')
 
   let label = ''
-  if (street) label = street
+  if (houseNumber && road) label = exactStreet
   else if (named && normalize(named) !== normalize(road)) label = named
   else label = road || district || city || state || result.display_name || 'Lieu détecté'
 
