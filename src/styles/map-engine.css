@@ -21,4 +21,11 @@
 .map-controls__reset { font-size: 19px !important; }
 .map-attribution { position: absolute; right: 8px; bottom: 7px; z-index: 5; padding: 3px 6px; border-radius: 5px; background: rgba(255,255,255,.82); color: #5b625e; font-size: 9px; pointer-events: none; }
 .map-engine__status { margin: var(--space-2) 0 0; color: var(--color-text-secondary); font-size: var(--font-size-xs); text-align: right; }
+
+/* Search popup address detector: same fixed-center-pin behavior as host Étape 1.4. */
+.search-map-preview__pin { position: absolute; left: 50%; top: 50%; z-index: 7; width: 34px; height: 42px; translate: -50% -100%; pointer-events: none; filter: drop-shadow(0 7px 9px rgba(26,34,29,.18)); animation: search-map-pin-set .24s cubic-bezier(.2,.8,.2,1); }
+.search-map-preview__pin span { position: absolute; left: 50%; top: 5px; width: 26px; height: 26px; translate: -50% 0; border: 3px solid rgba(255,255,255,.98); border-radius: 50% 50% 50% 0; background: #536d5e; transform: rotate(-45deg); box-shadow: 0 3px 10px rgba(30,44,35,.22), inset 0 1px 0 rgba(255,255,255,.2); }
+.search-map-preview__pin span::after { content: ''; position: absolute; inset: 7px; border-radius: 50%; background: #fff; }
+@keyframes search-map-pin-set { from { opacity: 0; transform: translateY(-7px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
 @media (max-width: 430px) { .map-surface { height: min(62svh, 560px); border-radius: var(--radius-lg); } .map-controls { right: 9px; top: 9px; } .map-controls button { width: 40px; height: 40px; } }
