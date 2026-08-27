@@ -1,5 +1,7 @@
-/* Four supplied property drawings, one per category. The sprite is loaded once by property-type-artwork-sprite.js. */
-.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button > span:first-child {
+/* Four supplied property drawings, one per category.
+   The new sprite only replaces the existing artwork after the image has been verified.
+   If loading ever fails, the previous native artwork stays visible instead of leaving blank cards. */
+html[data-property-artwork="ready"] .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button > span:first-child {
   display: block !important;
   flex: 0 0 auto !important;
   width: 84% !important;
@@ -14,21 +16,21 @@
   opacity: 1 !important;
 }
 
-.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(1) > span:first-child {
+html[data-property-artwork="ready"] .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(1) > span:first-child {
   background-position: left top !important;
 }
-.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(2) > span:first-child {
+html[data-property-artwork="ready"] .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(2) > span:first-child {
   background-position: right top !important;
 }
-.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(3) > span:first-child {
+html[data-property-artwork="ready"] .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(3) > span:first-child {
   background-position: left bottom !important;
 }
-.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(4) > span:first-child {
+html[data-property-artwork="ready"] .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(4) > span:first-child {
   background-position: right bottom !important;
 }
 
 @media (max-width: 360px) {
-  .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button > span:first-child {
+  html[data-property-artwork="ready"] .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button > span:first-child {
     width: 88% !important;
     height: 112px !important;
     min-height: 112px !important;
