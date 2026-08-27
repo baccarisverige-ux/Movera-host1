@@ -82,6 +82,18 @@
     if (span && text) span.textContent = text
   }
 
+  function setSearchValue(card, text, force = false) {
+    const input = card.querySelector('.host-step5-address-input')
+    if (!input || !text) return
+    if (force || document.activeElement !== input) input.value = text
+  }
+
+  function setAddress(card, text, forceInput = false) {
+    if (!text) return
+    setChip(card, text)
+    setSearchValue(card, text, forceInput)
+  }
+
   function setHint(card, text) {
     const hint = card.querySelector('.host-onboarding__map-hint')
     if (hint && text) hint.textContent = text
@@ -95,14 +107,63 @@
       try {
         const result = await reverse(center.lat, center.lng)
         const label = addressLabel(result)
-        if (label) setChip(card, label)
+        if (label) setAddress(card, label)
         persist(center.lat, center.lng, label || result.display_name || '')
-        setHint(card, 'Déplacez la carte pour ajuster le repère')
+        setHint(card, 'Adresse ajustée · déplacez la carte si nécessaire')
       } catch {
         persist(center.lat, center.lng, '')
         setHint(card, 'Position ajustée · adresse non disponible')
       }
     }, 420)
+  }
+
+  async function searchAddress(map, card, input, button) {
+    const query = input.value.trim()
+    if (query.length < 3) {
+      setHint(card, 'Écrivez une adresse complète')
+      input.focus()
+      return
+    }
+
+    button.dataset.loading = 'true'
+    setHint(card, 'Recherche de l’adresse…')
+    try {
+      const found = await geocode(query)
+      if (!found || !Number.isFinite(found.lat) || !Number.isFinite(found.lng)) {
+        setHint(card, 'Adresse introuvable · vérifiez puis réessayez')
+        return
+      }
+      const label = addressLabel(found.raw) || query
+      setAddress(card, label, true)
+      persist(found.lat, found.lng, label)
+      map.flyTo([found.lat, found.lng], 17, { duration: 0.55 })
+      setHint(card, 'Adresse trouvée · ajustez la carte si nécessaire')
+      input.blur()
+    } catch {
+      setHint(card, 'Impossible de rechercher cette adresse pour le moment')
+    } finally {
+      button.dataset.loading = 'false'
+    }
+  }
+
+  function addAddressSearch(card, map, initialAddress) {
+    const form = document.createElement('form')
+    form.className = 'host-step5-address-search'
+    form.setAttribute('role', 'search')
+    form.innerHTML = `
+      <svg class="host-step5-address-search__pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+      <input class="host-step5-address-input" type="text" autocomplete="street-address" enterkeyhint="search" aria-label="Rechercher ou modifier l’adresse" placeholder="Écrivez une adresse" />
+      <button class="host-step5-address-search__button" type="submit" aria-label="Rechercher cette adresse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+    `
+    card.appendChild(form)
+    const input = form.querySelector('.host-step5-address-input')
+    const button = form.querySelector('.host-step5-address-search__button')
+    input.value = initialAddress || ''
+    form.addEventListener('submit', (event) => {
+      event.preventDefault()
+      searchAddress(map, card, input, button)
+    })
+    return { input, button }
   }
 
   function locateUser(map, card, button) {
@@ -121,7 +182,7 @@
         try {
           const result = await reverse(lat, lng)
           const label = addressLabel(result)
-          if (label) setChip(card, label)
+          if (label) setAddress(card, label, true)
           persist(lat, lng, label || result.display_name || '')
           setHint(card, 'Adresse détectée à partir de votre position')
         } catch {
@@ -148,6 +209,8 @@
     try {
       const L = await loadLeaflet()
       if (!card.isConnected || !document.querySelector('.host-onboarding[data-screen="pin"]')) return
+
+      const typedAddress = card.querySelector('.host-onboarding__address-chip span')?.textContent?.trim() || ''
 
       const layer = document.createElement('div')
       layer.className = 'host-step5-real-map'
@@ -182,33 +245,36 @@
       map.zoomControl.setPosition('bottomright')
       map.on('moveend', () => scheduleReverse(map, card))
       locate.addEventListener('click', () => locateUser(map, card, locate))
+      addAddressSearch(card, map, typedAddress)
 
       currentMount = { card, map }
       setTimeout(() => map.invalidateSize(), 80)
 
+      // The address entered on Étape 4 always has priority over an older saved map position.
+      if (typedAddress.length >= 3) {
+        try {
+          const found = await geocode(typedAddress)
+          if (found && Number.isFinite(found.lat) && Number.isFinite(found.lng)) {
+            const label = addressLabel(found.raw) || typedAddress
+            map.setView([found.lat, found.lng], 17, { animate: false })
+            setAddress(card, label, true)
+            persist(found.lat, found.lng, label)
+            setHint(card, 'Adresse de l’étape 4 trouvée · ajustez si nécessaire')
+            return
+          }
+        } catch {}
+      }
+
+      // Only fall back to the previously adjusted position when the typed address cannot be found.
       const saved = savedLocation()
       if (saved) {
         map.setView([Number(saved.lat), Number(saved.lng)], 17, { animate: false })
-        if (saved.address) setChip(card, saved.address)
-        setHint(card, 'Déplacez la carte pour ajuster le repère')
+        if (saved.address) setAddress(card, saved.address, true)
+        setHint(card, typedAddress ? 'Adresse introuvable · position précédente affichée' : 'Déplacez la carte pour ajuster le repère')
         return
       }
 
-      const typedAddress = card.querySelector('.host-onboarding__address-chip span')?.textContent?.trim() || ''
-      try {
-        const found = await geocode(typedAddress)
-        if (found && Number.isFinite(found.lat) && Number.isFinite(found.lng)) {
-          map.setView([found.lat, found.lng], 17, { animate: false })
-          const label = addressLabel(found.raw)
-          if (label) setChip(card, label)
-          persist(found.lat, found.lng, label)
-          setHint(card, 'Adresse détectée · déplacez la carte si nécessaire')
-        } else {
-          setHint(card, 'Adresse introuvable · utilisez votre position')
-        }
-      } catch {
-        setHint(card, 'Utilisez votre position ou déplacez la carte')
-      }
+      setHint(card, typedAddress ? 'Adresse introuvable · écrivez-la ici ou utilisez votre position' : 'Écrivez une adresse ou utilisez votre position')
     } catch {
       card.dataset.realMapMounted = 'error'
       setHint(card, 'Impossible de charger la carte pour le moment')
