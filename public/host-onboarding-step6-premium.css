@@ -1,5 +1,6 @@
-/* Premium Étape 6 · capacity details.
-   Scoped only to the basics screen. Same Movera white / green / black palette. */
+/* Étape 6 · premium refinement aligned with the existing Movera Host app theme.
+   Scoped to the basics screen only. Keeps the same white background, green accent,
+   typography rhythm, rounded surfaces and footer behavior used across onboarding. */
 
 .host-onboarding[data-screen="basics"] {
   background:#fff !important;
@@ -9,252 +10,221 @@
   width:100% !important;
   max-width:430px !important;
   margin:0 auto !important;
-  padding:40px 20px 36px !important;
+  padding:34px 24px 34px !important;
 }
 
+/* Keep the native app title treatment instead of introducing a separate visual language. */
 .host-onboarding[data-screen="basics"] .host-onboarding__eyebrow {
   min-height:31px !important;
-  padding:0 12px !important;
-  border:1px solid #e5ebe6 !important;
-  border-radius:999px !important;
-  background:linear-gradient(180deg,#fbfdfb,#f4f8f5) !important;
-  color:#1f6a43 !important;
-  font-size:11px !important;
-  font-weight:760 !important;
-  letter-spacing:.015em !important;
-  box-shadow:0 6px 18px rgba(22,32,25,.045),inset 0 1px 0 rgba(255,255,255,.95) !important;
-}
-
-.host-onboarding[data-screen="basics"] h1 {
-  max-width:370px !important;
-  margin-top:17px !important;
-  color:#0f110f !important;
-  font-size:clamp(34px,8.8vw,41px) !important;
-  line-height:1.01 !important;
-  letter-spacing:-.052em !important;
-  font-weight:770 !important;
-}
-
-.host-onboarding[data-screen="basics"] p {
-  max-width:345px !important;
-  margin-top:13px !important;
-  color:#747a75 !important;
-  font-size:13.5px !important;
-  line-height:1.5 !important;
-  letter-spacing:-.012em !important;
-}
-
-/* 2 x 2 premium capacity dashboard */
-.host-onboarding[data-screen="basics"] .host-onboarding__counter-card {
-  position:relative !important;
-  display:grid !important;
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  gap:12px !important;
-  margin-top:26px !important;
-  padding:42px 0 0 !important;
-  overflow:visible !important;
+  padding:0 11px !important;
   border:0 !important;
-  border-radius:0 !important;
-  background:transparent !important;
+  border-radius:10px !important;
+  background:#f4f4f2 !important;
+  color:#1f6a43 !important;
+  font-size:12px !important;
+  font-weight:650 !important;
+  letter-spacing:-.01em !important;
   box-shadow:none !important;
 }
 
-.host-onboarding[data-screen="basics"] .host-onboarding__counter-card::before {
-  content:"Capacité du logement" !important;
-  position:absolute !important;
-  top:0 !important;
-  left:2px !important;
-  display:flex !important;
-  align-items:center !important;
-  min-height:28px !important;
-  padding:0 10px !important;
-  border:1px solid #e6ebe7 !important;
-  border-radius:999px !important;
-  background:#f7f9f7 !important;
-  color:#626963 !important;
-  font-size:9.5px !important;
-  line-height:1 !important;
+.host-onboarding[data-screen="basics"] h1 {
+  max-width:390px !important;
+  margin:18px 0 0 !important;
+  color:#0f1110 !important;
+  font-size:40px !important;
+  line-height:1.02 !important;
+  letter-spacing:-.052em !important;
   font-weight:760 !important;
-  letter-spacing:.075em !important;
-  text-transform:uppercase !important;
-  box-shadow:0 5px 14px rgba(24,31,26,.03) !important;
+}
+
+.host-onboarding[data-screen="basics"] p {
+  max-width:374px !important;
+  margin:16px 0 0 !important;
+  color:#777b78 !important;
+  font-size:15px !important;
+  line-height:1.53 !important;
+  letter-spacing:-.018em !important;
+}
+
+/* One refined app-style surface, consistent with the rest of onboarding. */
+.host-onboarding[data-screen="basics"] .host-onboarding__counter-card {
+  position:relative !important;
+  display:block !important;
+  margin-top:28px !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  border:1px solid #e2e3e1 !important;
+  border-radius:25px !important;
+  background:#fff !important;
+  box-shadow:0 12px 34px rgba(20,26,22,.055) !important;
+}
+
+.host-onboarding[data-screen="basics"] .host-onboarding__counter-card::before {
+  display:none !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-row {
   position:relative !important;
-  min-width:0 !important;
-  min-height:184px !important;
-  padding:16px 14px 13px !important;
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:stretch !important;
-  justify-content:space-between !important;
+  min-height:92px !important;
+  padding:0 15px !important;
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  align-items:center !important;
   gap:14px !important;
-  overflow:hidden !important;
-  border:1px solid #e1e6e2 !important;
-  border-radius:25px !important;
-  background:
-    radial-gradient(circle at 100% 0%,rgba(31,106,67,.055),transparent 42%),
-    linear-gradient(155deg,#fff 0%,#fbfcfb 68%,#f7faf8 100%) !important;
-  box-shadow:
-    0 14px 34px rgba(19,28,22,.065),
-    inset 0 1px 0 rgba(255,255,255,.98) !important;
-  transition:transform .16s ease,box-shadow .18s ease,border-color .18s ease !important;
-}
-
-.host-onboarding[data-screen="basics"] .host-onboarding__counter-row::after {
-  content:"" !important;
-  position:absolute !important;
-  top:0 !important;
-  left:18px !important;
-  right:18px !important;
-  height:1px !important;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.96),transparent) !important;
-  pointer-events:none !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:#fff !important;
+  box-shadow:none !important;
+  transform:none !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-row + .host-onboarding__counter-row::before {
-  display:none !important;
+  content:"" !important;
+  display:block !important;
+  position:absolute !important;
+  left:15px !important;
+  right:15px !important;
+  top:0 !important;
+  height:1px !important;
+  background:#eceeeb !important;
 }
 
-.host-onboarding[data-screen="basics"] .host-onboarding__counter-row:has(button:active) {
-  transform:translateY(1px) scale(.994) !important;
-  border-color:#d8e2da !important;
-  box-shadow:0 10px 26px rgba(19,28,22,.055),inset 0 1px 0 rgba(255,255,255,.98) !important;
+.host-onboarding[data-screen="basics"] .host-onboarding__counter-row::after {
+  display:none !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-label {
   min-width:0 !important;
   display:flex !important;
-  flex-direction:column !important;
-  align-items:flex-start !important;
-  gap:11px !important;
-  color:#181b18 !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  gap:12px !important;
+  color:#171917 !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-label > svg {
-  width:46px !important;
-  height:46px !important;
-  flex:0 0 46px !important;
-  padding:11px !important;
-  border:1px solid #dce8df !important;
-  border-radius:15px !important;
-  background:linear-gradient(145deg,#f2f8f4,#eaf4ed) !important;
+  width:42px !important;
+  height:42px !important;
+  flex:0 0 42px !important;
+  padding:9px !important;
+  border:1px solid #e2e7e3 !important;
+  border-radius:14px !important;
+  background:#f7f9f7 !important;
   color:#1f6a43 !important;
   fill:none !important;
   stroke:currentColor !important;
-  stroke-width:1.72 !important;
+  stroke-width:1.7 !important;
   stroke-linecap:round !important;
   stroke-linejoin:round !important;
-  box-shadow:0 7px 18px rgba(31,106,67,.07),inset 0 1px 0 rgba(255,255,255,.95) !important;
+  box-shadow:none !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-label strong {
-  max-width:100% !important;
-  color:#171a17 !important;
-  font-size:14.5px !important;
-  line-height:1.18 !important;
-  font-weight:730 !important;
-  letter-spacing:-.025em !important;
-  white-space:normal !important;
+  color:#171917 !important;
+  font-size:14px !important;
+  line-height:1.25 !important;
+  font-weight:650 !important;
+  letter-spacing:-.02em !important;
+  white-space:nowrap !important;
 }
 
-/* Counter control: one refined capsule per tile */
+/* Native compact Movera control: circular buttons + centered value. */
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-row > div {
-  width:100% !important;
-  height:48px !important;
   display:grid !important;
-  grid-template-columns:40px minmax(34px,1fr) 40px !important;
+  grid-template-columns:38px 34px 38px !important;
   align-items:center !important;
   justify-items:center !important;
-  gap:4px !important;
-  padding:4px !important;
-  border:1px solid #dde3de !important;
-  border-radius:16px !important;
-  background:rgba(255,255,255,.88) !important;
-  box-shadow:0 7px 18px rgba(20,28,22,.05),inset 0 1px 0 rgba(255,255,255,.96) !important;
-  backdrop-filter:blur(10px) !important;
-  -webkit-backdrop-filter:blur(10px) !important;
+  gap:5px !important;
+  width:auto !important;
+  height:auto !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-row button {
-  width:40px !important;
-  height:40px !important;
+  width:38px !important;
+  height:38px !important;
   display:grid !important;
   place-items:center !important;
-  border:0 !important;
-  border-radius:12px !important;
-  background:#f3f6f3 !important;
-  color:#171a17 !important;
-  font-size:21px !important;
-  font-weight:460 !important;
+  border:1px solid #d9dcda !important;
+  border-radius:50% !important;
+  background:#fff !important;
+  color:#171917 !important;
+  font-size:20px !important;
+  font-weight:440 !important;
   line-height:1 !important;
-  box-shadow:inset 0 0 0 1px #e4e9e5 !important;
-  transition:transform .1s ease,background .14s ease,color .14s ease,box-shadow .14s ease !important;
+  box-shadow:0 3px 10px rgba(20,26,22,.025) !important;
+  transition:transform .1s ease,border-color .14s ease,background .14s ease,color .14s ease !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-row button:not(:disabled):active {
-  transform:scale(.90) !important;
-  background:#1f6a43 !important;
-  color:#fff !important;
-  box-shadow:0 6px 14px rgba(31,106,67,.20) !important;
+  transform:scale(.92) !important;
+  border-color:#1f6a43 !important;
+  background:#eef6f0 !important;
+  color:#1f6a43 !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-row button:disabled {
+  border-color:#eceeec !important;
   background:#f7f8f7 !important;
-  color:#c6cac6 !important;
-  box-shadow:inset 0 0 0 1px #eff1ef !important;
+  color:#c2c6c2 !important;
   opacity:1 !important;
+  box-shadow:none !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__counter-row b {
   min-width:34px !important;
-  color:#0f120f !important;
-  font-size:20px !important;
+  color:#111312 !important;
+  font-size:15px !important;
   line-height:1 !important;
-  font-weight:790 !important;
-  letter-spacing:-.035em !important;
+  font-weight:700 !important;
+  letter-spacing:-.02em !important;
   text-align:center !important;
   font-variant-numeric:tabular-nums !important;
 }
 
-/* Premium footer, same flow and controls */
+/* Footer stays visually identical to the rest of the app. */
 .host-onboarding[data-screen="basics"] .host-onboarding__footer {
-  border-top:1px solid rgba(228,232,228,.9) !important;
-  background:rgba(255,255,255,.95) !important;
-  box-shadow:0 -14px 38px rgba(22,30,24,.055) !important;
-  backdrop-filter:blur(22px) saturate(1.08) !important;
-  -webkit-backdrop-filter:blur(22px) saturate(1.08) !important;
+  background:rgba(255,255,255,.96) !important;
+  box-shadow:none !important;
+  backdrop-filter:blur(20px) saturate(1.15) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.15) !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__back,
 .host-onboarding[data-screen="basics"] .host-onboarding__primary {
+  height:58px !important;
   border-radius:18px !important;
+  font-size:14px !important;
+  font-weight:620 !important;
 }
 
 .host-onboarding[data-screen="basics"] .host-onboarding__primary:not(:disabled) {
-  box-shadow:0 9px 22px rgba(0,0,0,.14) !important;
+  background:#111 !important;
+  border-color:#111 !important;
+  color:#fff !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.12) !important;
 }
 
 @media (max-width:360px) {
   .host-onboarding[data-screen="basics"] .host-onboarding__step {
-    padding:34px 16px 32px !important;
+    padding-left:18px !important;
+    padding-right:18px !important;
   }
 
   .host-onboarding[data-screen="basics"] h1 {
-    font-size:34px !important;
-  }
-
-  .host-onboarding[data-screen="basics"] .host-onboarding__counter-card {
-    gap:9px !important;
-    margin-top:22px !important;
-    padding-top:38px !important;
+    font-size:36px !important;
   }
 
   .host-onboarding[data-screen="basics"] .host-onboarding__counter-row {
-    min-height:169px !important;
-    padding:13px 11px 11px !important;
-    border-radius:21px !important;
+    min-height:84px !important;
+    padding:0 12px !important;
+    gap:10px !important;
   }
 
   .host-onboarding[data-screen="basics"] .host-onboarding__counter-label {
@@ -262,11 +232,11 @@
   }
 
   .host-onboarding[data-screen="basics"] .host-onboarding__counter-label > svg {
-    width:41px !important;
-    height:41px !important;
-    flex-basis:41px !important;
-    padding:10px !important;
-    border-radius:13px !important;
+    width:38px !important;
+    height:38px !important;
+    flex-basis:38px !important;
+    padding:8px !important;
+    border-radius:12px !important;
   }
 
   .host-onboarding[data-screen="basics"] .host-onboarding__counter-label strong {
@@ -274,34 +244,18 @@
   }
 
   .host-onboarding[data-screen="basics"] .host-onboarding__counter-row > div {
-    height:45px !important;
-    grid-template-columns:36px minmax(28px,1fr) 36px !important;
-    border-radius:14px !important;
+    grid-template-columns:36px 31px 36px !important;
+    gap:3px !important;
   }
 
   .host-onboarding[data-screen="basics"] .host-onboarding__counter-row button {
     width:36px !important;
     height:36px !important;
-    border-radius:10px !important;
-    font-size:20px !important;
+    font-size:19px !important;
   }
 
   .host-onboarding[data-screen="basics"] .host-onboarding__counter-row b {
-    font-size:18px !important;
-  }
-}
-
-@media (max-width:330px) {
-  .host-onboarding[data-screen="basics"] .host-onboarding__counter-card {
-    grid-template-columns:1fr !important;
-  }
-
-  .host-onboarding[data-screen="basics"] .host-onboarding__counter-row {
-    min-height:144px !important;
-  }
-
-  .host-onboarding[data-screen="basics"] .host-onboarding__counter-label {
-    flex-direction:row !important;
-    align-items:center !important;
+    min-width:31px !important;
+    font-size:14px !important;
   }
 }
