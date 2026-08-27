@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { SEARCH_ADDRESS_SUGGESTIONS, SEARCH_DESTINATIONS } from './searchData.js'
+import { scanTunisiaByVirtualPin } from './tunisiaPinScanner.js'
 
-const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org/search'
 export const SEARCH_ADDRESS_PREVIEW_EVENT = 'movera:search-address-preview'
 
 function normalize(value) {
@@ -29,75 +29,25 @@ function nearestDestinationId(lat, lng) {
   return best?.id || 'tunis'
 }
 
-function uniqueParts(parts) {
-  const seen = new Set()
-  return parts.filter((value) => {
-    const key = normalize(value)
-    if (!key || seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
-}
-
-function parseNominatimResult(result) {
-  if (!result) return null
-
-  const lat = Number(result.lat)
-  const lng = Number(result.lon)
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
-
-  const address = result.address || {}
-  const houseNumber = address.house_number || ''
-  const road = address.road || address.pedestrian || address.footway || address.path || address.cycleway || ''
-  const neighbourhood = address.neighbourhood || address.suburb || address.quarter || address.hamlet || ''
-  const city = address.city || address.town || address.village || address.municipality || address.county || ''
-  const postcode = address.postcode || ''
-  const state = address.state || address.region || ''
-  const country = address.country || ''
-
-  let label = ''
-  if (houseNumber && road) label = `${houseNumber} ${road}`
-  else if (road) label = road
-  else label = result.name || neighbourhood || city || state || country || result.display_name || ''
-  if (!label) return null
-
-  const cityLine = [postcode, city].filter(Boolean).join(' ')
-  const subtitle = uniqueParts([neighbourhood, cityLine, state, country])
-    .filter((value) => normalize(value) !== normalize(label))
-    .join(', ')
-
-  const addressType = String(result.addresstype || result.type || '').toLowerCase()
-  const zoom = houseNumber
-    ? 18
-    : road
-      ? 17
-      : ['neighbourhood', 'suburb', 'quarter'].includes(addressType)
-        ? 15
-        : ['city', 'town', 'village', 'municipality'].includes(addressType)
-          ? 13
-          : 14
-
+function attachDestination(address) {
+  if (!address?.viewport) return address
   return {
-    id: `nominatim-${result.place_id || `${result.osm_type || 'place'}-${result.osm_id || `${lat}-${lng}`}`}`,
-    destinationId: nearestDestinationId(lat, lng),
-    label,
-    subtitle: subtitle || result.display_name || 'Adresse détectée',
-    viewport: { lat, lng, zoom },
-    source: 'nominatim',
+    ...address,
+    destinationId: nearestDestinationId(address.viewport.lat, address.viewport.lng),
   }
 }
 
 function dedupe(items) {
   const seen = new Set()
   return items.filter((item) => {
-    const key = normalize(`${item.label}|${item.subtitle}`)
+    const key = normalize(`${item?.label}|${item?.subtitle}`)
     if (!key || seen.has(key)) return false
     seen.add(key)
     return true
   })
 }
 
-function publishPreview(address) {
+function publishPreview(address, stage = 'idle') {
   if (typeof window === 'undefined') return
   window.dispatchEvent(new CustomEvent(SEARCH_ADDRESS_PREVIEW_EVENT, {
     detail: address
@@ -106,6 +56,8 @@ function publishPreview(address) {
           label: address.label,
           subtitle: address.subtitle,
           viewport: address.viewport,
+          source: address.source,
+          scanStage: stage,
         }
       : null,
   }))
@@ -129,26 +81,24 @@ export function useAddressAutocomplete(query, active) {
     const timer = window.setTimeout(async () => {
       setLoading(true)
       try {
-        const url = new URL(NOMINATIM_ENDPOINT)
-        url.searchParams.set('format', 'jsonv2')
-        url.searchParams.set('addressdetails', '1')
-        url.searchParams.set('dedupe', '1')
-        url.searchParams.set('limit', '12')
-        url.searchParams.set('accept-language', 'fr')
-        url.searchParams.set('q', query.trim())
-
-        const response = await fetch(url, {
+        const scan = await scanTunisiaByVirtualPin(query, {
           signal: controller.signal,
-          headers: { Accept: 'application/json' },
+          onCandidate: (candidate) => {
+            if (controller.signal.aborted) return
+            // Stage 1: move the hidden map under the fixed virtual pin.
+            publishPreview(attachDestination(candidate), 'candidate')
+          },
         })
-        if (!response.ok) throw new Error(`Address search HTTP ${response.status}`)
-        const data = await response.json()
-        const next = dedupe((Array.isArray(data) ? data : [])
-          .map(parseNominatimResult)
-          .filter(Boolean))
-          .slice(0, 10)
+
+        if (controller.signal.aborted) return
+
+        const next = dedupe((scan.suggestions || []).map(attachDestination)).slice(0, 10)
+        const detected = attachDestination(scan.detected)
         setRemote(next)
-        publishPreview(next[0] || null)
+
+        // Stage 2: reverse scan what is exactly under the virtual pin,
+        // using the same coordinates -> address principle as host Étape 1.4.
+        publishPreview(detected || next[0] || null, detected ? 'detected' : 'candidate')
       } catch (error) {
         if (error?.name !== 'AbortError') {
           setRemote([])
@@ -157,7 +107,7 @@ export function useAddressAutocomplete(query, active) {
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
-    }, 420)
+    }, 460)
 
     return () => {
       window.clearTimeout(timer)
