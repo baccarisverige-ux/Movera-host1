@@ -1,0 +1,140 @@
+/* Real interactive map for onboarding Étape 5. Keeps the existing Movera palette. */
+.host-onboarding[data-screen="pin"] .host-onboarding__map-card {
+  overflow: hidden !important;
+  background: #f5f3ee !important;
+}
+
+.host-onboarding[data-screen="pin"] .host-onboarding__map-card::before,
+.host-onboarding[data-screen="pin"] .host-onboarding__map-card::after,
+.host-onboarding[data-screen="pin"] .host-onboarding__map-road,
+.host-onboarding[data-screen="pin"] .host-onboarding__map-pin,
+.host-onboarding[data-screen="pin"] .host-onboarding__map-zoom {
+  display: none !important;
+}
+
+.host-onboarding[data-screen="pin"] .host-step5-real-map {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: #f5f3ee;
+}
+
+.host-onboarding[data-screen="pin"] .host-step5-real-map .leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  background: #f5f3ee;
+}
+
+.host-onboarding[data-screen="pin"] .host-onboarding__address-chip {
+  z-index: 20 !important;
+  pointer-events: none;
+}
+
+.host-onboarding[data-screen="pin"] .host-onboarding__address-chip span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.host-onboarding[data-screen="pin"] .host-step5-center-pin {
+  position: absolute;
+  z-index: 21;
+  left: 50%;
+  top: 53%;
+  width: 48px;
+  height: 48px;
+  transform: translate(-50%,-50%);
+  border: 5px solid rgba(255,255,255,.96);
+  border-radius: 50%;
+  background: #1f6a43;
+  box-shadow: 0 10px 24px rgba(31,106,67,.28),0 0 0 7px rgba(31,106,67,.12);
+  pointer-events: none;
+}
+
+.host-onboarding[data-screen="pin"] .host-step5-center-pin::before {
+  content: "";
+  position: absolute;
+  inset: 13px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+
+.host-onboarding[data-screen="pin"] .host-step5-center-pin::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -15px;
+  width: 8px;
+  height: 8px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(31,106,67,.32);
+}
+
+.host-onboarding[data-screen="pin"] .host-step5-location-button {
+  position: absolute;
+  z-index: 22;
+  right: 14px;
+  top: 84px;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(224,225,221,.98);
+  border-radius: 15px;
+  background: rgba(255,255,255,.96);
+  color: #202320;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 22px rgba(20,24,21,.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.host-onboarding[data-screen="pin"] .host-step5-location-button svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.host-onboarding[data-screen="pin"] .host-step5-location-button[data-loading="true"] svg {
+  animation: host-step5-locate 1s linear infinite;
+}
+
+@keyframes host-step5-locate { to { transform: rotate(360deg); } }
+
+.host-onboarding[data-screen="pin"] .host-onboarding__map-hint {
+  z-index: 22 !important;
+  pointer-events: none;
+}
+
+.host-onboarding[data-screen="pin"] .leaflet-control-zoom {
+  margin-right: 14px !important;
+  margin-bottom: 72px !important;
+  border: 1px solid rgba(224,225,221,.98) !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(20,24,21,.09) !important;
+}
+
+.host-onboarding[data-screen="pin"] .leaflet-control-zoom a {
+  width: 42px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  border: 0 !important;
+  background: rgba(255,255,255,.96) !important;
+  color: #202320 !important;
+  font-size: 20px !important;
+}
+
+.host-onboarding[data-screen="pin"] .leaflet-control-zoom a + a {
+  border-top: 1px solid #ececea !important;
+}
+
+.host-onboarding[data-screen="pin"] .leaflet-control-attribution {
+  font-size: 8px !important;
+  background: rgba(255,255,255,.78) !important;
+}
