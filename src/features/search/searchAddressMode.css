@@ -6,6 +6,7 @@
   flex:0 0 auto;
   margin-top:4px;
   padding:0 1px 1px;
+  min-height:0;
 }
 
 .movera-st__address-label{
@@ -21,7 +22,14 @@
 .movera-st__address-suggestions{
   display:grid;
   gap:7px;
+  max-height:min(48vh,390px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  padding:1px 2px 5px 1px;
 }
+.movera-st__address-suggestions::-webkit-scrollbar{display:none}
 
 .movera-st__address-suggestion{
   width:100%;
@@ -61,7 +69,8 @@
 .movera-st__address-copy small{margin-top:2px;color:#909692;font-size:7.8px}
 .movera-st__address-arrow{color:#a0a6a2;font-size:17px;font-weight:400}
 
-.movera-st__address-empty{
+.movera-st__address-empty,
+.movera-st__address-loading{
   padding:13px 12px;
   border:1px solid rgba(36,43,39,.045);
   border-radius:14px;
@@ -77,5 +86,5 @@
 
 @media(max-height:700px){
   .movera-st__address-suggestion{min-height:50px;padding-block:7px}
-  .movera-st__address-suggestions{gap:6px}
+  .movera-st__address-suggestions{gap:6px;max-height:min(44vh,310px)}
 }
