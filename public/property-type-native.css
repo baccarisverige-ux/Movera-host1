@@ -29,7 +29,6 @@
   box-sizing: border-box;
 }
 
-/* This screen owns its presentation. Keep the rest of onboarding untouched. */
 .host-onboarding[data-screen="property-type"] > .host-onboarding__topbar,
 .host-onboarding[data-screen="property-type"] > .host-onboarding__micro-progress {
   display: none !important;
@@ -160,18 +159,17 @@
   box-shadow: inset 0 0 0 1.5px #111 !important;
 }
 
-/* Use the exact illustrated artwork, but only as isolated card art.
-   The card itself, label, border and selection are native DOM and never move. */
+/* The exact building drawings are cropped from one immutable reference image.
+   Only the small art layer uses the JPEG; all layout and interactions are DOM. */
 .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button > span:first-child {
   display: block !important;
-  flex: 1 1 auto !important;
-  width: 84% !important;
+  flex: 0 0 auto !important;
+  width: 76% !important;
   min-height: 0 !important;
-  margin: 2px auto 5px !important;
+  margin: auto auto 8px !important;
   padding: 0 !important;
+  background-image: url("assets/bootstrap/4.jpeg") !important;
   background-repeat: no-repeat !important;
-  background-position: center !important;
-  background-size: contain !important;
   color: transparent !important;
   transform: none !important;
 }
@@ -181,19 +179,27 @@
 }
 
 .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(1) > span:first-child {
-  background-image: url("assets/bootstrap/property/appartement.svg") !important;
+  aspect-ratio: 215 / 210 !important;
+  background-size: 437.674% 796.190% !important;
+  background-position: 20.661% 40.014% !important;
 }
 
 .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(2) > span:first-child {
-  background-image: url("assets/bootstrap/property/villa.svg") !important;
+  aspect-ratio: 240 / 200 !important;
+  background-size: 392.083% 836% !important;
+  background-position: 78.459% 40.761% !important;
 }
 
 .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(3) > span:first-child {
-  background-image: url("assets/bootstrap/property/maison-hote.svg") !important;
+  aspect-ratio: 225 / 195 !important;
+  background-size: 418.222% 857.436% !important;
+  background-position: 20.950% 67.366% !important;
 }
 
 .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(4) > span:first-child {
-  background-image: url("assets/bootstrap/property/hotel.svg") !important;
+  aspect-ratio: 235 / 180 !important;
+  background-size: 400.426% 928.889% !important;
+  background-position: 78.612% 67.694% !important;
 }
 
 .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button > strong {
@@ -242,7 +248,6 @@
   outline-offset: 3px !important;
 }
 
-/* Footer stays in normal document flow. No fixed/dynamic viewport positioning. */
 .host-onboarding[data-screen="property-type"] > .host-onboarding__footer {
   position: relative !important;
   inset: auto !important;
