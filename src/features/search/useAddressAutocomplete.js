@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { SEARCH_ADDRESS_SUGGESTIONS, SEARCH_DESTINATIONS } from './searchData.js'
 
-const PHOTON_ENDPOINT = 'https://photon.komoot.io/api/'
+const NOMINATIM_ENDPOINT = 'https://nominatim.openstreetmap.org/search'
 
 function normalize(value) {
   return String(value || '').trim().toLocaleLowerCase('fr')
@@ -38,49 +38,51 @@ function uniqueParts(parts) {
   })
 }
 
-function parsePhotonFeature(feature) {
-  const coordinates = feature?.geometry?.coordinates
-  const properties = feature?.properties || {}
-  if (!Array.isArray(coordinates) || coordinates.length < 2) return null
+function parseNominatimResult(result) {
+  if (!result) return null
 
-  const lng = Number(coordinates[0])
-  const lat = Number(coordinates[1])
+  const lat = Number(result.lat)
+  const lng = Number(result.lon)
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
 
-  const houseNumber = properties.housenumber || properties.house_number || ''
-  const street = properties.street || properties.name || ''
-  const locality = properties.locality || properties.district || properties.suburb || properties.county || ''
-  const city = properties.city || properties.town || properties.village || properties.municipality || ''
-  const postcode = properties.postcode || ''
-  const state = properties.state || ''
-  const country = properties.country || ''
-  const type = String(properties.type || '').toLowerCase()
+  const address = result.address || {}
+  const houseNumber = address.house_number || ''
+  const road = address.road || address.pedestrian || address.footway || address.path || address.cycleway || ''
+  const neighbourhood = address.neighbourhood || address.suburb || address.quarter || address.hamlet || ''
+  const city = address.city || address.town || address.village || address.municipality || address.county || ''
+  const postcode = address.postcode || ''
+  const state = address.state || address.region || ''
+  const country = address.country || ''
 
   let label = ''
-  if (houseNumber && street) label = `${houseNumber} ${street}`
-  else label = properties.name || street || city || locality || state || country
+  if (houseNumber && road) label = `${houseNumber} ${road}`
+  else if (road) label = road
+  else label = result.name || neighbourhood || city || state || country || result.display_name || ''
   if (!label) return null
 
   const cityLine = [postcode, city].filter(Boolean).join(' ')
-  const subtitle = uniqueParts([locality, cityLine, state, country])
+  const subtitle = uniqueParts([neighbourhood, cityLine, state, country])
     .filter((value) => normalize(value) !== normalize(label))
     .join(', ')
 
-  const zoom = type === 'house'
-    ? 17
-    : type === 'street'
-      ? 16
-      : ['city', 'town', 'village', 'district', 'locality'].includes(type)
-        ? 14
-        : 15
+  const addressType = String(result.addresstype || result.type || '').toLowerCase()
+  const zoom = houseNumber
+    ? 18
+    : road
+      ? 17
+      : ['neighbourhood', 'suburb', 'quarter'].includes(addressType)
+        ? 15
+        : ['city', 'town', 'village', 'municipality'].includes(addressType)
+          ? 13
+          : 14
 
   return {
-    id: `photon-${properties.osm_type || 'place'}-${properties.osm_id || `${lat}-${lng}`}`,
+    id: `nominatim-${result.place_id || `${result.osm_type || 'place'}-${result.osm_id || `${lat}-${lng}`}`}`,
     destinationId: nearestDestinationId(lat, lng),
     label,
-    subtitle: subtitle || country || city || 'Adresse détectée',
+    subtitle: subtitle || result.display_name || 'Adresse détectée',
     viewport: { lat, lng, zoom },
-    source: 'photon',
+    source: 'nominatim',
   }
 }
 
@@ -111,32 +113,30 @@ export function useAddressAutocomplete(query, active) {
     const timer = window.setTimeout(async () => {
       setLoading(true)
       try {
-        const url = new URL(PHOTON_ENDPOINT)
+        const url = new URL(NOMINATIM_ENDPOINT)
+        url.searchParams.set('format', 'jsonv2')
+        url.searchParams.set('addressdetails', '1')
+        url.searchParams.set('dedupe', '1')
+        url.searchParams.set('limit', '12')
+        url.searchParams.set('accept-language', 'fr')
         url.searchParams.set('q', query.trim())
-        url.searchParams.set('limit', '10')
-        url.searchParams.set('lang', 'fr')
-        // Keep Tunisia as a ranking bias for Movera, without restricting results to Tunisia.
-        // This lets the popup resolve precise streets, house numbers and cities worldwide.
-        url.searchParams.set('lat', '36.8065')
-        url.searchParams.set('lon', '10.1815')
 
         const response = await fetch(url, {
           signal: controller.signal,
           headers: { Accept: 'application/json' },
         })
-        if (!response.ok) throw new Error(`Autocomplete HTTP ${response.status}`)
+        if (!response.ok) throw new Error(`Address search HTTP ${response.status}`)
         const data = await response.json()
-        const next = (Array.isArray(data?.features) ? data.features : [])
-          .map(parsePhotonFeature)
+        const next = (Array.isArray(data) ? data : [])
+          .map(parseNominatimResult)
           .filter(Boolean)
-          .slice(0, 6)
-        setRemote(next)
+        setRemote(dedupe(next).slice(0, 10))
       } catch (error) {
         if (error?.name !== 'AbortError') setRemote([])
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
-    }, 300)
+    }, 420)
 
     return () => {
       window.clearTimeout(timer)
@@ -146,7 +146,8 @@ export function useAddressAutocomplete(query, active) {
 
   const suggestions = useMemo(() => {
     const hasQuery = normalize(query).length >= 3
-    return dedupe(hasQuery ? [...remote, ...local] : [...local, ...remote]).slice(0, 6)
+    if (hasQuery) return remote.slice(0, 10)
+    return dedupe(local).slice(0, 5)
   }, [local, remote, query])
 
   return { suggestions, loading }
