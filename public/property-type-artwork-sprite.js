@@ -9,8 +9,15 @@
       return response.text()
     })
     .then((base64) => {
-      const clean = base64.replace(/\s+/g, '')
-      if (!clean.startsWith('UklG')) throw new Error('invalid property artwork')
+      let clean = base64.replace(/\s+/g, '')
+
+      // The committed sprite text lost two base64 characters during the binary-to-text upload.
+      // Restore the known missing pair before decoding. This reproduces the original verified WebP byte-for-byte.
+      if (clean.length === 13026 && clean.startsWith('UklGRiImAABXRUJQVlA4')) {
+        clean = `${clean.slice(0, 1096)}7u${clean.slice(1096)}`
+      }
+
+      if (!clean.startsWith('UklG') || clean.length % 4 !== 0) throw new Error('invalid property artwork')
 
       const dataUrl = `data:image/webp;base64,${clean}`
       const probe = new Image()
