@@ -1,23 +1,35 @@
-/* Appartement artwork only. Stable explicit sizing avoids the blank-card issue on iOS Safari. */
-.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(1) > span:first-child {
+/* Four supplied property drawings, one per category. The sprite is loaded once by property-type-artwork-sprite.js. */
+.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button > span:first-child {
   display: block !important;
   flex: 0 0 auto !important;
-  width: 82% !important;
+  width: 84% !important;
   height: clamp(108px, 28vw, 170px) !important;
   min-height: 108px !important;
   aspect-ratio: auto !important;
   margin: auto auto 8px !important;
-  background-image: url("assets/bootstrap/property/appartement-building-v2.webp") !important;
-  background-size: contain !important;
-  background-position: center bottom !important;
+  background-image: var(--property-drawings-sprite) !important;
+  background-size: 200% 200% !important;
   background-repeat: no-repeat !important;
   filter: none !important;
   opacity: 1 !important;
 }
 
+.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(1) > span:first-child {
+  background-position: left top !important;
+}
+.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(2) > span:first-child {
+  background-position: right top !important;
+}
+.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(3) > span:first-child {
+  background-position: left bottom !important;
+}
+.host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(4) > span:first-child {
+  background-position: right bottom !important;
+}
+
 @media (max-width: 360px) {
-  .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button:nth-child(1) > span:first-child {
-    width: 86% !important;
+  .host-onboarding[data-screen="property-type"] .host-onboarding__choice-grid > button > span:first-child {
+    width: 88% !important;
     height: 112px !important;
     min-height: 112px !important;
   }
