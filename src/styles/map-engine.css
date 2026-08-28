@@ -5,6 +5,8 @@
 .map-tiles { z-index: 0; overflow: hidden; }
 .map-marker-layer, .map-cluster-layer { z-index: 2; }
 .map-tile { position: absolute; width: 256px; height: 256px; overflow: hidden; transform-origin: 0 0; background-color: #f5f7f8; background-image: linear-gradient(135deg, rgba(255,255,255,.72) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,.54) 25%, transparent 25%), linear-gradient(45deg, rgba(218,225,228,.28) 25%, transparent 25%), linear-gradient(315deg, rgba(218,225,228,.24) 25%, #f5f7f8 25%); background-position: 18px 0, 18px 0, 0 0, 0 0; background-size: 36px 36px; will-change: transform; }
+/* Preserve the exact B225 visual treatment on OpenStreetMap raster tiles. */
+.map-tile img { filter: grayscale(0.1) contrast(1.05) brightness(1.02); }
 .map-surface--preview { pointer-events: none; }
 .map-tile::after { content: ''; position: absolute; inset: 0; border: 1px solid rgba(80, 96, 84, .05); pointer-events: none; }
 .b225-map-page .map-surface, .movera-st__map-stage .map-surface { background: #f5f7f8 !important; }
