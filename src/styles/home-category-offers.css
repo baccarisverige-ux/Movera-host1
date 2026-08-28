@@ -24,44 +24,60 @@
   gap:12px!important;
 }
 
+/* Same two small animated chevrons used in the Tout / Plage category rail. */
 .b225-home .b225-category-selection__title>.b225-section-scroll-hint{
+  position:relative!important;
   flex:0 0 28px!important;
   width:28px!important;
   min-width:28px!important;
   height:28px!important;
   padding:0!important;
-  display:grid!important;
-  place-items:center!important;
-  border:1px solid rgba(102,102,97,.12)!important;
-  border-radius:999px!important;
-  background:linear-gradient(180deg,#ffffff 0%,#f7f7f5 58%,#ededeb 100%)!important;
-  color:#4d4f4a!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 1px 0 rgba(180,180,175,.38),0 3px 7px rgba(35,35,32,.07)!important;
-  transform:translateY(-.5px)!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:rgba(71,72,68,.78)!important;
+  box-shadow:none!important;
+  transform:translateY(-1px)!important;
   cursor:pointer!important;
   -webkit-tap-highlight-color:transparent!important;
 }
 
 .b225-home .b225-category-selection__title>.b225-section-scroll-hint svg{
-  width:14px!important;
-  height:14px!important;
-  fill:none!important;
-  stroke:currentColor!important;
-  stroke-width:1.9!important;
-  stroke-linecap:round!important;
-  stroke-linejoin:round!important;
-  animation:b225-scroll-arrow-cue 2.4s ease-in-out infinite!important;
+  display:none!important;
+}
+
+.b225-home .b225-category-selection__title>.b225-section-scroll-hint::before,
+.b225-home .b225-category-selection__title>.b225-section-scroll-hint::after{
+  content:'›'!important;
+  position:absolute!important;
+  top:50%!important;
+  width:9px!important;
+  height:20px!important;
+  margin-top:-10px!important;
+  color:currentColor!important;
+  font-family:Arial,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-size:18.75px!important;
+  line-height:20px!important;
+  font-weight:300!important;
+  text-align:center!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.94)!important;
+  filter:drop-shadow(0 1.5px 2px rgba(48,48,44,.09))!important;
+  animation:b225-category-chevron-flash 1.28s cubic-bezier(.4,0,.2,1) infinite!important;
+  will-change:transform,opacity!important;
+}
+
+.b225-home .b225-category-selection__title>.b225-section-scroll-hint::before{
+  left:5px!important;
+}
+
+.b225-home .b225-category-selection__title>.b225-section-scroll-hint::after{
+  left:12px!important;
+  animation-delay:.16s!important;
 }
 
 .b225-home .b225-category-selection__title>.b225-section-scroll-hint:active{
-  transform:translateY(1px) scale(.95)!important;
-  box-shadow:inset 0 2px 4px rgba(40,40,36,.11),0 1px 1px rgba(35,35,32,.03)!important;
-}
-
-@keyframes b225-scroll-arrow-cue{
-  0%,68%,100%{transform:translateX(0)}
-  80%{transform:translateX(2.5px)}
-  90%{transform:translateX(.5px)}
+  transform:translateY(0) scale(.94)!important;
+  box-shadow:none!important;
 }
 
 .b225-home .b225-offer-scroll{
@@ -242,6 +258,11 @@
 }
 
 @media(prefers-reduced-motion:reduce){
-  .b225-home .b225-category-selection__title>.b225-section-scroll-hint svg{animation:none!important}
+  .b225-home .b225-category-selection__title>.b225-section-scroll-hint::before,
+  .b225-home .b225-category-selection__title>.b225-section-scroll-hint::after{
+    animation:none!important;
+    opacity:.72!important;
+    transform:none!important;
+  }
   .b225-home .b225-offer-card__heart{transition:none!important}
 }
