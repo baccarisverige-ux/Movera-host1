@@ -16,6 +16,7 @@ import '../../styles/home-reference-gloss.css'
 import '../../styles/home-airbnb-surface.css'
 import '../../styles/home-category-6d.css'
 import '../../styles/home-category-offers.css'
+import '../../styles/home-see-all-card.css'
 import '../../styles/home-scroll-stability.css'
 import ALL_CATEGORY_GLOBE from './assets/all-category-globe.png'
 import BEACH_CATEGORY_ICON from './assets/plage-category.png'
@@ -107,7 +108,41 @@ function ListingCard({ item, sectionId, favorite, toggleFavorite, index }) {
   )
 }
 
-function CategorySelection({ id, title, items, favoriteIdSet, toggleFavorite }) {
+function SeeAllCard({ id, title, items, onNavigate }) {
+  const previewItems = items.slice(-3)
+  const openAll = () => {
+    setSelectedHomeCategory(id)
+    const route = getCollectionRouteForCategory(id)
+    onNavigate(route || `/map?category=${encodeURIComponent(id)}`)
+  }
+
+  return (
+    <button
+      type="button"
+      className="b225-see-all-card"
+      data-category={id}
+      data-testid={`home-see-all-${id}`}
+      onClick={openAll}
+      aria-label={`Tout voir dans ${title}`}
+    >
+      <span className="b225-see-all-card__gallery" aria-hidden="true">
+        {previewItems.map((item) => (
+          <span key={`${id}-preview-${item.id}`} className="b225-see-all-card__photo">
+            <img src={item.image} alt="" loading="lazy" decoding="async"/>
+          </span>
+        ))}
+        <span className="b225-see-all-card__mark">M</span>
+      </span>
+      <span className="b225-see-all-card__copy">
+        <span className="b225-see-all-card__eyebrow">Movera Select</span>
+        <span className="b225-see-all-card__title">Tout voir</span>
+        <span className="b225-see-all-card__arrow" aria-hidden="true">→</span>
+      </span>
+    </button>
+  )
+}
+
+function CategorySelection({ id, title, items, favoriteIdSet, toggleFavorite, onNavigate }) {
   const railRef = useRef(null)
   const scrollForward = () => railRef.current?.scrollBy({ left: Math.max(railRef.current.clientWidth * 0.72, 150), behavior: 'smooth' })
 
@@ -131,6 +166,7 @@ function CategorySelection({ id, title, items, favoriteIdSet, toggleFavorite }) 
               toggleFavorite={toggleFavorite}
             />
           ))}
+          <SeeAllCard id={id} title={title} items={items} onNavigate={onNavigate}/>
         </MotionList>
       ) : <p className="b225-empty">Sélection à venir.</p>}
     </section>
@@ -208,6 +244,7 @@ export function HomePage({ onNavigate }) {
           items={selection.items}
           favoriteIdSet={favoriteIdSet}
           toggleFavorite={toggleFavorite}
+          onNavigate={onNavigate}
         />
       ))}
     </div>
