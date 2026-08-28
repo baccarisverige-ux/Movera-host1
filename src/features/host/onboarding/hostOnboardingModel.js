@@ -99,6 +99,8 @@ export const DEFAULT_HOST_DRAFT = Object.freeze({
   guestAccess: 'entire',
   address: '',
   city: 'La Marsa',
+  latitude: null,
+  longitude: null,
   pinConfirmed: false,
   guests: 2,
   bedrooms: 1,

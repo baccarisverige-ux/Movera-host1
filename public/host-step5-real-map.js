@@ -3,6 +3,7 @@
   const LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
   const NOMINATIM = 'https://nominatim.openstreetmap.org'
   const STORE_KEY = 'movera:host-pin-location:v1'
+  const HOST_MAP_LOCATION_EVENT = 'movera:host-map-address-change'
   let leafletPromise
   let currentMount = null
   let reverseTimer = null
@@ -50,6 +51,33 @@
     const postcode = a.postcode || ''
     const compact = [street, district, [postcode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ')
     return compact || result.display_name || result.displayName || result.label || ''
+  }
+
+  function resultAddress(result, fallback = '') {
+    if (result?.label) return String(result.label).trim()
+    const a = result?.address || {}
+    const street = [a.house_number, a.road || a.pedestrian || a.footway].filter(Boolean).join(' ')
+    return street || fallback || addressLabel(result)
+  }
+
+  function resultCity(result) {
+    if (result?.location?.city) return String(result.location.city).trim()
+    const a = result?.address || {}
+    return String(a.city || a.town || a.village || a.municipality || a.county || '').trim()
+  }
+
+  function publishLocation(lat, lng, result, fallbackAddress = '') {
+    const latitude = Number(lat)
+    const longitude = Number(lng)
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return
+    window.dispatchEvent(new CustomEvent(HOST_MAP_LOCATION_EVENT, {
+      detail: {
+        lat: latitude,
+        lng: longitude,
+        address: resultAddress(result, fallbackAddress),
+        city: resultCity(result),
+      },
+    }))
   }
 
   async function legacyGeocode(query) {
@@ -143,9 +171,11 @@
         const label = addressLabel(result)
         if (label) setAddress(card, label)
         persist(center.lat, center.lng, label || result.display_name || result.displayName || '')
+        publishLocation(center.lat, center.lng, result, label)
         setHint(card, 'Adresse ajustée · déplacez la carte si nécessaire')
       } catch {
         persist(center.lat, center.lng, '')
+        publishLocation(center.lat, center.lng, null)
         setHint(card, 'Position ajustée · adresse non disponible')
       }
     }, 420)
@@ -170,6 +200,7 @@
       const label = addressLabel(found.raw) || query
       setAddress(card, label, true)
       persist(found.lat, found.lng, label)
+      publishLocation(found.lat, found.lng, found.raw, query)
       map.flyTo([found.lat, found.lng], 17, { duration: 0.55 })
       setHint(card, 'Adresse trouvée · ajustez la carte si nécessaire')
       input.blur()
@@ -218,9 +249,11 @@
           const label = addressLabel(result)
           if (label) setAddress(card, label, true)
           persist(lat, lng, label || result.display_name || result.displayName || '')
+          publishLocation(lat, lng, result, label)
           setHint(card, 'Adresse détectée à partir de votre position')
         } catch {
           persist(lat, lng, '')
+          publishLocation(lat, lng, null)
           setHint(card, 'Position détectée')
         }
       },
@@ -293,6 +326,7 @@
             map.setView([found.lat, found.lng], 17, { animate: false })
             setAddress(card, label, true)
             persist(found.lat, found.lng, label)
+            publishLocation(found.lat, found.lng, found.raw, typedAddress)
             setHint(card, 'Adresse de l’étape 4 trouvée · ajustez si nécessaire')
             return
           }
@@ -304,6 +338,7 @@
       if (saved) {
         map.setView([Number(saved.lat), Number(saved.lng)], 17, { animate: false })
         if (saved.address) setAddress(card, saved.address, true)
+        publishLocation(Number(saved.lat), Number(saved.lng), null, saved.address || '')
         setHint(card, typedAddress ? 'Adresse introuvable · position précédente affichée' : 'Déplacez la carte pour ajuster le repère')
         return
       }

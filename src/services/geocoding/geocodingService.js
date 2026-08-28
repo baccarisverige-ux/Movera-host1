@@ -67,19 +67,23 @@ function parseResult(result, source = 'tunisia-search', forcedZoom = null) {
   const subtitle = uniqueParts(subtitleParts)
     .filter((value) => normalize(value) !== normalize(label))
     .join(', ')
-  const displayName = result.display_name || ''
 
   return {
     id: `nominatim-${result.place_id || `${result.osm_type || 'place'}-${result.osm_id || `${lat}-${lng}`}`}`,
     label,
-    subtitle: subtitle || displayName || 'Tunisie',
-    displayName,
-    // Compatibility fields let legacy map consumers keep their existing
-    // address formatting while the network request is centralized here.
-    display_name: displayName,
-    address: { ...address },
+    subtitle: subtitle || result.display_name || 'Tunisie',
+    displayName: result.display_name || '',
     viewport: { lat, lng, zoom: forcedZoom ?? zoomForResult(result) },
     source,
+    location: {
+      houseNumber,
+      road,
+      district,
+      city,
+      postcode,
+      state,
+      country,
+    },
     mapObject: {
       osmType: result.osm_type || '',
       osmId: result.osm_id || '',

@@ -3,6 +3,7 @@ import { activateHostProfile } from '../../../entities/host/hostProfileStore.js'
 import { ParkingIcon, SnowflakeIcon, WavesIcon, WifiIcon } from '../../../shared/icons/AppIcons.jsx'
 import { useAuthSession } from '../../auth/authSession.js'
 import { clearHostOnboardingDraft, readHostOnboardingDraft, writeHostOnboardingDraft } from './hostOnboardingDraftStore.js'
+import { useHostMapLocationSync } from './hostLocationSync.js'
 import {
   HOST_AMENITIES,
   HOST_AMENITY_GROUPS,
@@ -226,6 +227,7 @@ export function HostOnboardingPage({ onNavigate, onActivated }) {
   const [draft, setDraft] = useState(() => readHostOnboardingDraft(session?.userId))
   const [step, setStep] = useState(() => Math.min(readHostOnboardingDraft(session?.userId).screenIndex || 0, HOST_ONBOARDING_SCREENS.length - 1))
   const [feedback, setFeedback] = useState('')
+  useHostMapLocationSync(setDraft)
 
   const id = screenId(step)
   const phase = screenPhase(step)
@@ -295,6 +297,8 @@ export function HostOnboardingPage({ onNavigate, onActivated }) {
       type: draft.propertyType,
       basePrice: Number(draft.basePrice),
       address: draft.address.trim(),
+      latitude: draft.latitude,
+      longitude: draft.longitude,
       guestAccess: draft.guestAccess,
       guests: draft.guests,
       bedrooms: draft.bedrooms,

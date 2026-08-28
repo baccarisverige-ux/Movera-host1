@@ -25,6 +25,11 @@ function normalizeSafety(value) {
   }
 }
 
+function normalizeCoordinate(value) {
+  const coordinate = Number(value)
+  return Number.isFinite(coordinate) ? coordinate : null
+}
+
 function normalizeListing(value) {
   if (!value || typeof value !== 'object') return null
   const name = typeof value.name === 'string' ? value.name.trim() : ''
@@ -40,6 +45,8 @@ function normalizeListing(value) {
     basePrice: Math.round(basePrice),
     currency: 'TND',
     address: typeof value.address === 'string' ? value.address.trim() : '',
+    latitude: normalizeCoordinate(value.latitude),
+    longitude: normalizeCoordinate(value.longitude),
     guestAccess: typeof value.guestAccess === 'string' ? value.guestAccess : 'entire',
     guests: Math.max(1, Number(value.guests) || 1),
     bedrooms: Math.max(0, Number(value.bedrooms) || 0),
