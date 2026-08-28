@@ -26,6 +26,7 @@ const expectedSearchFiles = [
   'searchTransition-stability.css',
   'searchTransition.css',
   'tunisiaPinScanner.js',
+  'tunisiaPinScannerLegacy.js',
   'useAddressAutocomplete.js',
   'useSearchPanelFit.js',
   'useSearchPanelHeightMotion.js',

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+import { scanTunisia } from '../../services/geocoding/index.js'
 import { SEARCH_ADDRESS_SUGGESTIONS, SEARCH_DESTINATIONS } from './searchData.js'
-import { scanTunisiaByVirtualPin } from './tunisiaPinScanner.js'
+import { scanTunisiaByVirtualPinLegacy } from './tunisiaPinScannerLegacy.js'
 
 export const SEARCH_ADDRESS_PREVIEW_EVENT = 'movera:search-address-preview'
 
@@ -63,6 +64,15 @@ function publishPreview(address, stage = 'idle') {
   }))
 }
 
+async function scanWithSafeFallback(query, options) {
+  try {
+    return await scanTunisia(query, options)
+  } catch (error) {
+    if (error?.name === 'AbortError') throw error
+    return scanTunisiaByVirtualPinLegacy(query, options)
+  }
+}
+
 export function useAddressAutocomplete(query, active) {
   const local = useMemo(() => localMatches(query), [query])
   const [remote, setRemote] = useState([])
@@ -81,11 +91,10 @@ export function useAddressAutocomplete(query, active) {
     const timer = window.setTimeout(async () => {
       setLoading(true)
       try {
-        const scan = await scanTunisiaByVirtualPin(query, {
+        const scan = await scanWithSafeFallback(query, {
           signal: controller.signal,
           onCandidate: (candidate) => {
             if (controller.signal.aborted) return
-            // Stage 1: move the hidden map under the fixed virtual pin.
             publishPreview(attachDestination(candidate), 'candidate')
           },
         })
@@ -96,8 +105,6 @@ export function useAddressAutocomplete(query, active) {
         const detected = attachDestination(scan.detected)
         setRemote(next)
 
-        // Stage 2: reverse scan what is exactly under the virtual pin,
-        // using the same coordinates -> address principle as host Étape 1.4.
         publishPreview(detected || next[0] || null, detected ? 'detected' : 'candidate')
       } catch (error) {
         if (error?.name !== 'AbortError') {
