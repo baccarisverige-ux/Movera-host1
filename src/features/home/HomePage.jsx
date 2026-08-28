@@ -74,7 +74,6 @@ function CategoryArtwork({ id }) {
 
 function ListingCard({ item, sectionId, favorite, toggleFavorite, index }) {
   const dates = item.dateLabel || '3–4 sept.'
-  const cancellation = item.cancellationLabel || 'Annulation gratuite'
 
   return (
     <MotionListItem
@@ -103,7 +102,6 @@ function ListingCard({ item, sectionId, favorite, toggleFavorite, index }) {
         <h3 className="b225-offer-card__title">{item.title}</h3>
         <p className="b225-offer-card__dates">{dates}</p>
         <p className="b225-offer-card__meta"><strong>{item.priceTotal}</strong><span className="b225-offer-card__dot">·</span><span>★ {item.rating}</span></p>
-        <span className="b225-offer-card__cancellation">{cancellation}</span>
       </div>
     </MotionListItem>
   )
