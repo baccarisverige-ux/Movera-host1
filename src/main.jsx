@@ -13,12 +13,17 @@ import './styles/search-close-sync.css'
 import './styles/search-open-slow.css'
 import './styles/search-motion-very-slow.css'
 import './styles/search-popup-continuity.css'
+import './styles/property-type-native-bundled.css'
+import './styles/property-type-premium-bundled.css'
+import './styles/property-type-artwork-bundled.css'
 import './styles/host-onboarding-stackblitz-sync.css'
 import './features/home/homeScrollLink.js'
 import './features/search/searchOpenFocusGuard.js'
+import { installPropertyArtworkRuntime } from './features/host/onboarding/propertyArtworkRuntime.js'
 import { installGeocodingBrowserBridge } from './services/geocoding/browserBridge.js'
 import App from './app/App.jsx'
 
+installPropertyArtworkRuntime()
 installGeocodingBrowserBridge(window)
 
 // Phase 6B safety switch: the normal app keeps the proven Leaflet host-pin map.
