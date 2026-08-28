@@ -68,22 +68,13 @@ function parseResult(result, source = 'tunisia-search', forcedZoom = null) {
     .filter((value) => normalize(value) !== normalize(label))
     .join(', ')
 
-  return {
+  const parsed = {
     id: `nominatim-${result.place_id || `${result.osm_type || 'place'}-${result.osm_id || `${lat}-${lng}`}`}`,
     label,
     subtitle: subtitle || result.display_name || 'Tunisie',
     displayName: result.display_name || '',
     viewport: { lat, lng, zoom: forcedZoom ?? zoomForResult(result) },
     source,
-    location: {
-      houseNumber,
-      road,
-      district,
-      city,
-      postcode,
-      state,
-      country,
-    },
     mapObject: {
       osmType: result.osm_type || '',
       osmId: result.osm_id || '',
@@ -91,6 +82,15 @@ function parseResult(result, source = 'tunisia-search', forcedZoom = null) {
       type: result.type || result.addresstype || '',
     },
   }
+
+  Object.defineProperty(parsed, 'location', {
+    value: Object.freeze({ houseNumber, road, district, city, postcode, state, country }),
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  })
+
+  return parsed
 }
 
 function dedupe(items) {
