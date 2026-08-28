@@ -33,6 +33,8 @@ const required = [
   'src/features/guesthouse/assets/hero.webp',
   'src/features/search/SearchTransitionHost.jsx',
   'src/features/search/searchState.js',
+  'src/features/host/onboarding/HostPinMap.jsx',
+  'src/features/host/onboarding/hostPinReactEngineEnhancer.jsx',
   'src/features/map/MapPage.jsx',
   'src/features/map/constants/map.constants.js',
   'src/features/map-engine/MapContainer.jsx',
