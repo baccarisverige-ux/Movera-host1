@@ -3,6 +3,7 @@ import { HostPinMap } from './HostPinMap.jsx'
 
 export const HOST_PIN_REACT_QUERY_VALUE = 'react'
 export const HOST_MAP_LOCATION_EVENT = 'movera:host-map-address-change'
+const REACT_READY_SELECTOR = '[data-testid="host-pin-react-map"]'
 
 export function shouldUseReactHostPinMap(search = typeof window !== 'undefined' ? window.location.search : '') {
   return new URLSearchParams(search).get('hostMap') === HOST_PIN_REACT_QUERY_VALUE
@@ -23,14 +24,38 @@ export function installHostPinReactEngine() {
   let mountedCard = null
   let reactRoot = null
   let reactNode = null
+  let readyFrame = 0
+  const failedCards = new WeakSet()
 
-  const unmount = () => {
+  const unmount = ({ keepFailure = false } = {}) => {
+    if (readyFrame) cancelAnimationFrame(readyFrame)
+    readyFrame = 0
     reactRoot?.unmount()
     reactNode?.remove()
-    if (mountedCard) delete mountedCard.dataset.reactMapEngine
+    if (mountedCard) {
+      if (!keepFailure) delete mountedCard.dataset.reactMapEngine
+      else mountedCard.dataset.reactMapEngine = 'failed'
+    }
     reactRoot = null
     reactNode = null
     mountedCard = null
+  }
+
+  const verifyReactSurface = (card, node, setHint) => {
+    readyFrame = requestAnimationFrame(() => {
+      readyFrame = requestAnimationFrame(() => {
+        readyFrame = 0
+        if (mountedCard !== card || reactNode !== node || !card.isConnected) return
+        if (node.querySelector(REACT_READY_SELECTOR)) {
+          card.dataset.reactMapEngine = 'true'
+          return
+        }
+
+        failedCards.add(card)
+        setHint('Moteur de secours activé')
+        unmount({ keepFailure: true })
+      })
+    })
   }
 
   const sync = () => {
@@ -41,10 +66,11 @@ export function installHostPinReactEngine() {
       if (mountedCard) unmount()
       return
     }
+    if (failedCards.has(card)) return
     if (card === mountedCard) return
     if (mountedCard) unmount()
 
-    card.dataset.reactMapEngine = 'true'
+    card.dataset.reactMapEngine = 'pending'
     const hint = card.querySelector('.host-onboarding__map-hint')
     const node = document.createElement('div')
     node.className = 'host-step5-react-engine-root'
@@ -64,6 +90,7 @@ export function installHostPinReactEngine() {
         onHintChange={setHint}
       />,
     )
+    verifyReactSurface(card, node, setHint)
   }
 
   const observer = new MutationObserver(sync)
