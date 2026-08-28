@@ -1,5 +1,17 @@
 import { TILE_SIZE, project } from '../geometry/geometry.js'
 
+const CARTO_SUBDOMAINS = Object.freeze(['a', 'b', 'c', 'd'])
+
+function cartoVoyagerUrl(zoom, x, y) {
+  const subdomain = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length]
+  const retina = typeof window !== 'undefined' && window.devicePixelRatio > 1 ? '@2x' : ''
+  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${x}/${y}${retina}.png`
+}
+
+function openStreetMapFallbackUrl(zoom, x, y) {
+  return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`
+}
+
 export function TileLayer({ viewport, size }) {
   const zoom = Math.floor(viewport.zoom)
   const scale = 2 ** (viewport.zoom - zoom)
@@ -23,9 +35,10 @@ export function TileLayer({ viewport, size }) {
   }
 
   return (
-    <div className="map-tiles" data-testid="map-tile-layer" data-tile-count={tiles.length} data-tile-zoom={zoom} data-scale={scale} aria-hidden="true">
+    <div className="map-tiles" data-testid="map-tile-layer" data-tile-count={tiles.length} data-tile-zoom={zoom} data-scale={scale} data-tile-provider="carto-voyager" aria-hidden="true">
       {tiles.map((tile) => {
-        const src = `https://tile.openstreetmap.org/${zoom}/${tile.wrappedX}/${tile.y}.png`
+        const src = cartoVoyagerUrl(zoom, tile.wrappedX, tile.y)
+        const fallbackSrc = openStreetMapFallbackUrl(zoom, tile.wrappedX, tile.y)
         return (
           <div
             className="map-tile"
@@ -39,9 +52,17 @@ export function TileLayer({ viewport, size }) {
               fetchPriority="high"
               loading="eager"
               src={src}
+              data-fallback-src={fallbackSrc}
               onLoad={(event) => { event.currentTarget.style.visibility = 'visible' }}
               onError={(event) => {
-                event.currentTarget.style.visibility = 'hidden'
+                const image = event.currentTarget
+                const fallback = image.dataset.fallbackSrc
+                if (fallback && image.src !== fallback) {
+                  image.dataset.fallbackSrc = ''
+                  image.src = fallback
+                  return
+                }
+                image.style.visibility = 'hidden'
               }}
             />
           </div>
