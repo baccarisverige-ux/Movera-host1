@@ -135,7 +135,7 @@ export function MapContainer({
       <ClusterLayer markers={markers} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
       {viewport.zoom > 10 ? <MarkerLayer markers={markers} viewport={viewport} size={size} selectedListingId={selectedListingId} onSelect={selectMarker} /> : null}
       <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} />
-      <div className="map-attribution">© OpenStreetMap contributors</div>
+      <div className="map-attribution">© OpenStreetMap contributors · © CARTO</div>
       <ResizeManager targetRef={surfaceRef} onSize={setSize} />
       <ViewportController onLifecycle={handleLifecycle} />
     </div>
