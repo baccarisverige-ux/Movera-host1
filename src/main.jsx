@@ -15,7 +15,10 @@ import './styles/search-motion-very-slow.css'
 import './styles/search-popup-continuity.css'
 import './features/home/homeScrollLink.js'
 import './features/search/searchOpenFocusGuard.js'
+import { installGeocodingBrowserBridge } from './services/geocoding/browserBridge.js'
 import App from './app/App.jsx'
+
+installGeocodingBrowserBridge(window)
 
 for (const src of [BEACH_HERO_IMAGE, GUESTHOUSE_HERO_IMAGE, HOTEL_HERO_IMAGE]) {
   const link = document.createElement('link')

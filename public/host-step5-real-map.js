@@ -35,6 +35,12 @@
     return leafletPromise
   }
 
+  function sharedGeocoding() {
+    const service = window.MoveraGeocoding
+    if (!service || typeof service.searchAddress !== 'function' || typeof service.reverseGeocode !== 'function') return null
+    return service
+  }
+
   function addressLabel(result) {
     if (!result) return ''
     const a = result.address || {}
@@ -43,11 +49,10 @@
     const city = a.city || a.town || a.municipality || a.county || ''
     const postcode = a.postcode || ''
     const compact = [street, district, [postcode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ')
-    return compact || result.display_name || ''
+    return compact || result.display_name || result.displayName || result.label || ''
   }
 
-  async function geocode(query) {
-    if (!query || query.trim().length < 3) return null
+  async function legacyGeocode(query) {
     const url = `${NOMINATIM}/search?format=jsonv2&limit=1&addressdetails=1&accept-language=fr&q=${encodeURIComponent(query)}`
     const response = await fetch(url, { headers: { Accept: 'application/json' } })
     if (!response.ok) throw new Error('geocode failed')
@@ -56,11 +61,40 @@
     return { lat: Number(items[0].lat), lng: Number(items[0].lon), raw: items[0] }
   }
 
-  async function reverse(lat, lng) {
+  async function geocode(query) {
+    if (!query || query.trim().length < 3) return null
+    const service = sharedGeocoding()
+    if (service) {
+      try {
+        const items = await service.searchAddress(query, { countryCode: 'tn', language: 'fr', limit: 1 })
+        const first = Array.isArray(items) ? items[0] : null
+        const lat = Number(first?.viewport?.lat)
+        const lng = Number(first?.viewport?.lng)
+        if (first && Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng, raw: first }
+        if (Array.isArray(items) && items.length === 0) return legacyGeocode(query)
+      } catch {
+        return legacyGeocode(query)
+      }
+    }
+    return legacyGeocode(query)
+  }
+
+  async function legacyReverse(lat, lng) {
     const url = `${NOMINATIM}/reverse?format=jsonv2&zoom=18&addressdetails=1&accept-language=fr&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`
     const response = await fetch(url, { headers: { Accept: 'application/json' } })
     if (!response.ok) throw new Error('reverse geocode failed')
     return response.json()
+  }
+
+  async function reverse(lat, lng) {
+    const service = sharedGeocoding()
+    if (service) {
+      try {
+        const result = await service.reverseGeocode({ lat, lng, zoom: 18 })
+        if (result) return result
+      } catch {}
+    }
+    return legacyReverse(lat, lng)
   }
 
   function persist(lat, lng, label) {
@@ -108,7 +142,7 @@
         const result = await reverse(center.lat, center.lng)
         const label = addressLabel(result)
         if (label) setAddress(card, label)
-        persist(center.lat, center.lng, label || result.display_name || '')
+        persist(center.lat, center.lng, label || result.display_name || result.displayName || '')
         setHint(card, 'Adresse ajustée · déplacez la carte si nécessaire')
       } catch {
         persist(center.lat, center.lng, '')
@@ -183,7 +217,7 @@
           const result = await reverse(lat, lng)
           const label = addressLabel(result)
           if (label) setAddress(card, label, true)
-          persist(lat, lng, label || result.display_name || '')
+          persist(lat, lng, label || result.display_name || result.displayName || '')
           setHint(card, 'Adresse détectée à partir de votre position')
         } catch {
           persist(lat, lng, '')
