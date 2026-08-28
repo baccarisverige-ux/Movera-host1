@@ -167,10 +167,10 @@
   transform:scale(.91)!important;
 }
 
-/* Text stack mirrors the supplied Airbnb reference: title, dates, price/rating, cancellation pill. */
+/* Text stack mirrors the supplied Airbnb reference: title, dates, price/rating. */
 .b225-home .b225-offer-card__body{
   display:grid!important;
-  grid-template-rows:auto auto auto auto!important;
+  grid-template-rows:auto auto auto!important;
   justify-items:start!important;
   row-gap:2px!important;
   padding:7px 4px 0!important;
@@ -229,22 +229,6 @@
   opacity:.55!important;
 }
 
-.b225-home .b225-offer-card__cancellation{
-  display:inline-flex!important;
-  align-items:center!important;
-  min-height:20px!important;
-  margin-top:1px!important;
-  padding:3px 6px!important;
-  border-radius:6px!important;
-  background:#f2f2f2!important;
-  color:#777!important;
-  font-size:10.4px!important;
-  line-height:1!important;
-  font-weight:520!important;
-  letter-spacing:-.09px!important;
-  white-space:nowrap!important;
-}
-
 @media(max-width:390px){
   .b225-home .b225-category-selection{margin-top:22px!important}
   .b225-home .b225-category-selection .b225-section__title h2{font-size:15.4px!important}
@@ -255,7 +239,6 @@
   .b225-home .b225-offer-card__title{font-size:12px!important}
   .b225-home .b225-offer-card__dates{font-size:10.7px!important}
   .b225-home .b225-offer-card__meta{font-size:10.3px!important}
-  .b225-home .b225-offer-card__cancellation{font-size:9.9px!important;min-height:19px!important}
 }
 
 @media(prefers-reduced-motion:reduce){
