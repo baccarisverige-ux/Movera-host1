@@ -14,11 +14,21 @@ const workflowFiles = listFiles('.github/workflows').filter((f) => f.endsWith('.
 const expectedSearchFiles = [
   'GuestSelector.jsx',
   'SearchCalendar.jsx',
+  'SearchStepMotion.jsx',
   'SearchTransitionHost.jsx',
+  'mapHandoff.js',
+  'searchAddressMode.css',
   'searchData.js',
+  'searchExactFit.css',
+  'searchOpenFocusGuard.js',
   'searchState.js',
+  'searchStepFit.css',
   'searchTransition-stability.css',
   'searchTransition.css',
+  'tunisiaPinScanner.js',
+  'useAddressAutocomplete.js',
+  'useSearchPanelFit.js',
+  'useSearchPanelHeightMotion.js',
 ].sort()
 
 const unexpectedSearchFiles = searchFiles.filter((file) => !expectedSearchFiles.includes(file))
