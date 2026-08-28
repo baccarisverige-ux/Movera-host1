@@ -125,27 +125,27 @@
   opacity:.72!important;
 }
 
-/* Individual destination color identities — Mediterranean luxury, richer but still restrained. */
+/* Individual destination color identities — quiet luxury, not neon. */
 .b225-home .b225-welcome-city[data-city-id='sidi-bou-said']{
-  --city-top:#fbfdff;--city-mid:#e0efff;--city-bottom:#bfd8f2;--city-edge:rgba(61,107,146,.22);--city-ink:#234b6a;--city-glow:rgba(49,115,168,.16);
+  --city-top:#f9fcff;--city-mid:#e4f0fa;--city-bottom:#c9ddeb;--city-edge:rgba(75,119,151,.18);--city-ink:#27485f;--city-glow:rgba(73,133,174,.15);
 }
 .b225-home .b225-welcome-city[data-city-id='sousse']{
-  --city-top:#fffdf8;--city-mid:#e8f0e7;--city-bottom:#c9ddd0;--city-edge:rgba(78,117,96,.20);--city-ink:#355646;--city-glow:rgba(61,119,91,.14);
+  --city-top:#fffdf8;--city-mid:#f1eee2;--city-bottom:#d9e3dc;--city-edge:rgba(90,122,108,.17);--city-ink:#3b5549;--city-glow:rgba(72,121,106,.13);
 }
 .b225-home .b225-welcome-city[data-city-id='hammamet']{
-  --city-top:#f9fffc;--city-mid:#d7efe6;--city-bottom:#acd5c5;--city-edge:rgba(48,112,87,.22);--city-ink:#215943;--city-glow:rgba(36,127,92,.16);
+  --city-top:#f8fffd;--city-mid:#dfeee8;--city-bottom:#bfd8ce;--city-edge:rgba(63,112,94,.20);--city-ink:#285342;--city-glow:rgba(46,120,92,.15);
 }
 .b225-home .b225-welcome-city[data-city-id='tunis']{
-  --city-top:#fffdf8;--city-mid:#f1eadb;--city-bottom:#d9c9a9;--city-edge:rgba(126,105,62,.20);--city-ink:#5b492b;--city-glow:rgba(145,112,55,.14);
+  --city-top:#fffdf9;--city-mid:#eee9dc;--city-bottom:#d6d8c9;--city-edge:rgba(102,106,77,.19);--city-ink:#4c5139;--city-glow:rgba(112,111,69,.12);
 }
 .b225-home .b225-welcome-city[data-city-id='djerba']{
-  --city-top:#f8ffff;--city-mid:#d6f1f3;--city-bottom:#b3dde4;--city-edge:rgba(54,119,130,.21);--city-ink:#245963;--city-glow:rgba(44,132,145,.16);
+  --city-top:#fbffff;--city-mid:#ddf1ee;--city-bottom:#c4dfe2;--city-edge:rgba(67,123,130,.18);--city-ink:#28545a;--city-glow:rgba(48,129,139,.14);
 }
 .b225-home .b225-welcome-city[data-city-id='tozeur']{
-  --city-top:#fff9f1;--city-mid:#f4dfc5;--city-bottom:#d9b28d;--city-edge:rgba(149,96,51,.21);--city-ink:#6a4326;--city-glow:rgba(166,94,40,.15);
+  --city-top:#fffaf2;--city-mid:#f1e3c8;--city-bottom:#d9c29e;--city-edge:rgba(143,108,62,.18);--city-ink:#654b2e;--city-glow:rgba(155,105,48,.13);
 }
 .b225-home .b225-welcome-city[data-city-id='tabarka']{
-  --city-top:#f8fcfa;--city-mid:#d8e9df;--city-bottom:#adcbb9;--city-edge:rgba(51,100,70,.22);--city-ink:#294f3a;--city-glow:rgba(44,112,73,.16);
+  --city-top:#f9fdfb;--city-mid:#dce9df;--city-bottom:#bfd0c6;--city-edge:rgba(62,101,79,.20);--city-ink:#315140;--city-glow:rgba(56,112,78,.14);
 }
 
 .b225-home .b225-welcome-city:active{
