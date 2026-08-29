@@ -14,6 +14,8 @@ const CLUSTER_FOCUS_ZOOM = 11
 const PINCH_ZOOM_SENSITIVITY = 0.65
 const PINCH_ZOOM_THRESHOLD = 0.003
 const PINCH_PAN_THRESHOLD = 0.8
+const VIEWPORT_EPSILON = 0.000001
+const ZOOM_EPSILON = 0.001
 export const DEFAULT_MARKERS = Object.freeze([
   { id: 'marsa-sea', label: 'La Marsa', lat: 36.8782, lng: 10.3247 },
   { id: 'carthage-suite', label: 'Carthage', lat: 36.8528, lng: 10.3233 },
@@ -27,6 +29,12 @@ function pinchSnapshot(points) {
     distance: Math.hypot(a.x - b.x, a.y - b.y),
     midpoint: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
   }
+}
+
+function sameViewport(a, b) {
+  return Math.abs(a.lat - b.lat) <= VIEWPORT_EPSILON
+    && Math.abs(a.lng - b.lng) <= VIEWPORT_EPSILON
+    && Math.abs(a.zoom - b.zoom) <= ZOOM_EPSILON
 }
 
 export function MapContainer({
@@ -48,17 +56,21 @@ export function MapContainer({
   const [size, setSize] = useState({ width: 390, height: 560 })
   const [lifecycleEvents, setLifecycleEvents] = useState(0)
   const [internalSelectedId, setInternalSelectedId] = useState(null)
+  const [mapProvider, setMapProvider] = useState('google-loading')
   const selectedListingId = controlledSelectedId === undefined ? internalSelectedId : controlledSelectedId
   const previousSelectedRef = useRef(selectedListingId)
   const commandedLat = viewportCommand?.lat
   const commandedLng = viewportCommand?.lng
   const commandedZoom = viewportCommand?.zoom
   const commandRevision = viewportCommand?.revision
+  const googleNativeGestures = mapProvider === 'google'
   renderCountRef.current += 1
 
   useEffect(() => () => {
     cancelAnimationFrame(frameRef.current)
     pendingViewportUpdatesRef.current = []
+    pointersRef.current.clear()
+    pinchGestureRef.current = null
   }, [])
   useEffect(() => { onViewportChange?.(viewport) }, [viewport, onViewportChange])
 
@@ -82,6 +94,23 @@ export function MapContainer({
   const handleLifecycle = useCallback(() => setLifecycleEvents((count) => count + 1), [])
   const focusPoint = useCallback((point, targetZoom) => commitViewport((current) => ({ ...current, lat: point.lat, lng: point.lng, zoom: targetZoom })), [commitViewport])
   const selectMarker = useCallback((marker) => { setSelected(marker.id); focusPoint(marker, MARKER_FOCUS_ZOOM) }, [focusPoint, setSelected])
+  const handleGoogleStatus = useCallback((status) => {
+    setMapProvider(status)
+    if (status === 'google') {
+      pointersRef.current.clear()
+      pinchGestureRef.current = null
+    }
+  }, [])
+  const handleGoogleViewportChange = useCallback((next) => {
+    const lat = Number(next?.lat)
+    const lng = Number(next?.lng)
+    const zoom = Number(next?.zoom)
+    if (![lat, lng, zoom].every(Number.isFinite)) return
+    commitViewport((current) => {
+      const candidate = { ...current, lat, lng, zoom }
+      return sameViewport(current, candidate) ? current : candidate
+    })
+  }, [commitViewport])
 
   useEffect(() => {
     if (previousSelectedRef.current === selectedListingId) return
@@ -97,6 +126,7 @@ export function MapContainer({
   }, [commandedLat, commandedLng, commandedZoom, commandRevision, commitViewport])
 
   const onPointerDown = (event) => {
+    if (googleNativeGestures) return
     if (event.target.closest('button, a, input, select, textarea')) return
     event.preventDefault()
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
@@ -105,6 +135,7 @@ export function MapContainer({
   }
 
   const onPointerMove = (event) => {
+    if (googleNativeGestures) return
     const previous = pointersRef.current.get(event.pointerId)
     if (!previous) return
     event.preventDefault()
@@ -135,9 +166,6 @@ export function MapContainer({
           return shouldZoom ? zoomViewportAtPoint(panned, zoomDelta, midpoint, size) : panned
         })
 
-        // Important: if a tiny pinch movement is below the zoom threshold, keep
-        // the previous distance so the movement accumulates instead of being lost.
-        // This makes inward pinch (zoom out) as responsive as outward pinch.
         pinchGestureRef.current = {
           distance: shouldZoom ? currentGesture.distance : previousGesture.distance,
           midpoint: shouldPan ? currentGesture.midpoint : previousGesture.midpoint,
@@ -152,17 +180,24 @@ export function MapContainer({
   }
 
   const releasePointer = (event) => {
+    if (googleNativeGestures) return
     pointersRef.current.delete(event.pointerId)
     if (pointersRef.current.size < 2) pinchGestureRef.current = null
     try { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId) } catch { /* no capture */ }
   }
 
-  return <section className="map-engine" data-testid="map-engine" data-selected-listing-id={selectedListingId || ''}>
+  return <section className="map-engine" data-testid="map-engine" data-selected-listing-id={selectedListingId || ''} data-map-provider={mapProvider} data-native-gestures={googleNativeGestures ? 'true' : 'false'}>
     <div ref={surfaceRef} className="map-surface" data-testid="map-surface" data-lat={viewport.lat.toFixed(6)} data-lng={viewport.lng.toFixed(6)} data-zoom={viewport.zoom}
       data-width={size.width} data-height={size.height} data-update-count={updateCountRef.current} data-render-count={renderCountRef.current} data-listener-count="7" data-lifecycle-events={lifecycleEvents}
-      onDoubleClick={(event) => { if (!event.target.closest('button')) zoomBy(1) }} onPointerCancel={releasePointer} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
-      onPointerUp={releasePointer} onWheel={(event) => { event.preventDefault(); zoomBy(event.deltaY < 0 ? 1 : -1) }}>
-      <TileLayer viewport={viewport} size={size} />
+      onDoubleClick={googleNativeGestures ? undefined : (event) => { if (!event.target.closest('button')) zoomBy(1) }} onPointerCancel={releasePointer} onPointerDown={onPointerDown} onPointerMove={onPointerMove}
+      onPointerUp={releasePointer} onWheel={googleNativeGestures ? undefined : (event) => { event.preventDefault(); zoomBy(event.deltaY < 0 ? 1 : -1) }}>
+      <TileLayer
+        viewport={viewport}
+        size={size}
+        interactive
+        onGoogleStatus={handleGoogleStatus}
+        onGoogleViewportChange={handleGoogleViewportChange}
+      />
       <ClusterLayer markers={markers} viewport={viewport} size={size} onFocus={(point) => focusPoint(point, CLUSTER_FOCUS_ZOOM)} />
       {viewport.zoom > 10 ? <MarkerLayer markers={markers} viewport={viewport} size={size} selectedListingId={selectedListingId} onSelect={selectMarker} /> : null}
       <MapControls onZoomIn={() => zoomBy(1)} onZoomOut={() => zoomBy(-1)} />
