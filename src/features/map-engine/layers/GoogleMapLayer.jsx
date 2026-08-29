@@ -6,8 +6,10 @@ const GOOGLE_MAPS_SCRIPT_ID = 'movera-google-maps-js'
 const GOOGLE_MAPS_CALLBACK = '__moveraGoogleMapsReady'
 const GOOGLE_MAPS_TIMEOUT_MS = 15000
 const GOOGLE_MAPS_POLL_MS = 50
-const CAMERA_EPSILON = 0.000001
-const ZOOM_EPSILON = 0.001
+const CAMERA_EPSILON = 0.000005
+const ZOOM_EPSILON = 0.01
+const MARKER_HIT_RADIUS_PX = 20
+const CLUSTER_HIT_RADIUS_PX = 28
 
 function loadGoogleMaps() {
   if (typeof window === 'undefined') return Promise.reject(new Error('Google Maps requires a browser'))
@@ -105,18 +107,82 @@ function cameraMatches(map, viewport) {
     && Math.abs(current.zoom - viewport.zoom) <= ZOOM_EPSILON
 }
 
-export function GoogleMapLayer({ viewport, interactive = false, onStatus, onViewportChange }) {
+function distanceMeters(a, b) {
+  const radius = 6371000
+  const toRadians = (value) => value * Math.PI / 180
+  const lat1 = toRadians(a.lat)
+  const lat2 = toRadians(b.lat)
+  const deltaLat = lat2 - lat1
+  const deltaLng = toRadians(b.lng - a.lng)
+  const hav = Math.sin(deltaLat / 2) ** 2
+    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) ** 2
+  return radius * 2 * Math.atan2(Math.sqrt(hav), Math.sqrt(1 - hav))
+}
+
+function hitRadiusMeters(lat, zoom, pixelRadius, maxMeters) {
+  const safeZoom = Math.max(3, Math.min(18, Number(zoom) || 3))
+  const metersPerPixel = (156543.03392 * Math.cos((lat * Math.PI) / 180)) / (2 ** safeZoom)
+  return Math.min(maxMeters, Math.max(18, Math.abs(metersPerPixel) * pixelRadius))
+}
+
+export function GoogleMapLayer({
+  viewport,
+  viewportSource = 'app',
+  markers = [],
+  interactive = false,
+  onStatus,
+  onViewportChange,
+  onInteractionChange,
+  onMarkerSelect,
+  onClusterFocus,
+}) {
   const hostRef = useRef(null)
   const mapRef = useRef(null)
   const mapsRef = useRef(null)
-  const boundsListenerRef = useRef(null)
+  const listenersRef = useRef([])
   const syncFrameRef = useRef(0)
+  const releaseTimerRef = useRef(0)
+  const activePointersRef = useRef(new Set())
+  const interactionActiveRef = useRef(false)
+  const cameraMovingRef = useRef(false)
   const interactiveRef = useRef(interactive)
+  const viewportSourceRef = useRef(viewportSource)
+  const markersRef = useRef(markers)
   const onViewportChangeRef = useRef(onViewportChange)
+  const onInteractionChangeRef = useRef(onInteractionChange)
+  const onMarkerSelectRef = useRef(onMarkerSelect)
+  const onClusterFocusRef = useRef(onClusterFocus)
   const [ready, setReady] = useState(false)
 
-  useEffect(() => { interactiveRef.current = interactive }, [interactive])
-  useEffect(() => { onViewportChangeRef.current = onViewportChange }, [onViewportChange])
+  interactiveRef.current = interactive
+  viewportSourceRef.current = viewportSource
+  markersRef.current = markers
+  onViewportChangeRef.current = onViewportChange
+  onInteractionChangeRef.current = onInteractionChange
+  onMarkerSelectRef.current = onMarkerSelect
+  onClusterFocusRef.current = onClusterFocus
+
+  const setInteractionActive = (active) => {
+    if (interactionActiveRef.current === active) return
+    interactionActiveRef.current = active
+    onInteractionChangeRef.current?.(active)
+  }
+
+  const scheduleInteractionRelease = () => {
+    window.clearTimeout(releaseTimerRef.current)
+    releaseTimerRef.current = window.setTimeout(() => {
+      if (activePointersRef.current.size === 0 && !cameraMovingRef.current) setInteractionActive(false)
+    }, 180)
+  }
+
+  const emitViewport = () => {
+    if (syncFrameRef.current) return
+    syncFrameRef.current = window.requestAnimationFrame(() => {
+      syncFrameRef.current = 0
+      const next = mapViewport(mapRef.current)
+      if (next) onViewportChangeRef.current?.(next)
+    })
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -150,14 +216,53 @@ export function GoogleMapLayer({ viewport, interactive = false, onStatus, onView
         })
         mapRef.current = map
 
-        boundsListenerRef.current = map.addListener('bounds_changed', () => {
-          if (!interactiveRef.current || syncFrameRef.current) return
-          syncFrameRef.current = window.requestAnimationFrame(() => {
-            syncFrameRef.current = 0
-            const next = mapViewport(mapRef.current)
-            if (next) onViewportChangeRef.current?.(next)
-          })
-        })
+        listenersRef.current = [
+          map.addListener('bounds_changed', () => {
+            if (!interactiveRef.current) return
+            cameraMovingRef.current = true
+            emitViewport()
+          }),
+          map.addListener('dragstart', () => {
+            if (!interactiveRef.current) return
+            setInteractionActive(true)
+          }),
+          map.addListener('idle', () => {
+            cameraMovingRef.current = false
+            if (interactiveRef.current) emitViewport()
+            if (activePointersRef.current.size === 0) setInteractionActive(false)
+          }),
+          map.addListener('click', (event) => {
+            if (!interactiveRef.current || !event?.latLng) return
+            const point = { lat: Number(event.latLng.lat()), lng: Number(event.latLng.lng()) }
+            if (![point.lat, point.lng].every(Number.isFinite)) return
+            const currentMarkers = markersRef.current || []
+            if (!currentMarkers.length) return
+            const zoom = Number(map.getZoom()) || 3
+
+            if (zoom <= 10) {
+              const cluster = {
+                lat: currentMarkers.reduce((sum, marker) => sum + marker.lat, 0) / currentMarkers.length,
+                lng: currentMarkers.reduce((sum, marker) => sum + marker.lng, 0) / currentMarkers.length,
+              }
+              const radius = hitRadiusMeters(cluster.lat, zoom, CLUSTER_HIT_RADIUS_PX, 2200)
+              if (distanceMeters(point, cluster) <= radius) onClusterFocusRef.current?.(cluster)
+              return
+            }
+
+            let nearest = null
+            let nearestDistance = Infinity
+            currentMarkers.forEach((marker) => {
+              const distance = distanceMeters(point, marker)
+              if (distance < nearestDistance) {
+                nearest = marker
+                nearestDistance = distance
+              }
+            })
+            if (!nearest) return
+            const radius = hitRadiusMeters(nearest.lat, zoom, MARKER_HIT_RADIUS_PX, 450)
+            if (nearestDistance <= radius) onMarkerSelectRef.current?.(nearest)
+          }),
+        ]
 
         setReady(true)
         onStatus?.('google')
@@ -171,9 +276,13 @@ export function GoogleMapLayer({ viewport, interactive = false, onStatus, onView
     return () => {
       cancelled = true
       window.cancelAnimationFrame(syncFrameRef.current)
+      window.clearTimeout(releaseTimerRef.current)
       syncFrameRef.current = 0
-      boundsListenerRef.current?.remove?.()
-      boundsListenerRef.current = null
+      releaseTimerRef.current = 0
+      listenersRef.current.forEach((listener) => listener?.remove?.())
+      listenersRef.current = []
+      activePointersRef.current.clear()
+      setInteractionActive(false)
       if (mapRef.current && mapsRef.current?.event?.clearInstanceListeners) {
         mapsRef.current.event.clearInstanceListeners(mapRef.current)
       }
@@ -195,22 +304,49 @@ export function GoogleMapLayer({ viewport, interactive = false, onStatus, onView
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !ready || cameraMatches(map, viewport)) return
+    if (!map || !ready) return
+
+    // Native Google gestures own the camera while the user is touching the map.
+    // Viewport updates emitted by Google are mirrors for Movera overlays only and
+    // must never be written back into Google, otherwise a delayed React render
+    // can move the camera back to an older frame and make pan/pinch feel unstable.
+    if (viewportSource === 'google' || interactionActiveRef.current || cameraMatches(map, viewport)) return
+
     const camera = { center: { lat: viewport.lat, lng: viewport.lng }, zoom: viewport.zoom }
     if (typeof map.moveCamera === 'function') map.moveCamera(camera)
     else {
       map.setCenter(camera.center)
       map.setZoom(camera.zoom)
     }
-  }, [viewport.lat, viewport.lng, viewport.zoom, ready])
+  }, [viewport.lat, viewport.lng, viewport.zoom, viewportSource, ready])
 
   return (
     <div
       className="map-google-layer"
       data-ready={ready ? 'true' : 'false'}
       data-interactive={interactive ? 'true' : 'false'}
+      data-camera-source={viewportSource}
       data-testid="map-google-layer"
       aria-hidden="true"
+      onPointerDownCapture={(event) => {
+        if (!interactive) return
+        window.clearTimeout(releaseTimerRef.current)
+        activePointersRef.current.add(event.pointerId)
+        setInteractionActive(true)
+      }}
+      onPointerUpCapture={(event) => {
+        activePointersRef.current.delete(event.pointerId)
+        if (activePointersRef.current.size === 0) scheduleInteractionRelease()
+      }}
+      onPointerCancelCapture={(event) => {
+        activePointersRef.current.delete(event.pointerId)
+        if (activePointersRef.current.size === 0) scheduleInteractionRelease()
+      }}
+      onWheelCapture={() => {
+        if (!interactive) return
+        setInteractionActive(true)
+        scheduleInteractionRelease()
+      }}
     >
       <div ref={hostRef} className="map-google-layer__canvas" />
     </div>
