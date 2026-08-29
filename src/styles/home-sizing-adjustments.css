@@ -54,6 +54,8 @@
   font-size:5.8px!important;
 }
 
+/* Destination cards intentionally inherit their original dimensions from welcome-city-cards.css. */
+
 @media(max-width:350px){
   .b225-home .b225-services-mini{margin-top:9px!important}
   .b225-home .b225-services-mini__head h2{font-size:8.7px!important}
