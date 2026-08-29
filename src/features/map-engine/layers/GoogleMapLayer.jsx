@@ -292,6 +292,34 @@ export function GoogleMapLayer({
   }, [])
 
   useEffect(() => {
+    if (!ready || !interactive) return undefined
+
+    const releasePointer = (event) => {
+      activePointersRef.current.delete(event.pointerId)
+      if (activePointersRef.current.size === 0) scheduleInteractionRelease()
+    }
+    const cancelAllPointers = () => {
+      activePointersRef.current.clear()
+      cameraMovingRef.current = false
+      window.clearTimeout(releaseTimerRef.current)
+      setInteractionActive(false)
+    }
+
+    // iOS can finish a pointer sequence outside the map element after a fast
+    // diagonal pan or pinch. Window capture guarantees the gesture state cannot
+    // remain stuck and block later camera commands or alter the next gesture.
+    window.addEventListener('pointerup', releasePointer, true)
+    window.addEventListener('pointercancel', releasePointer, true)
+    window.addEventListener('blur', cancelAllPointers)
+
+    return () => {
+      window.removeEventListener('pointerup', releasePointer, true)
+      window.removeEventListener('pointercancel', releasePointer, true)
+      window.removeEventListener('blur', cancelAllPointers)
+    }
+  }, [ready, interactive])
+
+  useEffect(() => {
     const map = mapRef.current
     if (!map || !ready) return
     map.setOptions({
@@ -333,14 +361,6 @@ export function GoogleMapLayer({
         window.clearTimeout(releaseTimerRef.current)
         activePointersRef.current.add(event.pointerId)
         setInteractionActive(true)
-      }}
-      onPointerUpCapture={(event) => {
-        activePointersRef.current.delete(event.pointerId)
-        if (activePointersRef.current.size === 0) scheduleInteractionRelease()
-      }}
-      onPointerCancelCapture={(event) => {
-        activePointersRef.current.delete(event.pointerId)
-        if (activePointersRef.current.size === 0) scheduleInteractionRelease()
       }}
       onWheelCapture={() => {
         if (!interactive) return
