@@ -1,9 +1,9 @@
 import { screenPoint } from '../geometry/geometry.js'
 import { getMarkerState, MarkerState } from '../model/markerModel.js'
 
-export function MarkerLayer({ markers, viewport, size, selectedListingId, onSelect, hiddenIds = new Set() }) {
+export function MarkerLayer({ markers, viewport, size, selectedListingId, onSelect, interactive = true, hiddenIds = new Set() }) {
   return (
-    <div className="map-marker-layer" data-testid="map-marker-layer" data-marker-count={markers.length}>
+    <div className="map-marker-layer" data-testid="map-marker-layer" data-marker-count={markers.length} data-interactive={interactive ? 'true' : 'false'}>
       {markers.map((marker) => {
         const state = getMarkerState(marker, { selectedListingId, hiddenIds })
         if (state === MarkerState.HIDDEN) return null
@@ -16,14 +16,19 @@ export function MarkerLayer({ markers, viewport, size, selectedListingId, onSele
             data-testid={`map-marker-${marker.id}`}
             data-marker-state={state}
             aria-pressed={state === MarkerState.SELECTED}
+            aria-disabled={interactive ? undefined : 'true'}
             key={marker.id}
             type="button"
             aria-label={marker.label}
-            style={{ transform: `translate3d(${Math.round(point.x)}px, ${Math.round(point.y)}px, 0)` }}
-            onClick={(event) => {
+            tabIndex={interactive ? 0 : -1}
+            style={{
+              transform: `translate3d(${Math.round(point.x)}px, ${Math.round(point.y)}px, 0)`,
+              pointerEvents: interactive ? 'auto' : 'none',
+            }}
+            onClick={interactive ? (event) => {
               event.stopPropagation()
               onSelect(marker)
-            }}
+            } : undefined}
           >
             <span aria-hidden="true" />
           </button>
