@@ -12,6 +12,7 @@ import { MapOfferSheet } from './MapOfferSheet.jsx'
 import { MapSearchFilters } from './MapSearchFilters.jsx'
 
 const MAP_MOTION_PROGRESS_LIMIT = 0.72
+const MAP_GESTURE_SETTLE_MS = 500
 
 const LISTING_MARKERS = Object.freeze(
   listingCatalog
@@ -105,6 +106,8 @@ export function MapPage({ onNavigate }) {
   const initialViewport = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
 
   const headerRef = useRef(null)
+  const mapInteractionRef = useRef(false)
+  const mapAutoCameraBlockedUntilRef = useRef(0)
   const [headerHeight, setHeaderHeight] = useState(0)
   const [selectionState, setSelectionState] = useState(() => ({ contextKey: mapContextKey, id: selectedMarker?.id || null }))
   const [viewportState, setViewportState] = useState(() => ({ contextKey: mapContextKey, command: null }))
@@ -138,6 +141,15 @@ export function MapPage({ onNavigate }) {
       command: { ...command, revision: performance.now() },
     })
   }, [mapContextKey])
+
+  const handleMapInteractionChange = useCallback((active) => {
+    const next = Boolean(active)
+    mapInteractionRef.current = next
+    mapAutoCameraBlockedUntilRef.current = next
+      ? Number.POSITIVE_INFINITY
+      : performance.now() + MAP_GESTURE_SETTLE_MS
+    setMapInteracting(next)
+  }, [])
 
   const contextListings = useMemo(
     () => listingsForMapContext(requestedDestination, requestedListing),
@@ -189,13 +201,15 @@ export function MapPage({ onNavigate }) {
   }
 
   const handleSheetProgress = useCallback((progress) => {
-    if (progress > 0.14 && !selectedListingId && cityListings[0]) setSelectedListingId(cityListings[0].id)
+    const autoCameraBlocked = mapInteractionRef.current || performance.now() < mapAutoCameraBlockedUntilRef.current
 
-    // Native map gestures have exclusive camera ownership while a finger/pinch
-    // is active. The offer sheet must never write automatic camera commands in
-    // that window, otherwise Google and the sheet can pull the camera in two
-    // different directions and create acceleration, resistance or snap-back.
-    if (mapInteracting || progress > MAP_MOTION_PROGRESS_LIMIT) return
+    // The map gets exclusive camera ownership from the first pointer-down until
+    // a short settling window after Google reports the gesture complete. Using
+    // refs here is intentional: it blocks sheet commands synchronously, before
+    // a React state render can lag one frame behind the native touch event.
+    if (autoCameraBlocked || progress > MAP_MOTION_PROGRESS_LIMIT) return
+
+    if (progress > 0.14 && !selectedListingId && cityListings[0]) setSelectedListingId(cityListings[0].id)
 
     const base = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
     const activeId = selectedListingId || cityListings[0]?.id
@@ -207,7 +221,7 @@ export function MapPage({ onNavigate }) {
     const zoom = Math.min(17, base.zoom + progress * 1.45)
 
     issueViewportCommand({ lat, lng, zoom })
-  }, [handoffViewport, listingViewport, destinationViewport, selectedListingId, cityListings, visibleMarkers, setSelectedListingId, issueViewportCommand, mapInteracting])
+  }, [handoffViewport, listingViewport, destinationViewport, selectedListingId, cityListings, visibleMarkers, setSelectedListingId, issueViewportCommand])
 
   const handleSheetSelectedListingChange = useCallback((listingId) => {
     setSelectedListingId(listingId)
@@ -301,7 +315,7 @@ export function MapPage({ onNavigate }) {
           markers={visibleMarkers}
           selectedListingId={selectedListingId}
           onSelectedListingChange={setSelectedListingId}
-          onInteractionChange={setMapInteracting}
+          onInteractionChange={handleMapInteractionChange}
           initialViewport={initialViewport}
           viewportCommand={viewportCommand}
         />
