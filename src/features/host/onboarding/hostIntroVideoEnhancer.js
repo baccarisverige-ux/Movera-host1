@@ -4,12 +4,18 @@ const INTRO_SELECTOR = '.host-onboarding[data-screen="intro-place"] .host-onboar
 const PRESENTATION_SELECTOR = '.host-onboarding[data-screen="intro-presentation"] .host-onboarding__phase-visual'
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 const BASE_URL = import.meta.env.BASE_URL
-const HOST_INTRO_VIDEO_SRC = `${BASE_URL}assets/host-intro.mp4`
+const HOST_INTRO_VIDEO_FALLBACK_SRC = `${BASE_URL}assets/host-intro.mp4`
+const HOST_INTRO_VIDEO_PARTS = Array.from(
+  { length: 8 },
+  (_, index) => `${BASE_URL}assets/host-intro-video/part-${String(index).padStart(2, '0')}.txt`,
+)
 const STEP_TWO_VIDEO_SOURCES = [
   `${BASE_URL}up.mp4`,
   `${BASE_URL}assets/up.mp4`,
   `${BASE_URL}assets/bootstrap/up.mp4`,
 ]
+
+let hostIntroBlobUrlPromise = null
 
 function configureVideo(video) {
   video.muted = true
@@ -34,10 +40,38 @@ function configureVideo(video) {
   return video
 }
 
+function loadHostIntroBlobUrl() {
+  if (hostIntroBlobUrlPromise) return hostIntroBlobUrlPromise
+
+  hostIntroBlobUrlPromise = Promise.all(
+    HOST_INTRO_VIDEO_PARTS.map((src) => fetch(src, { cache: 'force-cache' }).then((response) => {
+      if (!response.ok) throw new Error(`Host intro video part failed: ${response.status}`)
+      return response.text()
+    })),
+  ).then((parts) => {
+    const binary = window.atob(parts.join('').trim())
+    const bytes = new Uint8Array(binary.length)
+    for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index)
+    return URL.createObjectURL(new Blob([bytes], { type: 'video/mp4' }))
+  })
+
+  return hostIntroBlobUrlPromise
+}
+
 function createIntroVideo() {
   const video = configureVideo(document.createElement('video'))
   video.className = 'host-onboarding__intro-video'
-  video.src = HOST_INTRO_VIDEO_SRC
+
+  loadHostIntroBlobUrl()
+    .then((src) => {
+      video.src = src
+      video.load()
+    })
+    .catch(() => {
+      video.src = HOST_INTRO_VIDEO_FALLBACK_SRC
+      video.load()
+    })
+
   return video
 }
 
