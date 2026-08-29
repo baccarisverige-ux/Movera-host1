@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import '../../../styles/map-google-layer.css'
 
 const GOOGLE_MAPS_BROWSER_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY?.trim()
 const GOOGLE_MAPS_SCRIPT_ID = 'movera-google-maps-js'
