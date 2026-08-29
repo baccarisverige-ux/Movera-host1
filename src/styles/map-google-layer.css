@@ -13,9 +13,18 @@
   opacity: 1;
 }
 
+.map-google-layer[data-ready="true"][data-interactive="true"] {
+  pointer-events: auto;
+  touch-action: none;
+}
+
 .map-google-layer__canvas {
   width: 100%;
   height: 100%;
+}
+
+.map-google-layer[data-ready="true"][data-interactive="true"] .map-google-layer__canvas {
+  touch-action: none;
 }
 
 /* Google renders its own required attribution. Keep the OSM/CARTO fallback credit only when Google is unavailable. */
