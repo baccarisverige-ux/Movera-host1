@@ -17,6 +17,7 @@ import '../../styles/home-airbnb-surface.css'
 import '../../styles/home-category-6d.css'
 import '../../styles/home-category-offers.css'
 import '../../styles/home-see-all-card.css'
+import '../../styles/home-services-mini.css'
 import '../../styles/home-scroll-stability.css'
 import ALL_CATEGORY_GLOBE from './assets/all-category-globe.png'
 import BEACH_CATEGORY_ICON from './assets/plage-category.png'
@@ -59,6 +60,12 @@ const WELCOME_CITIES = [
   { id: 'tozeur', label: 'Tozeur' },
   { id: 'tabarka', label: 'Tabarka' },
 ]
+
+const HOME_SERVICES = Object.freeze([
+  { id: 'driver', label: 'Chauffeur', subtitle: 'À la demande', image: '' },
+  { id: 'cleaning', label: 'Ménage', subtitle: 'Pour votre séjour', image: '' },
+  { id: 'car-rental', label: 'Location voiture', subtitle: 'Simple & rapide', image: '' },
+])
 
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -173,6 +180,30 @@ function CategorySelection({ id, title, items, favoriteIdSet, toggleFavorite, on
   )
 }
 
+function MiniServicesSection() {
+  return (
+    <section className="b225-services-mini" data-testid="home-services-mini" aria-label="Services Movera">
+      <div className="b225-services-mini__head">
+        <h2>Services Movera</h2>
+        <span className="b225-services-mini__tag">Essentiels</span>
+      </div>
+      <div className="b225-services-mini__rail">
+        {HOME_SERVICES.map((service) => (
+          <article key={service.id} className="b225-service-mini-card" data-service-id={service.id}>
+            <span className="b225-service-mini-card__photo" data-empty-photo="true" aria-hidden="true">
+              {service.image ? <img src={service.image} alt=""/> : null}
+            </span>
+            <span className="b225-service-mini-card__copy">
+              <strong className="b225-service-mini-card__title">{service.label}</strong>
+              <span className="b225-service-mini-card__subtitle">{service.subtitle}</span>
+            </span>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export function HomePage({ onNavigate }) {
   const [category, setCategory] = useState(getSelectedHomeCategory)
   const [query, setQuery] = useState('')
@@ -197,6 +228,21 @@ export function HomePage({ onNavigate }) {
       ),
     }))
   }, [query])
+
+  const allSelection = categorySelections.find((selection) => selection.id === 'all')
+  const remainingSelections = categorySelections.filter((selection) => selection.id !== 'all')
+
+  const renderSelection = (selection) => (
+    <CategorySelection
+      key={selection.id}
+      id={selection.id}
+      title={selection.title}
+      items={selection.items}
+      favoriteIdSet={favoriteIdSet}
+      toggleFavorite={toggleFavorite}
+      onNavigate={onNavigate}
+    />
+  )
 
   return (
     <div className="b225-home" data-testid="page-home">
@@ -225,6 +271,10 @@ export function HomePage({ onNavigate }) {
         </div>
       </div>
 
+      {allSelection ? renderSelection(allSelection) : null}
+
+      <MiniServicesSection/>
+
       <section className="b225-welcome" aria-label="Bienvenue chez Movera">
         <span className="b225-welcome__title">Bienvenue chez Movera</span>
         <div className="b225-welcome-cities" data-testid="home-welcome-cities">
@@ -236,17 +286,7 @@ export function HomePage({ onNavigate }) {
         </div>
       </section>
 
-      {categorySelections.map((selection) => (
-        <CategorySelection
-          key={selection.id}
-          id={selection.id}
-          title={selection.title}
-          items={selection.items}
-          favoriteIdSet={favoriteIdSet}
-          toggleFavorite={toggleFavorite}
-          onNavigate={onNavigate}
-        />
-      ))}
+      {remainingSelections.map(renderSelection)}
     </div>
   )
 }
