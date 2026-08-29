@@ -54,45 +54,10 @@
   font-size:5.8px!important;
 }
 
-/* Destination city cards only: visually 20% smaller while preserving the section footprint and original positions. */
-.b225-home .b225-welcome-city{
-  --city-size:.8;
-  min-height:32px!important;
-  padding-inline:7.7px!important;
-  border-radius:7.7px!important;
-  font-size:7.45px!important;
-  transform:rotate(var(--city-rotate)) scale(var(--city-size)) translateZ(0)!important;
-}
-
-.b225-home .b225-welcome-city::before{
-  left:5px!important;
-  right:5px!important;
-  bottom:-3px!important;
-  height:5px!important;
-  border-radius:0 0 6px 6px!important;
-}
-
-.b225-home .b225-welcome-city::after{
-  left:7px!important;
-  right:7px!important;
-  top:2px!important;
-}
-
-@media(hover:hover) and (pointer:fine){
-  .b225-home .b225-welcome-city:hover{
-    transform:rotate(var(--city-rotate)) scale(var(--city-size)) translateY(-1px) translateZ(4px)!important;
-  }
-}
-
-.b225-home .b225-welcome-city:active{
-  transform:rotate(var(--city-rotate)) scale(.78) translateY(3px)!important;
-}
-
 @media(max-width:350px){
   .b225-home .b225-services-mini{margin-top:9px!important}
   .b225-home .b225-services-mini__head h2{font-size:8.7px!important}
   .b225-home .b225-service-mini-card{flex-basis:66px!important;min-width:66px!important;max-width:66px!important;min-height:55px!important;grid-template-rows:29px auto!important}
   .b225-home .b225-service-mini-card__title{font-size:6.7px!important}
   .b225-home .b225-service-mini-card__subtitle{font-size:5.5px!important}
-  .b225-home .b225-welcome-city{min-height:30px!important;font-size:6.75px!important}
 }
