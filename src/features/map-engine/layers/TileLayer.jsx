@@ -13,13 +13,7 @@ function openStreetMapFallbackUrl(zoom, x, y) {
   return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`
 }
 
-export function TileLayer({
-  viewport,
-  size,
-  interactive = false,
-  onGoogleStatus,
-  onGoogleViewportChange,
-}) {
+function fallbackTiles(viewport, size) {
   const zoom = Math.floor(viewport.zoom)
   const scale = 2 ** (viewport.zoom - zoom)
   const tilesPerAxis = 2 ** zoom
@@ -41,47 +35,80 @@ export function TileLayer({
     }
   }
 
+  return { zoom, scale, tiles }
+}
+
+export function TileLayer({
+  viewport,
+  viewportSource = 'app',
+  size,
+  markers = [],
+  interactive = false,
+  showFallbackTiles = true,
+  onGoogleStatus,
+  onGoogleViewportChange,
+  onGoogleInteractionChange,
+  onGoogleMarkerSelect,
+  onGoogleClusterFocus,
+}) {
+  const fallback = showFallbackTiles ? fallbackTiles(viewport, size) : null
+
   return (
     <>
-      <div className="map-tiles" data-testid="map-tile-layer" data-tile-count={tiles.length} data-tile-zoom={zoom} data-scale={scale} data-tile-provider="carto-voyager" aria-hidden="true">
-        {tiles.map((tile) => {
-          const src = cartoVoyagerUrl(zoom, tile.wrappedX, tile.y)
-          const fallbackSrc = openStreetMapFallbackUrl(zoom, tile.wrappedX, tile.y)
-          return (
-            <div
-              className="map-tile"
-              key={`${zoom}-${tile.x}-${tile.y}`}
-              style={{ transform: `translate3d(${tile.left}px, ${tile.top}px, 0) scale(${scale})` }}
-            >
-              <img
-                alt=""
-                decoding="async"
-                draggable="false"
-                fetchPriority="high"
-                loading="eager"
-                src={src}
-                data-fallback-src={fallbackSrc}
-                onLoad={(event) => { event.currentTarget.style.visibility = 'visible' }}
-                onError={(event) => {
-                  const image = event.currentTarget
-                  const fallback = image.dataset.fallbackSrc
-                  if (fallback && image.src !== fallback) {
-                    image.dataset.fallbackSrc = ''
-                    image.src = fallback
-                    return
-                  }
-                  image.style.visibility = 'hidden'
-                }}
-              />
-            </div>
-          )
-        })}
-      </div>
+      {fallback ? (
+        <div
+          className="map-tiles"
+          data-testid="map-tile-layer"
+          data-tile-count={fallback.tiles.length}
+          data-tile-zoom={fallback.zoom}
+          data-scale={fallback.scale}
+          data-tile-provider="carto-voyager"
+          aria-hidden="true"
+        >
+          {fallback.tiles.map((tile) => {
+            const src = cartoVoyagerUrl(fallback.zoom, tile.wrappedX, tile.y)
+            const fallbackSrc = openStreetMapFallbackUrl(fallback.zoom, tile.wrappedX, tile.y)
+            return (
+              <div
+                className="map-tile"
+                key={`${fallback.zoom}-${tile.x}-${tile.y}`}
+                style={{ transform: `translate3d(${tile.left}px, ${tile.top}px, 0) scale(${fallback.scale})` }}
+              >
+                <img
+                  alt=""
+                  decoding="async"
+                  draggable="false"
+                  fetchPriority="high"
+                  loading="eager"
+                  src={src}
+                  data-fallback-src={fallbackSrc}
+                  onLoad={(event) => { event.currentTarget.style.visibility = 'visible' }}
+                  onError={(event) => {
+                    const image = event.currentTarget
+                    const fallbackSrcValue = image.dataset.fallbackSrc
+                    if (fallbackSrcValue && image.src !== fallbackSrcValue) {
+                      image.dataset.fallbackSrc = ''
+                      image.src = fallbackSrcValue
+                      return
+                    }
+                    image.style.visibility = 'hidden'
+                  }}
+                />
+              </div>
+            )
+          })}
+        </div>
+      ) : null}
       <GoogleMapLayer
         viewport={viewport}
+        viewportSource={viewportSource}
+        markers={markers}
         interactive={interactive}
         onStatus={onGoogleStatus}
         onViewportChange={onGoogleViewportChange}
+        onInteractionChange={onGoogleInteractionChange}
+        onMarkerSelect={onGoogleMarkerSelect}
+        onClusterFocus={onGoogleClusterFocus}
       />
     </>
   )
