@@ -2,7 +2,7 @@
 
 /* Services Movera: approximately 35% smaller overall. */
 .b225-home .b225-services-mini{
-  margin:10px 0 8px!important;
+  margin:4px 0 0!important;
 }
 
 .b225-home .b225-services-mini__head{
@@ -21,6 +21,7 @@
 }
 
 .b225-home .b225-services-mini__rail{
+  justify-content:center!important;
   gap:5px!important;
   padding-top:1px!important;
   padding-bottom:3px!important;
@@ -57,7 +58,7 @@
 /* Destination cards intentionally inherit their original dimensions from welcome-city-cards.css. */
 
 @media(max-width:350px){
-  .b225-home .b225-services-mini{margin-top:9px!important}
+  .b225-home .b225-services-mini{margin-top:3px!important}
   .b225-home .b225-services-mini__head h2{font-size:8.7px!important}
   .b225-home .b225-service-mini-card{flex-basis:66px!important;min-width:66px!important;max-width:66px!important;min-height:55px!important;grid-template-rows:29px auto!important}
   .b225-home .b225-service-mini-card__title{font-size:6.7px!important}
