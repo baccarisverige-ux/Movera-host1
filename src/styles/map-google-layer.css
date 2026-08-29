@@ -1,0 +1,28 @@
+.map-google-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  background: transparent;
+  transition: opacity 180ms ease;
+}
+
+.map-google-layer[data-ready="true"] {
+  opacity: 1;
+}
+
+.map-google-layer__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Google renders its own required attribution. Keep the OSM/CARTO fallback credit only when Google is unavailable. */
+.map-google-layer[data-ready="true"] ~ .map-attribution {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-google-layer { transition: none; }
+}
