@@ -87,11 +87,19 @@
   z-index:1!important;
   display:block!important;
   margin:6px 6px 0!important;
+  overflow:hidden!important;
   border:1px dashed rgba(111,112,106,.12)!important;
   border-radius:11px!important;
-  background:
-    linear-gradient(145deg,rgba(247,247,244,.98),rgba(238,239,235,.88))!important;
+  background:linear-gradient(145deg,rgba(247,247,244,.98),rgba(238,239,235,.88))!important;
   box-shadow:inset 0 1px 3px rgba(45,45,40,.035)!important;
+}
+
+.b225-home .b225-service-mini-card__photo img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
 }
 
 .b225-home .b225-service-mini-card__copy{
