@@ -271,10 +271,6 @@ export function HomePage({ onNavigate }) {
         </div>
       </div>
 
-      {allSelection ? renderSelection(allSelection) : null}
-
-      <MiniServicesSection/>
-
       <section className="b225-welcome" aria-label="Bienvenue chez Movera">
         <span className="b225-welcome__title">Bienvenue chez Movera</span>
         <div className="b225-welcome-cities" data-testid="home-welcome-cities">
@@ -285,6 +281,10 @@ export function HomePage({ onNavigate }) {
           ))}
         </div>
       </section>
+
+      <MiniServicesSection/>
+
+      {allSelection ? renderSelection(allSelection) : null}
 
       {remainingSelections.map(renderSelection)}
     </div>
