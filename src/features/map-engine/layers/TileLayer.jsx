@@ -13,7 +13,13 @@ function openStreetMapFallbackUrl(zoom, x, y) {
   return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`
 }
 
-export function TileLayer({ viewport, size }) {
+export function TileLayer({
+  viewport,
+  size,
+  interactive = false,
+  onGoogleStatus,
+  onGoogleViewportChange,
+}) {
   const zoom = Math.floor(viewport.zoom)
   const scale = 2 ** (viewport.zoom - zoom)
   const tilesPerAxis = 2 ** zoom
@@ -71,7 +77,12 @@ export function TileLayer({ viewport, size }) {
           )
         })}
       </div>
-      <GoogleMapLayer viewport={viewport} />
+      <GoogleMapLayer
+        viewport={viewport}
+        interactive={interactive}
+        onStatus={onGoogleStatus}
+        onViewportChange={onGoogleViewportChange}
+      />
     </>
   )
 }
