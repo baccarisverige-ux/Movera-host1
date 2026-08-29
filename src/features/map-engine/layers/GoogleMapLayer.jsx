@@ -3,6 +3,9 @@ import '../../../styles/map-google-layer.css'
 
 const GOOGLE_MAPS_BROWSER_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY?.trim()
 const GOOGLE_MAPS_SCRIPT_ID = 'movera-google-maps-js'
+const GOOGLE_MAPS_CALLBACK = '__moveraGoogleMapsReady'
+const GOOGLE_MAPS_TIMEOUT_MS = 15000
+const GOOGLE_MAPS_POLL_MS = 50
 
 function loadGoogleMaps() {
   if (typeof window === 'undefined') return Promise.reject(new Error('Google Maps requires a browser'))
@@ -11,22 +14,70 @@ function loadGoogleMaps() {
   if (window.__moveraGoogleMapsPromise) return window.__moveraGoogleMapsPromise
 
   window.__moveraGoogleMapsPromise = new Promise((resolve, reject) => {
-    const existing = document.getElementById(GOOGLE_MAPS_SCRIPT_ID)
-    if (existing) {
-      existing.addEventListener('load', () => window.google?.maps?.Map ? resolve(window.google.maps) : reject(new Error('Google Maps unavailable')), { once: true })
-      existing.addEventListener('error', () => reject(new Error('Google Maps script failed')), { once: true })
-      return
+    let settled = false
+    let timeoutId = 0
+    let pollId = 0
+    const previousAuthFailure = window.gm_authFailure
+
+    const cleanup = () => {
+      window.clearTimeout(timeoutId)
+      window.clearInterval(pollId)
+      if (window[GOOGLE_MAPS_CALLBACK] === handleReady) delete window[GOOGLE_MAPS_CALLBACK]
+      if (window.gm_authFailure === handleAuthFailure) {
+        if (typeof previousAuthFailure === 'function') window.gm_authFailure = previousAuthFailure
+        else delete window.gm_authFailure
+      }
     }
 
-    const script = document.createElement('script')
-    script.id = GOOGLE_MAPS_SCRIPT_ID
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_BROWSER_KEY)}&v=weekly&loading=async`
-    script.async = true
-    script.defer = true
-    script.onload = () => window.google?.maps?.Map ? resolve(window.google.maps) : reject(new Error('Google Maps unavailable'))
-    script.onerror = () => reject(new Error('Google Maps script failed'))
-    document.head.appendChild(script)
+    const fail = (error) => {
+      if (settled) return
+      settled = true
+      cleanup()
+      reject(error)
+    }
+
+    const resolveIfReady = () => {
+      if (settled || !window.google?.maps?.Map) return false
+      settled = true
+      const maps = window.google.maps
+      cleanup()
+      resolve(maps)
+      return true
+    }
+
+    function handleReady() {
+      if (!resolveIfReady()) fail(new Error('Google Maps callback fired before Maps was ready'))
+    }
+
+    function handleAuthFailure() {
+      try { previousAuthFailure?.() } catch { /* preserve previous handler without blocking fallback */ }
+      fail(new Error('Google Maps authentication failed'))
+    }
+
+    window[GOOGLE_MAPS_CALLBACK] = handleReady
+    window.gm_authFailure = handleAuthFailure
+
+    const existing = document.getElementById(GOOGLE_MAPS_SCRIPT_ID)
+    if (existing) {
+      if (resolveIfReady()) return
+      existing.addEventListener('error', () => fail(new Error('Google Maps script failed')), { once: true })
+      pollId = window.setInterval(resolveIfReady, GOOGLE_MAPS_POLL_MS)
+    } else {
+      const script = document.createElement('script')
+      script.id = GOOGLE_MAPS_SCRIPT_ID
+      script.dataset.moveraGoogleMapsOwned = 'true'
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_BROWSER_KEY)}&v=weekly&loading=async&callback=${GOOGLE_MAPS_CALLBACK}`
+      script.async = true
+      script.defer = true
+      script.onerror = () => fail(new Error('Google Maps script failed'))
+      script.onload = () => { resolveIfReady() }
+      document.head.appendChild(script)
+    }
+
+    timeoutId = window.setTimeout(() => fail(new Error('Google Maps readiness timeout')), GOOGLE_MAPS_TIMEOUT_MS)
   }).catch((error) => {
+    const script = document.getElementById(GOOGLE_MAPS_SCRIPT_ID)
+    if (!window.google?.maps?.Map && script?.dataset.moveraGoogleMapsOwned === 'true') script.remove()
     window.__moveraGoogleMapsPromise = null
     throw error
   })
