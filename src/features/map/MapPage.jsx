@@ -109,6 +109,7 @@ export function MapPage({ onNavigate }) {
   const [selectionState, setSelectionState] = useState(() => ({ contextKey: mapContextKey, id: selectedMarker?.id || null }))
   const [viewportState, setViewportState] = useState(() => ({ contextKey: mapContextKey, command: null }))
   const [amenityFilters, setAmenityFilters] = useState(() => new Set())
+  const [mapInteracting, setMapInteracting] = useState(false)
   const selectedListingId = selectionState.contextKey === mapContextKey ? selectionState.id : selectedMarker?.id || null
   const viewportCommand = viewportState.contextKey === mapContextKey ? viewportState.command : null
 
@@ -190,11 +191,11 @@ export function MapPage({ onNavigate }) {
   const handleSheetProgress = useCallback((progress) => {
     if (progress > 0.14 && !selectedListingId && cityListings[0]) setSelectedListingId(cityListings[0].id)
 
-    // The final attachment phase is intentionally map-idle. Once the sheet is
-    // covering most of the map, continuing to pan/zoom tiles only competes
-    // with the spring animation on the iOS main thread and can create a small
-    // visual vibration at the header boundary.
-    if (progress > MAP_MOTION_PROGRESS_LIMIT) return
+    // Native map gestures have exclusive camera ownership while a finger/pinch
+    // is active. The offer sheet must never write automatic camera commands in
+    // that window, otherwise Google and the sheet can pull the camera in two
+    // different directions and create acceleration, resistance or snap-back.
+    if (mapInteracting || progress > MAP_MOTION_PROGRESS_LIMIT) return
 
     const base = handoffViewport || listingViewport || destinationViewport || INITIAL_VIEWPORT
     const activeId = selectedListingId || cityListings[0]?.id
@@ -206,7 +207,7 @@ export function MapPage({ onNavigate }) {
     const zoom = Math.min(17, base.zoom + progress * 1.45)
 
     issueViewportCommand({ lat, lng, zoom })
-  }, [handoffViewport, listingViewport, destinationViewport, selectedListingId, cityListings, visibleMarkers, setSelectedListingId, issueViewportCommand])
+  }, [handoffViewport, listingViewport, destinationViewport, selectedListingId, cityListings, visibleMarkers, setSelectedListingId, issueViewportCommand, mapInteracting])
 
   const handleSheetSelectedListingChange = useCallback((listingId) => {
     setSelectedListingId(listingId)
@@ -275,6 +276,7 @@ export function MapPage({ onNavigate }) {
       data-city-offer-count={cityListings.length}
       data-context-offer-count={contextListings.length}
       data-amenity-filter-count={amenityFilters.size}
+      data-map-interacting={mapInteracting ? 'true' : 'false'}
     >
       <div ref={headerRef} className="b225-map-top">
         <MapSearchFilters
@@ -299,6 +301,7 @@ export function MapPage({ onNavigate }) {
           markers={visibleMarkers}
           selectedListingId={selectedListingId}
           onSelectedListingChange={setSelectedListingId}
+          onInteractionChange={setMapInteracting}
           initialViewport={initialViewport}
           viewportCommand={viewportCommand}
         />
