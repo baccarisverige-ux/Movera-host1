@@ -1,6 +1,12 @@
 /* Category offer rails: Airbnb-inspired image-first cards with text below. */
 
+/* Keep the original spacing between every offer section. */
 .b225-home .b225-category-selection{
+  margin-top:24px!important;
+}
+
+/* Lift the whole Tout → Partenaire block by reducing only the first gap after Services Movera. */
+.b225-home .b225-services-mini + .b225-category-selection{
   margin-top:6px!important;
 }
 
@@ -246,7 +252,8 @@
 }
 
 @media(max-width:390px){
-  .b225-home .b225-category-selection{margin-top:4px!important}
+  .b225-home .b225-category-selection{margin-top:22px!important}
+  .b225-home .b225-services-mini + .b225-category-selection{margin-top:4px!important}
   .b225-home .b225-category-selection .b225-section__title h2{font-size:15.4px!important}
   .b225-home .b225-category-selection__title>.b225-section-scroll-hint{width:27px!important;min-width:27px!important;height:27px!important;flex-basis:27px!important}
   .b225-home .b225-offer-card{flex-basis:140px!important;min-width:140px!important;max-width:140px!important}
