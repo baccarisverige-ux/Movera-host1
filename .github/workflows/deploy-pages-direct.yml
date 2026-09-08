@@ -1,4 +1,4 @@
-name: Deploy Movera Host to GitHub Pages
+name: Deploy Movera Host + Rider + Driver to GitHub Pages
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Movera Host
         uses: actions/checkout@v6
 
       - name: Setup Node
@@ -28,26 +28,90 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
+      - name: Install Host dependencies
         run: npm ci
 
-      - name: Lint
+      - name: Lint Host
         run: npm run lint
 
-      - name: Build
+      - name: Build Host
         env:
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.h131189 }}
         run: npm run build
 
-      - name: Add SPA route fallback
+      - name: Add Host SPA route fallback
         run: cp dist/index.html dist/404.html
+
+      - name: Checkout Movera Rider
+        uses: actions/checkout@v4
+        with:
+          repository: baccarisverige-ux/-movera-rider
+          ref: main
+          path: external/rider
+
+      - name: Checkout Movera Driver
+        uses: actions/checkout@v4
+        with:
+          repository: baccarisverige-ux/-movera-driver
+          ref: main
+          path: external/driver
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Inject Maps loader into Flutter web shells
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.h131189 }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          key = os.environ['GOOGLE_MAPS_API_KEY']
+          if not key:
+              raise SystemExit('Google Maps API key secret is empty')
+
+          loader = f'  <script src="https://maps.googleapis.com/maps/api/js?key={key}"></script>\n'
+          for rel in ('external/rider/web/index.html', 'external/driver/web/index.html'):
+              p = Path(rel)
+              text = p.read_text()
+              if 'maps.googleapis.com/maps/api/js' not in text:
+                  text = text.replace('</head>', loader + '</head>')
+              p.write_text(text)
+          PY
+
+      - name: Build Rider web with Maps
+        working-directory: external/rider
+        run: |
+          flutter pub get
+          flutter build web --release --pwa-strategy=none --base-href /Movera-host1/rider/
+          mkdir -p ../../dist/rider
+          cp -a build/web/. ../../dist/rider/
+          cp ../../dist/rider/index.html ../../dist/rider/404.html
+
+      - name: Build Driver web with Maps
+        working-directory: external/driver
+        run: |
+          flutter pub get
+          flutter build web --release --pwa-strategy=none --base-href /Movera-host1/driver/
+          mkdir -p ../../dist/driver
+          cp -a build/web/. ../../dist/driver/
+          cp ../../dist/driver/index.html ../../dist/driver/404.html
 
       - name: Verify compiled output
         run: |
           test -f dist/index.html
           test -f dist/404.html
           test -d dist/assets
-          grep -q '/Movera-host1/assets/' dist/index.html
+          test -f dist/rider/index.html
+          test -f dist/rider/main.dart.js
+          test -f dist/driver/index.html
+          test -f dist/driver/main.dart.js
+          grep -q 'maps.googleapis.com/maps/api/js' dist/rider/index.html
+          grep -q 'maps.googleapis.com/maps/api/js' dist/driver/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
