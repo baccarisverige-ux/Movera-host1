@@ -1,2 +1,2 @@
-Rider source commit: ab94f338a48201ce091c696cb7f655a4821428d0
-Purpose: deploy exact groc-movera map palette through the shared Rider map widget across all Rider map screens.
+Rider source commit: 0380492069f911235332e69ded419d971e65842f
+Purpose: apply the exact Movera map style during GoogleMap creation so no default/old map colors flash before the custom palette.
