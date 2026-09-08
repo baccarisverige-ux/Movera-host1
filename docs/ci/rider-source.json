@@ -1,1 +1,1 @@
-{"repository":"baccarisverige-ux/-movera-rider","ref":"main","sha":"c3d81ef84f7e1622ef7d631f18e972fa8e45114c","purpose":"Trigger map-enabled Rider deployment after premium map/menu redesign"}
+{"repository":"baccarisverige-ux/-movera-rider","ref":"main","sha":"1a0050062eaa12ff262fbbc7ec2129acb438a53c","purpose":"Deploy Rider Home map warmup so the live map is ready before Home is revealed"}
