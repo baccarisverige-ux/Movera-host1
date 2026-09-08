@@ -74,8 +74,11 @@ jobs:
           if not key:
               raise SystemExit('Google Maps API key secret is empty')
 
-          loader = f'  <script src="https://maps.googleapis.com/maps/api/js?key={key}"></script>\n'
-          for rel in ('external/rider/web/index.html', 'external/driver/web/index.html'):
+          loaders = {
+              'external/rider/web/index.html': f'  <script src="https://maps.googleapis.com/maps/api/js?key={key}&language=en&region=SE"></script>\n',
+              'external/driver/web/index.html': f'  <script src="https://maps.googleapis.com/maps/api/js?key={key}"></script>\n',
+          }
+          for rel, loader in loaders.items():
               p = Path(rel)
               text = p.read_text()
               if 'maps.googleapis.com/maps/api/js' not in text:
@@ -111,6 +114,7 @@ jobs:
           test -f dist/driver/index.html
           test -f dist/driver/main.dart.js
           grep -q 'maps.googleapis.com/maps/api/js' dist/rider/index.html
+          grep -q 'language=en&region=SE' dist/rider/index.html
           grep -q 'maps.googleapis.com/maps/api/js' dist/driver/index.html
 
       - name: Setup Pages
