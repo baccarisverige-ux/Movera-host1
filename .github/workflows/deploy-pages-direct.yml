@@ -81,8 +81,21 @@ jobs:
           if not key:
               raise SystemExit('Google Maps API key secret is empty')
 
+          # Rider starts the Maps download in parallel with Flutter instead of
+          # blocking the document parser / Flutter bootstrap. The app reaches
+          # Home after splash/onboarding, giving the API time to finish before
+          # the GoogleMap platform view is created.
+          rider_loader = (
+              '  <link rel="preconnect" href="https://maps.googleapis.com">\n'
+              '  <link rel="preconnect" href="https://maps.gstatic.com" crossorigin>\n'
+              '  <link rel="dns-prefetch" href="https://maps.googleapis.com">\n'
+              f'  <script async src="https://maps.googleapis.com/maps/api/js?key={key}&loading=async&language=en&region=SE"></script>\n'
+          )
+
+          # Driver intentionally keeps its existing loader. This performance
+          # change is scoped to Rider only.
           loaders = {
-              'external/rider/web/index.html': f'  <script src="https://maps.googleapis.com/maps/api/js?key={key}&language=en&region=SE"></script>\n',
+              'external/rider/web/index.html': rider_loader,
               'external/driver/web/index.html': f'  <script src="https://maps.googleapis.com/maps/api/js?key={key}"></script>\n',
           }
           for rel, loader in loaders.items():
@@ -121,7 +134,10 @@ jobs:
           test -f dist/driver/index.html
           test -f dist/driver/main.dart.js
           grep -q 'maps.googleapis.com/maps/api/js' dist/rider/index.html
-          grep -q 'language=en&region=SE' dist/rider/index.html
+          grep -q 'rel="preconnect" href="https://maps.googleapis.com"' dist/rider/index.html
+          grep -q 'rel="preconnect" href="https://maps.gstatic.com" crossorigin' dist/rider/index.html
+          grep -q 'script async src="https://maps.googleapis.com/maps/api/js' dist/rider/index.html
+          grep -q 'loading=async&language=en&region=SE' dist/rider/index.html
           grep -q 'maps.googleapis.com/maps/api/js' dist/driver/index.html
 
       - name: Setup Pages
