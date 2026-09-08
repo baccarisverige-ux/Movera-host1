@@ -1,1 +1,1 @@
-{"repository":"baccarisverige-ux/-movera-rider","ref":"main","sha":"1a0050062eaa12ff262fbbc7ec2129acb438a53c","purpose":"Deploy Rider Home map warmup so the live map is ready before Home is revealed"}
+{"repository":"baccarisverige-ux/-movera-rider","ref":"main","sha":"73529307ed51a22c771e9106fe650136c3461d0b","purpose":"Deploy Rider immediate Google Map render without loading-color cover"}
