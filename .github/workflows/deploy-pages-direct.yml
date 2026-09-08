@@ -56,12 +56,15 @@ jobs:
           ref: main
           path: external/driver
 
-      - name: Verify Rider Stockholm and English defaults
+      - name: Verify Rider Stockholm English and map warmup defaults
         run: |
           grep -q 'LatLng(59.3293, 18.0686)' external/rider/lib/features/rider/home/home.dart
           grep -q 'text: "Stockholm"' external/rider/lib/features/rider/home/home.dart
           grep -q "locale: const Locale('en')" external/rider/lib/main.dart
           grep -q "fallbackLocale: const Locale('en')" external/rider/lib/main.dart
+          grep -q 'child: const Home()' external/rider/lib/shared/presentation/onboarding/onboarding.dart
+          grep -q '_showHome = true' external/rider/lib/shared/presentation/onboarding/onboarding.dart
+          grep -q 'flutter_bootstrap.js" defer' external/rider/web/index.html
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -81,19 +84,20 @@ jobs:
           if not key:
               raise SystemExit('Google Maps API key secret is empty')
 
-          # Rider starts the Maps download in parallel with Flutter instead of
-          # blocking the document parser / Flutter bootstrap. The app reaches
-          # Home after splash/onboarding, giving the API time to finish before
-          # the GoogleMap platform view is created.
+          # google_maps_flutter_web expects the Maps JS global to exist before
+          # Flutter creates a GoogleMap. Both scripts are deferred, so they
+          # download in parallel with HTML parsing but execute in document order:
+          # Maps first, Flutter bootstrap second. This removes the async race.
           rider_loader = (
               '  <link rel="preconnect" href="https://maps.googleapis.com">\n'
               '  <link rel="preconnect" href="https://maps.gstatic.com" crossorigin>\n'
               '  <link rel="dns-prefetch" href="https://maps.googleapis.com">\n'
-              f'  <script async src="https://maps.googleapis.com/maps/api/js?key={key}&loading=async&language=en&region=SE"></script>\n'
+              '  <link rel="dns-prefetch" href="https://maps.gstatic.com">\n'
+              f'  <script defer src="https://maps.googleapis.com/maps/api/js?key={key}&v=weekly&language=en&region=SE"></script>\n'
           )
 
-          # Driver intentionally keeps its existing loader. This performance
-          # change is scoped to Rider only.
+          # Driver intentionally keeps its existing loader. This startup change
+          # remains scoped to Rider only.
           loaders = {
               'external/rider/web/index.html': rider_loader,
               'external/driver/web/index.html': f'  <script src="https://maps.googleapis.com/maps/api/js?key={key}"></script>\n',
@@ -136,8 +140,9 @@ jobs:
           grep -q 'maps.googleapis.com/maps/api/js' dist/rider/index.html
           grep -q 'rel="preconnect" href="https://maps.googleapis.com"' dist/rider/index.html
           grep -q 'rel="preconnect" href="https://maps.gstatic.com" crossorigin' dist/rider/index.html
-          grep -q 'script async src="https://maps.googleapis.com/maps/api/js' dist/rider/index.html
-          grep -q 'loading=async&language=en&region=SE' dist/rider/index.html
+          grep -q 'script defer src="https://maps.googleapis.com/maps/api/js' dist/rider/index.html
+          grep -q 'v=weekly&language=en&region=SE' dist/rider/index.html
+          grep -q 'flutter_bootstrap.js" defer' dist/rider/index.html
           grep -q 'maps.googleapis.com/maps/api/js' dist/driver/index.html
 
       - name: Setup Pages
