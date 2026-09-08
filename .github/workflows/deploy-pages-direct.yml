@@ -56,6 +56,13 @@ jobs:
           ref: main
           path: external/driver
 
+      - name: Verify Rider Stockholm and English defaults
+        run: |
+          grep -q 'LatLng(59.3293, 18.0686)' external/rider/lib/features/rider/home/home.dart
+          grep -q 'text: "Stockholm"' external/rider/lib/features/rider/home/home.dart
+          grep -q "locale: const Locale('en')" external/rider/lib/main.dart
+          grep -q "fallbackLocale: const Locale('en')" external/rider/lib/main.dart
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
