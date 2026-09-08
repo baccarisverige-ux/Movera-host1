@@ -1,2 +1,2 @@
-Rider source commit: a202f8718b02d00e6052c6466672ae32e6ce1752
-Purpose: hide the Google Maps web platform-view first paint behind the Movera base color until the first styled map frame settles, while keeping the exact groc-movera palette applied at map creation.
+Rider source commit: ba4c51e614d23516c8c87f463fe0a7efc9f8cac4
+Purpose: keep the exact groc-movera palette and first-frame flash protection while reducing the web reveal guard to 16-120 ms and removing the blocking style diagnostic wait.
