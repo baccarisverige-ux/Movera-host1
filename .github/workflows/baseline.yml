@@ -1,0 +1,48 @@
+name: Baseline Validation
+
+on:
+  push:
+    branches:
+      - audit/baseline-validation
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Smoke preview
+        run: |
+          npm run preview -- --host 127.0.0.1 > /tmp/movera-preview.log 2>&1 &
+          PID=$!
+          READY=0
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:4173/ > /tmp/movera-home.html; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$READY" -ne 1 ]; then
+            cat /tmp/movera-preview.log
+            kill $PID || true
+            exit 1
+          fi
+          grep -q '<div id="root"></div>' /tmp/movera-home.html
+          kill $PID
